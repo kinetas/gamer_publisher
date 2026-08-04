@@ -1,0 +1,13 @@
+{
+  "status": "active",
+  "managerLimit": 3,
+  "subAILimit": 4,
+  "debugLimit": 1,
+  "autoReport": true,
+  "monitoringEnabled": true,
+  "collectorMode": 1,
+  "bossMode": false,
+  "holidayMode": false,
+  "taskCounter": 0,
+  "startedAt": "2026-08-04T07:47:16Z"
+}

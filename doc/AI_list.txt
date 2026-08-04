@@ -1,0 +1,7 @@
+[Capacity]
+Manager Limit     : 3
+Sub AI per Manager: 4
+
+[Status]
+Active Managers   : 0
+Available Managers: 3

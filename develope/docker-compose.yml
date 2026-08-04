@@ -1,0 +1,301 @@
+services:
+  postgres-app:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${APP_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${APP_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${APP_POSTGRES_DB}
+    volumes:
+      - postgres-app-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  postgres-airflow:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${AIRFLOW_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${AIRFLOW_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${AIRFLOW_POSTGRES_DB}
+    volumes:
+      - postgres-airflow-data:/var/lib/postgresql/data
+
+  chromadb:
+    image: chromadb/chroma:latest
+    volumes:
+      - chromadb-data:/chroma/chroma
+    ports:
+      - "8200:8000"
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  # code / datalake / reports / spark-events 버킷을 최초 1회 생성.
+  #   code         : Git -> (Jenkins CI) -> 여기로 올라오는 Airflow DAG 코드
+  #   datalake     : Spark가 수집한 원본/정제 게임 데이터
+  #   reports      : LangGraph가 만든 보고서 파일 (웹에서 조회/다운로드)
+  #   spark-events : Spark History Server가 읽는 이벤트 로그 (잡 종료 후 UI 조회용)
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio-init
+    depends_on:
+      minio:
+        condition: service_started
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        set -e
+        until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done
+        mc mb -p local/code
+        mc mb -p local/datalake
+        mc mb -p local/reports
+        mc mb -p local/spark-events
+        echo 'minio buckets ready'
+
+  fastapi-server:
+    build: ./fastapi-server
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${APP_POSTGRES_USER}:${APP_POSTGRES_PASSWORD}@postgres-app:5432/${APP_POSTGRES_DB}
+      CHROMADB_HOST: chromadb
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_REPORTS_BUCKET: reports
+    depends_on:
+      postgres-app:
+        condition: service_started
+      chromadb:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
+    ports:
+      - "8000:8000"
+
+  langgraph-server:
+    build: ./langgraph-server
+    environment:
+      CHROMADB_HOST: chromadb
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_REPORTS_BUCKET: reports
+    depends_on:
+      chromadb:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
+    ports:
+      - "8100:8100"
+
+  # spark-jobs는 상시 실행되는 서비스가 아니라 이미지 빌드 용도로만 존재한다.
+  # `docker compose build spark-jobs` 후 scripts/load-image-to-k3s.sh 로 k3s에 넣어야
+  # KubernetesPodOperator가 이 이미지로 pod를 띄울 수 있다.
+  spark-jobs:
+    build: ./spark-jobs
+    image: gamer_publisher/spark-jobs:latest
+    profiles: ["build-only"]
+
+  # 완료된 Spark 잡의 UI(4040)는 드라이버 pod가 사라지면 같이 사라진다.
+  # eventLog를 MinIO(spark-events 버킷)에 남기고 History Server가 그걸 읽어 UI를 재구성한다.
+  # 실제 DAG의 spark-submit에는 아래 옵션이 필요:
+  #   --conf spark.eventLog.enabled=true
+  #   --conf spark.eventLog.dir=s3a://spark-events/
+  #   --conf spark.hadoop.fs.s3a.endpoint=http://minio:9000
+  #   --conf spark.hadoop.fs.s3a.path.style.access=true
+  spark-history-server:
+    build: ./spark-jobs
+    container_name: spark-history-server
+    entrypoint: /opt/bitnami/spark/bin/spark-class
+    command: ["org.apache.spark.deploy.history.HistoryServer"]
+    environment:
+      SPARK_HISTORY_OPTS: >-
+        -Dspark.history.fs.logDirectory=s3a://spark-events/
+        -Dspark.hadoop.fs.s3a.endpoint=http://minio:9000
+        -Dspark.hadoop.fs.s3a.access.key=${MINIO_ROOT_USER}
+        -Dspark.hadoop.fs.s3a.secret.key=${MINIO_ROOT_PASSWORD}
+        -Dspark.hadoop.fs.s3a.path.style.access=true
+        -Dspark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+    ports:
+      - "18080:18080"
+
+  # ---- k3s: Spark 작업을 KubernetesPodOperator로 실행하기 위한 단일 노드 클러스터 ----
+  k3s:
+    image: rancher/k3s:v1.29.4-k3s1
+    container_name: k8s-master-node
+    privileged: true
+    command: server --write-kubeconfig-mode=644 --tls-san=k8s-master-node --disable=traefik
+    environment:
+      K3S_TOKEN: ${K3S_TOKEN:-devtoken}
+    volumes:
+      - k3s-data:/var/lib/rancher/k3s
+      - k3s-kubeconfig:/etc/rancher/k3s
+    ports:
+      - "6443:6443"
+
+  # k3s가 만든 kubeconfig는 server 주소가 "https://127.0.0.1:6443"(k3s 컨테이너 자기 자신 기준)로
+  # 박혀 있어서 다른 컨테이너(Airflow)에서는 그대로 못 쓴다. docker 네트워크 안에서는 컨테이너명
+  # "k8s-master-node"로 접근 가능하므로 그걸로 치환하고, 그 이름에 대한 SAN이 인증서에 없어서
+  # insecure-skip-tls-verify로 검증을 끈 사본을 만들어 공유 볼륨에 저장한다.
+  kubeconfig-prep:
+    image: alpine:3.20
+    container_name: airflow-kubeconfig-prep
+    depends_on:
+      k3s:
+        condition: service_started
+    volumes:
+      - k3s-kubeconfig:/src:ro
+      - kube-config:/dst
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        until [ -f /src/k3s.yaml ]; do echo 'k3s.yaml 대기 중...'; sleep 2; done
+        sed 's#127.0.0.1#k8s-master-node#' /src/k3s.yaml \
+          | sed '/certificate-authority-data/d' \
+          | sed 's#server: https://k8s-master-node:6443#server: https://k8s-master-node:6443\n    insecure-skip-tls-verify: true#' \
+          > /dst/config
+        echo 'kubeconfig 준비 완료'
+
+  # Spark의 네이티브 k8s 스케줄러(--master k8s://...)가 executor pod를 만들 수 있도록
+  # ServiceAccount/Role/RoleBinding을 1회 적용한다 (k3s/spark-rbac.yaml).
+  k3s-bootstrap:
+    image: bitnami/kubectl:1.29
+    container_name: k3s-bootstrap
+    depends_on:
+      kubeconfig-prep:
+        condition: service_completed_successfully
+    environment:
+      KUBECONFIG: /kube/config
+    volumes:
+      - kube-config:/kube:ro
+      - ./k3s:/manifests:ro
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        set -e
+        until kubectl get nodes >/dev/null 2>&1; do echo 'k3s API 대기 중...'; sleep 2; done
+        kubectl apply -f /manifests/spark-rbac.yaml
+        echo 'RBAC 적용 완료'
+
+  # MinIO code 버킷의 dags/ 프리픽스를 Airflow dags 볼륨으로 1회 동기화.
+  # 로컬에서 DAG을 고치면 scripts/push_dags_to_minio.sh 로 code 버킷에 올린 뒤
+  # `docker compose run --rm dags-sync` 로 다시 반영한다.
+  dags-sync:
+    image: minio/mc:latest
+    container_name: airflow-dags-sync
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - airflow-dags:/dags
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        set -e
+        until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done
+        mc mirror --overwrite local/code/dags /dags || echo 'code/dags 비어있음, 건너뜀'
+
+  # 계정을 무작위로 만들게 두지 않고 원하는 아이디/비번으로 고정하기 위한 1회성 초기화.
+  airflow-init:
+    build: ./airflow
+    container_name: airflow-init
+    depends_on:
+      postgres-airflow:
+        condition: service_started
+    environment:
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD}
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@postgres-airflow:5432/${AIRFLOW_POSTGRES_DB}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username "$$_AIRFLOW_WWW_USER_USERNAME" \
+          --password "$$_AIRFLOW_WWW_USER_PASSWORD" \
+          --firstname Admin --lastname User --role Admin \
+          --email "$$_AIRFLOW_WWW_USER_USERNAME@example.com" \
+        || true
+        airflow users reset-password \
+          --username "$$_AIRFLOW_WWW_USER_USERNAME" \
+          --password "$$_AIRFLOW_WWW_USER_PASSWORD"
+
+  airflow-webserver:
+    build: ./airflow
+    container_name: airflow-webserver
+    command: webserver
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      kubeconfig-prep:
+        condition: service_completed_successfully
+      dags-sync:
+        condition: service_completed_successfully
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@postgres-airflow:5432/${AIRFLOW_POSTGRES_DB}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      KUBECONFIG: /opt/airflow/kube/config
+      AIRFLOW_CONN_MINIO_DEFAULT: aws://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@/?endpoint_url=http%3A%2F%2Fminio%3A9000
+    volumes:
+      - airflow-dags:/opt/airflow/dags
+      - kube-config:/opt/airflow/kube:ro
+    ports:
+      - "8080:8080"
+
+  airflow-scheduler:
+    build: ./airflow
+    container_name: airflow-scheduler
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      kubeconfig-prep:
+        condition: service_completed_successfully
+      dags-sync:
+        condition: service_completed_successfully
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@postgres-airflow:5432/${AIRFLOW_POSTGRES_DB}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      KUBECONFIG: /opt/airflow/kube/config
+      AIRFLOW_CONN_MINIO_DEFAULT: aws://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@/?endpoint_url=http%3A%2F%2Fminio%3A9000
+    volumes:
+      - airflow-dags:/opt/airflow/dags
+      - kube-config:/opt/airflow/kube:ro
+
+volumes:
+  postgres-app-data:
+  postgres-airflow-data:
+  chromadb-data:
+  minio-data:
+  k3s-data:
+  k3s-kubeconfig:
+  kube-config:
+  airflow-dags:

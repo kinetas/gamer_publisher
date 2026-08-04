@@ -1,0 +1,4 @@
+[Harness Engineering 코딩 규칙]
+
+(프로젝트 시작 전 이 파일에 코딩 규칙을 작성하세요.)
+(참고 양식: doc/sample/Coding_Rule_sample.txt)

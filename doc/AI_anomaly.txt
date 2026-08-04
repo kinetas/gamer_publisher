@@ -1,0 +1,3 @@
+[AI Anomaly Log]
+
+(Monitoring AI가 이상 감지 시 이 파일에 기록합니다.)
