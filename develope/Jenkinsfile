@@ -1,0 +1,79 @@
+// gamer_publisher CI/CD
+//
+// 흐름: Git push -> (이 파이프라인) -> 이미지 빌드 -> DAG/Spark 코드를 MinIO code 버킷에 업로드
+//       -> Airflow에 반영 -> 서비스 재배포
+//
+// Jenkins 에이전트는 develope/docker-compose.yml을 실행하는 도커 호스트와 같은 머신이어야 한다
+// (로컬 서버 1대 구성을 전제로 함. PRD Infrastructure 참고).
+//
+// 시크릿(.env)은 저장소에 커밋하지 않고, Jenkins Credentials Store의
+// Secret file 크리덴셜(ID: gamer_publisher-env)로 주입한다.
+pipeline {
+    agent any
+
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+    }
+
+    environment {
+        COMPOSE_DIR = 'develope'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Prepare secrets (.env)') {
+            steps {
+                withCredentials([file(credentialsId: 'gamer_publisher-env', variable: 'ENV_FILE')]) {
+                    sh "cp \$ENV_FILE ${COMPOSE_DIR}/.env"
+                }
+            }
+        }
+
+        stage('Build images') {
+            steps {
+                dir(COMPOSE_DIR) {
+                    sh 'docker compose build fastapi-server langgraph-server airflow-init frontend spark-jobs'
+                }
+            }
+        }
+
+        stage('Load spark-jobs image into k3s') {
+            steps {
+                dir(COMPOSE_DIR) {
+                    sh './scripts/load-image-to-k3s.sh'
+                }
+            }
+        }
+
+        stage('Push DAGs & Spark scripts to MinIO') {
+            steps {
+                dir(COMPOSE_DIR) {
+                    sh './scripts/push_code_to_minio.sh'
+                    sh 'docker compose run --rm dags-sync'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                dir(COMPOSE_DIR) {
+                    sh 'docker compose up -d --build fastapi-server langgraph-server frontend airflow-webserver airflow-scheduler'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            dir(COMPOSE_DIR) {
+                sh 'rm -f .env'
+            }
+        }
+    }
+}

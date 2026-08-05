@@ -3,7 +3,7 @@
 # 잡이 끝나면 pod가 사라지므로 이 UI도 같이 사라진다 — 종료된 잡은 Spark History Server(18080)에서 본다.
 #
 # 사용법: ./scripts/spark-driver-ui.sh <pod-name>
-#   pod 목록 확인: docker run --rm --network develope_default \
+#   pod 목록 확인: docker run --rm --network develope_k8s-net \
 #     -v develope_kube-config:/kube:ro -e KUBECONFIG=/kube/config \
 #     bitnami/kubectl:1.29 get pods
 set -e
@@ -16,7 +16,7 @@ if [ -z "$POD_NAME" ]; then
 fi
 
 docker run --rm -it \
-  --network develope_default \
+  --network develope_k8s-net \
   -v develope_kube-config:/kube:ro \
   -e KUBECONFIG=/kube/config \
   -p 4040:4040 \

@@ -1,23 +1,20 @@
 services:
-  postgres-app:
+  # ---- 데이터 저장 계층 (postgres/minio/chromadb) : backend-net에만 존재 ----
+  postgres:
     image: postgres:16
+    container_name: postgres
     environment:
-      POSTGRES_USER: ${APP_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${APP_POSTGRES_PASSWORD}
-      POSTGRES_DB: ${APP_POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      AIRFLOW_POSTGRES_DB: ${AIRFLOW_POSTGRES_DB}
     volumes:
-      - postgres-app-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
     ports:
       - "5432:5432"
-
-  postgres-airflow:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: ${AIRFLOW_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${AIRFLOW_POSTGRES_PASSWORD}
-      POSTGRES_DB: ${AIRFLOW_POSTGRES_DB}
-    volumes:
-      - postgres-airflow-data:/var/lib/postgresql/data
+    networks:
+      - backend-net
 
   chromadb:
     image: chromadb/chroma:latest
@@ -25,6 +22,8 @@ services:
       - chromadb-data:/chroma/chroma
     ports:
       - "8200:8000"
+    networks:
+      - backend-net
 
   minio:
     image: minio/minio:latest
@@ -36,12 +35,16 @@ services:
     volumes:
       - minio-data:/data
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9000:9000"   # API
+      - "9001:9001"   # Console UI
+    networks:
+      - backend-net
 
-  # code / datalake / reports / spark-events 버킷을 최초 1회 생성.
-  #   code         : Git -> (Jenkins CI) -> 여기로 올라오는 Airflow DAG 코드
-  #   datalake     : Spark가 수집한 원본/정제 게임 데이터
+  # 버킷을 최초 1회 생성.
+  #   datalake     : 수집 원본(raw) + 메달리언 가공 데이터 (raw/bronze/silver/gold 프리픽스)
+  #   code         : Git -> (Jenkins CI) -> 업로드되는 Airflow DAG 코드 + Spark 메달리언 스크립트
+  #                    code/dags/       : Airflow DAG 정의
+  #                    code/spark-jobs/ : ingest.py, bronze.py, silver.py, gold.py (참조용 미러)
   #   reports      : LangGraph가 만든 보고서 파일 (웹에서 조회/다운로드)
   #   spark-events : Spark History Server가 읽는 이벤트 로그 (잡 종료 후 UI 조회용)
   minio-init:
@@ -59,23 +62,27 @@ services:
       - |
         set -e
         until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done
-        mc mb -p local/code
         mc mb -p local/datalake
+        mc mb -p local/code
         mc mb -p local/reports
         mc mb -p local/spark-events
         echo 'minio buckets ready'
+    networks:
+      - backend-net
 
+  # ---- 앱 계층 (fastapi/langgraph/frontend) : app-net + backend-net ----
   fastapi-server:
     build: ./fastapi-server
     environment:
-      DATABASE_URL: postgresql+psycopg2://${APP_POSTGRES_USER}:${APP_POSTGRES_PASSWORD}@postgres-app:5432/${APP_POSTGRES_DB}
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       CHROMADB_HOST: chromadb
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_DATALAKE_BUCKET: datalake
       MINIO_REPORTS_BUCKET: reports
     depends_on:
-      postgres-app:
+      postgres:
         condition: service_started
       chromadb:
         condition: service_started
@@ -83,6 +90,9 @@ services:
         condition: service_completed_successfully
     ports:
       - "8000:8000"
+    networks:
+      - backend-net
+      - app-net
 
   langgraph-server:
     build: ./langgraph-server
@@ -92,6 +102,7 @@ services:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_DATALAKE_BUCKET: datalake
       MINIO_REPORTS_BUCKET: reports
     depends_on:
       chromadb:
@@ -100,6 +111,18 @@ services:
         condition: service_completed_successfully
     ports:
       - "8100:8100"
+    networks:
+      - backend-net
+      - app-net
+
+  # 프론트엔드 기술스택 미정 -> 자리만 확보한 placeholder (frontend/Dockerfile 참고).
+  # backend-net에는 올리지 않는다: 데이터는 항상 fastapi-server(app-net)를 거쳐서만 접근.
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    networks:
+      - app-net
 
   # spark-jobs는 상시 실행되는 서비스가 아니라 이미지 빌드 용도로만 존재한다.
   # `docker compose build spark-jobs` 후 scripts/load-image-to-k3s.sh 로 k3s에 넣어야
@@ -133,9 +156,14 @@ services:
       minio-init:
         condition: service_completed_successfully
     ports:
-      - "18080:18080"
+      - "18080:18080"   # History Server UI (종료된 Spark 잡)
+    networks:
+      - backend-net
 
-  # ---- k3s: Spark 작업을 KubernetesPodOperator로 실행하기 위한 단일 노드 클러스터 ----
+  # ---- k3s: Spark 작업을 KubernetesPodOperator + dynamicAllocation으로 실행하기 위한
+  #      단일 노드 클러스터. Spark 워커(executor pod)는 여기서 작업량에 따라 동적으로 뜨고 사라진다.
+  #      backend-net에도 물려있는 이유: pod 안의 Spark 드라이버/executor가 s3a://로 minio에
+  #      접근해야 하기 때문 (이 컨테이너의 노드 네트워크를 경유해 나간다). ----
   k3s:
     image: rancher/k3s:v1.29.4-k3s1
     container_name: k8s-master-node
@@ -148,6 +176,11 @@ services:
       - k3s-kubeconfig:/etc/rancher/k3s
     ports:
       - "6443:6443"
+      # Spark Driver UI(4040)는 여기서 상시 열어두지 않는다. 잡 실행 중에만
+      # scripts/spark-driver-ui.sh <pod-name> 으로 그때그때 4040에 포워딩한다.
+    networks:
+      - k8s-net
+      - backend-net
 
   # k3s가 만든 kubeconfig는 server 주소가 "https://127.0.0.1:6443"(k3s 컨테이너 자기 자신 기준)로
   # 박혀 있어서 다른 컨테이너(Airflow)에서는 그대로 못 쓴다. docker 네트워크 안에서는 컨테이너명
@@ -173,6 +206,8 @@ services:
           | sed 's#server: https://k8s-master-node:6443#server: https://k8s-master-node:6443\n    insecure-skip-tls-verify: true#' \
           > /dst/config
         echo 'kubeconfig 준비 완료'
+    networks:
+      - k8s-net
 
   # Spark의 네이티브 k8s 스케줄러(--master k8s://...)가 executor pod를 만들 수 있도록
   # ServiceAccount/Role/RoleBinding을 1회 적용한다 (k3s/spark-rbac.yaml).
@@ -195,10 +230,12 @@ services:
         until kubectl get nodes >/dev/null 2>&1; do echo 'k3s API 대기 중...'; sleep 2; done
         kubectl apply -f /manifests/spark-rbac.yaml
         echo 'RBAC 적용 완료'
+    networks:
+      - k8s-net
 
   # MinIO code 버킷의 dags/ 프리픽스를 Airflow dags 볼륨으로 1회 동기화.
   # 로컬에서 DAG을 고치면 scripts/push_dags_to_minio.sh 로 code 버킷에 올린 뒤
-  # `docker compose run --rm dags-sync` 로 다시 반영한다.
+  # `docker compose run --rm dags-sync` 로 다시 반영한다. (Jenkins가 이 두 단계를 대신 수행한다.)
   dags-sync:
     image: minio/mc:latest
     container_name: airflow-dags-sync
@@ -217,19 +254,21 @@ services:
         set -e
         until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done
         mc mirror --overwrite local/code/dags /dags || echo 'code/dags 비어있음, 건너뜀'
+    networks:
+      - backend-net
 
   # 계정을 무작위로 만들게 두지 않고 원하는 아이디/비번으로 고정하기 위한 1회성 초기화.
   airflow-init:
     build: ./airflow
     container_name: airflow-init
     depends_on:
-      postgres-airflow:
+      postgres:
         condition: service_started
     environment:
       _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER}
       _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD}
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@postgres-airflow:5432/${AIRFLOW_POSTGRES_DB}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_POSTGRES_DB}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
     entrypoint: /bin/bash
     command:
@@ -245,6 +284,8 @@ services:
         airflow users reset-password \
           --username "$$_AIRFLOW_WWW_USER_USERNAME" \
           --password "$$_AIRFLOW_WWW_USER_PASSWORD"
+    networks:
+      - backend-net
 
   airflow-webserver:
     build: ./airflow
@@ -259,7 +300,7 @@ services:
         condition: service_completed_successfully
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@postgres-airflow:5432/${AIRFLOW_POSTGRES_DB}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_POSTGRES_DB}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
       KUBECONFIG: /opt/airflow/kube/config
       AIRFLOW_CONN_MINIO_DEFAULT: aws://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@/?endpoint_url=http%3A%2F%2Fminio%3A9000
@@ -267,7 +308,10 @@ services:
       - airflow-dags:/opt/airflow/dags
       - kube-config:/opt/airflow/kube:ro
     ports:
-      - "8080:8080"
+      - "8080:8080"   # Airflow Webserver UI
+    networks:
+      - backend-net
+      - k8s-net
 
   airflow-scheduler:
     build: ./airflow
@@ -282,17 +326,29 @@ services:
         condition: service_completed_successfully
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@postgres-airflow:5432/${AIRFLOW_POSTGRES_DB}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_POSTGRES_DB}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
       KUBECONFIG: /opt/airflow/kube/config
       AIRFLOW_CONN_MINIO_DEFAULT: aws://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@/?endpoint_url=http%3A%2F%2Fminio%3A9000
     volumes:
       - airflow-dags:/opt/airflow/dags
       - kube-config:/opt/airflow/kube:ro
+    networks:
+      - backend-net
+      - k8s-net
+
+networks:
+  # 데이터 저장 계층 전용. frontend/k8s-net 쪽에서는 직접 못 붙고,
+  # fastapi-server/langgraph-server/airflow/spark-history-server 처럼 실제로
+  # postgres/minio/chromadb가 필요한 서비스만 올라온다.
+  backend-net:
+  # 사용자 대면 앱 계층. frontend는 fastapi-server를 통해서만 데이터에 접근한다.
+  app-net:
+  # k3s 컨트롤플레인 + Airflow의 KubernetesPodOperator 연동 전용.
+  k8s-net:
 
 volumes:
-  postgres-app-data:
-  postgres-airflow-data:
+  postgres-data:
   chromadb-data:
   minio-data:
   k3s-data:

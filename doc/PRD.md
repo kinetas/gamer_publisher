@@ -99,6 +99,15 @@ Airflow가 스케줄에 따라 파이프라인을 트리거하면, Spark 작업�
 - Spark 잡 종료 후에도 UI를 볼 수 있도록 History Server 도입 필요 (완료)
 - 포트/네트워킹 정리는 추후 Jenkins CI/CD 파이프라인에 편입시킬 예정
 
+### 메모 (2026-08-05) — 컨테이너 구성 확정
+- 컨테이너 7개로 확정: ① k3s(쿠버네티스, Spark 워커 동적할당) ② frontend ③ fastapi-server ④ minio ⑤ airflow ⑥ langgraph-server ⑦ postgres
+- postgres는 컨테이너 1개, DB 2개(`app_db`: 유저 로그인 + 프론트엔드용 gold 요약, `airflow_db`: Airflow 메타데이터)로 통합. `app_db`는 Airflow와 무관하지만 필요 시 gold 데이터를 담을 수 있음
+- minio는 `datalake`(수집 원본 raw + 메달리언 가공 데이터: raw/bronze/silver/gold) 버킷과, Airflow용 코드(메달리언 스크립트 ingest/bronze/silver/gold.py + DAG)를 담는 `code` 버킷으로 구성. Airflow 컨테이너 자체에는 DAG(파이프라인 오케스트레이션 코드)만 두고, 파이프라인이 다루는 데이터는 전부 MinIO에 둠
+- frontend는 기술스택 미정 상태라 placeholder(nginx) 컨테이너로만 자리 확보, 스택 확정 시 교체
+- 관리 UI 포트: Airflow(8080), Spark Driver UI(4040, 잡 실행 중에만 포트포워딩), Spark History Server(18080), MinIO Console(9001) 전부 노출
+- Docker 네트워크는 backend-net/app-net/k8s-net 3개로 분리 (보안 요구사항 반영)
+- 상세 구현은 `develope/docker-compose.yml`, `develope/README.md`, `develope/Jenkinsfile` 참고
+
 ---
 
 # External Tools / APIs
