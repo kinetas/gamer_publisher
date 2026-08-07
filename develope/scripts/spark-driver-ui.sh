@@ -5,7 +5,7 @@
 # 사용법: ./scripts/spark-driver-ui.sh <pod-name>
 #   pod 목록 확인: docker run --rm --network develope_k8s-net \
 #     -v develope_kube-config:/kube:ro -e KUBECONFIG=/kube/config \
-#     bitnami/kubectl:1.29 get pods
+#     bitnamilegacy/kubectl:1.29 get pods
 set -e
 cd "$(dirname "$0")/.."
 
@@ -20,4 +20,4 @@ docker run --rm -it \
   -v develope_kube-config:/kube:ro \
   -e KUBECONFIG=/kube/config \
   -p 4040:4040 \
-  bitnami/kubectl:1.29 port-forward "pod/$POD_NAME" 4040:4040
+  bitnamilegacy/kubectl:1.29 port-forward "pod/$POD_NAME" 4040:4040

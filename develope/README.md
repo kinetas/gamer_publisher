@@ -74,12 +74,15 @@ ingest >> bronze >> silver >> gold
 | 버킷 | 용도 |
 |---|---|
 | `datalake` | 수집 원본(raw) + 메달리언 가공 데이터. 프리픽스: `raw/`, `bronze/`, `silver/`, `gold/` |
-| `code` | Git → (Jenkins CI) → 업로드되는 Airflow DAG(`code/dags/`) + Spark 메달리언 스크립트(`code/spark-jobs/`, 참조용 미러) |
+| `code` | Git → (Jenkins CI) → 업로드되는 Airflow DAG (`code/dags/`) |
 | `reports` | LangGraph가 생성한 보고서 파일 (웹에서 조회/다운로드) |
 | `spark-events` | Spark History Server가 읽는 이벤트 로그 |
 
-로컬에서 DAG/Spark 코드를 고치면 아래 스크립트로 `code` 버킷에 올리고, `dags-sync`를 다시 실행해 Airflow에 반영합니다.
+로컬에서 DAG 코드를 고치면 아래 스크립트로 `code` 버킷에 올리고, `dags-sync`를 다시 실행해 Airflow에 반영합니다.
 (Jenkins CI/CD가 구성되면 이 두 단계는 파이프라인이 자동으로 수행합니다 — `Jenkinsfile` 참고.)
+
+Spark 잡 코드(`spark-jobs/jobs/`)는 MinIO를 거치지 않고 이미지에 직접 박제됩니다. 수정 후에는
+`./scripts/load-image-to-k3s.sh`로 이미지를 재빌드 + k3s에 반입해야 반영됩니다.
 
 ```
 ./scripts/push_code_to_minio.sh

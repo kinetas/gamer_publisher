@@ -1,0 +1,1127 @@
+[2026-08-07T08:22:14.895+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2026-08-07T08:22:14.911+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: medallion_pipeline.ingest manual__2026-08-07T08:22:13+00:00 [queued]>
+[2026-08-07T08:22:14.919+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: medallion_pipeline.ingest manual__2026-08-07T08:22:13+00:00 [queued]>
+[2026-08-07T08:22:14.919+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 1
+[2026-08-07T08:22:14.927+0000] {taskinstance.py:2330} INFO - Executing <Task(KubernetesPodOperator): ingest> on 2026-08-07 08:22:13+00:00
+[2026-08-07T08:22:14.933+0000] {standard_task_runner.py:64} INFO - Started process 197 to run task
+[2026-08-07T08:22:14.936+0000] {standard_task_runner.py:90} INFO - Running: ['airflow', 'tasks', 'run', 'medallion_pipeline', 'ingest', 'manual__2026-08-07T08:22:13+00:00', '--job-id', '12', '--raw', '--subdir', 'DAGS_FOLDER/medallion_pipeline.py', '--cfg-path', '/tmp/tmp8tu7mi9m']
+[2026-08-07T08:22:14.937+0000] {standard_task_runner.py:91} INFO - Job 12: Subtask ingest
+[2026-08-07T08:22:14.986+0000] {task_command.py:426} INFO - Running <TaskInstance: medallion_pipeline.ingest manual__2026-08-07T08:22:13+00:00 [running]> on host a9e22ac38744
+[2026-08-07T08:22:15.072+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='airflow' AIRFLOW_CTX_DAG_ID='medallion_pipeline' AIRFLOW_CTX_TASK_ID='ingest' AIRFLOW_CTX_EXECUTION_DATE='2026-08-07T08:22:13+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-08-07T08:22:13+00:00'
+[2026-08-07T08:22:15.072+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2026-08-07T08:22:15.087+0000] {pod.py:1121} INFO - Building pod medallion-ingest-num31u48 with labels: {'dag_id': 'medallion_pipeline', 'task_id': 'ingest', 'run_id': 'manual__2026-08-07T0822130000-c56006760', 'kubernetes_pod_operator': 'True', 'try_number': '1'}
+[2026-08-07T08:22:15.146+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:15.155+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:15.193+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:15.199+0000] {pod.py:553} INFO - Found matching pod medallion-ingest-num31u48 with labels {'airflow_kpo_in_cluster': 'False', 'airflow_version': '2.9.3', 'dag_id': 'medallion_pipeline', 'kubernetes_pod_operator': 'True', 'run_id': 'manual__2026-08-07T0822130000-c56006760', 'task_id': 'ingest', 'try_number': '1'}
+[2026-08-07T08:22:15.199+0000] {pod.py:554} INFO - `try_number` of task_instance: 1
+[2026-08-07T08:22:15.200+0000] {pod.py:555} INFO - `try_number` of pod: 1
+[2026-08-07T08:22:15.200+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:15.206+0000] {pod_manager.py:378} WARNING - Pod not yet started: medallion-ingest-num31u48
+[2026-08-07T08:22:20.207+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:20.225+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:20.237+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:20.282+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:20.288+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:16 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[2026-08-07T08:22:20.289+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SparkContext: Running Spark version 3.5.6
+[2026-08-07T08:22:20.289+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SparkContext: OS info Linux, 6.18.33.2-microsoft-standard-WSL2, amd64
+[2026-08-07T08:22:20.289+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SparkContext: Java version 17.0.15
+[2026-08-07T08:22:20.289+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO ResourceUtils: ==============================================================
+[2026-08-07T08:22:20.289+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO ResourceUtils: No custom resources configured for spark.driver.
+[2026-08-07T08:22:20.289+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO ResourceUtils: ==============================================================
+[2026-08-07T08:22:20.290+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SparkContext: Submitted application: ingest
+[2026-08-07T08:22:20.290+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(cores -> name: cores, amount: 1, script: , vendor: , memory -> name: memory, amount: 1024, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+[2026-08-07T08:22:20.290+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO ResourceProfile: Limiting resource is cpus at 1 tasks per executor
+[2026-08-07T08:22:20.290+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO ResourceProfileManager: Added ResourceProfile id: 0
+[2026-08-07T08:22:20.290+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SecurityManager: Changing view acls to: root,spark
+[2026-08-07T08:22:20.290+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SecurityManager: Changing modify acls to: root,spark
+[2026-08-07T08:22:20.291+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SecurityManager: Changing view acls groups to:
+[2026-08-07T08:22:20.291+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SecurityManager: Changing modify acls groups to:
+[2026-08-07T08:22:20.291+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: root, spark; groups with view permissions: EMPTY; users with modify permissions: root, spark; groups with modify permissions: EMPTY
+[2026-08-07T08:22:20.291+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO Utils: Successfully started service 'sparkDriver' on port 40363.
+[2026-08-07T08:22:20.291+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SparkEnv: Registering MapOutputTracker
+[2026-08-07T08:22:20.291+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SparkEnv: Registering BlockManagerMaster
+[2026-08-07T08:22:20.291+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+[2026-08-07T08:22:20.292+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+[2026-08-07T08:22:20.292+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+[2026-08-07T08:22:20.292+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-e72aaa47-68ff-4007-b4cb-f8c25d86152f
+[2026-08-07T08:22:20.292+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO MemoryStore: MemoryStore started with capacity 434.4 MiB
+[2026-08-07T08:22:20.292+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SparkEnv: Registering OutputCommitCoordinator
+[2026-08-07T08:22:20.292+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
+[2026-08-07T08:22:20.292+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+[2026-08-07T08:22:20.293+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:18 INFO SparkKubernetesClientFactory: Auto-configuring K8S client using current context from users K8S config file
+[2026-08-07T08:22:20.293+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO Utils: Using initial executors = 0, max of spark.dynamicAllocation.initialExecutors, spark.dynamicAllocation.minExecutors and spark.executor.instances
+[2026-08-07T08:22:20.293+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 WARN ExecutorPodsWatchSnapshotSource: Kubernetes client has been closed.
+[2026-08-07T08:22:20.293+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 ERROR SparkContext: Error initializing SparkContext.
+[2026-08-07T08:22:20.293+0000] {pod_manager.py:472} INFO - [base] io.fabric8.kubernetes.client.KubernetesClientException: Received 403 on websocket. Failure executing: GET at: https://kubernetes.default.svc:443/api/v1/namespaces/default/pods?labelSelector=spark-app-selector%3Dspark-4d5b0f929ad34965bbfe99287f3304f1%2Cspark-role%3Dexecutor&allowWatchBookmarks=true&watch=true. Message: Forbidden.
+[2026-08-07T08:22:20.293+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.requestFailure(OperationSupport.java:671)
+[2026-08-07T08:22:20.293+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.WatchConnectionManager.lambda$start$3(WatchConnectionManager.java:86)
+[2026-08-07T08:22:20.294+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniHandle(Unknown Source)
+[2026-08-07T08:22:20.294+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniHandle.tryFire(Unknown Source)
+[2026-08-07T08:22:20.294+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.294+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.completeExceptionally(Unknown Source)
+[2026-08-07T08:22:20.294+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.StandardHttpClient.lambda$completeOrCancel$10(StandardHttpClient.java:138)
+[2026-08-07T08:22:20.294+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.StandardHttpClient.lambda$buildWebSocket$17(StandardHttpClient.java:241)
+[2026-08-07T08:22:20.294+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.295+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.295+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.295+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.295+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.utils.AsyncUtils.lambda$retryWithExponentialBackoff$3(AsyncUtils.java:90)
+[2026-08-07T08:22:20.295+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.295+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.295+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.296+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.296+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.okhttp.OkHttpWebSocketImpl$1.onFailure(OkHttpWebSocketImpl.java:88)
+[2026-08-07T08:22:20.296+0000] {pod_manager.py:472} INFO - [base] 	at okhttp3.internal.ws.RealWebSocket.failWebSocket(RealWebSocket.java:571)
+[2026-08-07T08:22:20.296+0000] {pod_manager.py:472} INFO - [base] 	at okhttp3.internal.ws.RealWebSocket$2.onResponse(RealWebSocket.java:198)
+[2026-08-07T08:22:20.296+0000] {pod_manager.py:472} INFO - [base] 	at okhttp3.RealCall$AsyncCall.execute(RealCall.java:203)
+[2026-08-07T08:22:20.296+0000] {pod_manager.py:472} INFO - [base] 	at okhttp3.internal.NamedRunnable.run(NamedRunnable.java:32)
+[2026-08-07T08:22:20.296+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+[2026-08-07T08:22:20.297+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+[2026-08-07T08:22:20.297+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.Thread.run(Unknown Source)
+[2026-08-07T08:22:20.297+0000] {pod_manager.py:472} INFO - [base] 	Suppressed: java.lang.Throwable: waiting here
+[2026-08-07T08:22:20.297+0000] {pod_manager.py:472} INFO - [base] 		at io.fabric8.kubernetes.client.utils.Utils.waitUntilReady(Utils.java:174)
+[2026-08-07T08:22:20.297+0000] {pod_manager.py:472} INFO - [base] 		at io.fabric8.kubernetes.client.utils.Utils.waitUntilReadyOrFail(Utils.java:185)
+[2026-08-07T08:22:20.298+0000] {pod_manager.py:472} INFO - [base] 		at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.watch(BaseOperation.java:611)
+[2026-08-07T08:22:20.298+0000] {pod_manager.py:472} INFO - [base] 		at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.watch(BaseOperation.java:598)
+[2026-08-07T08:22:20.298+0000] {pod_manager.py:472} INFO - [base] 		at org.apache.spark.scheduler.cluster.k8s.ExecutorPodsWatchSnapshotSource.start(ExecutorPodsWatchSnapshotSource.scala:67)
+[2026-08-07T08:22:20.298+0000] {pod_manager.py:472} INFO - [base] 		at org.apache.spark.scheduler.cluster.k8s.KubernetesClusterSchedulerBackend.start(KubernetesClusterSchedulerBackend.scala:111)
+[2026-08-07T08:22:20.298+0000] {pod_manager.py:472} INFO - [base] 		at org.apache.spark.scheduler.TaskSchedulerImpl.start(TaskSchedulerImpl.scala:235)
+[2026-08-07T08:22:20.298+0000] {pod_manager.py:472} INFO - [base] 		at org.apache.spark.SparkContext.<init>(SparkContext.scala:599)
+[2026-08-07T08:22:20.298+0000] {pod_manager.py:472} INFO - [base] 		at org.apache.spark.api.java.JavaSparkContext.<init>(JavaSparkContext.scala:58)
+[2026-08-07T08:22:20.298+0000] {pod_manager.py:472} INFO - [base] 		at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+[2026-08-07T08:22:20.299+0000] {pod_manager.py:472} INFO - [base] 		at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.299+0000] {pod_manager.py:472} INFO - [base] 		at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.299+0000] {pod_manager.py:472} INFO - [base] 		at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+[2026-08-07T08:22:20.299+0000] {pod_manager.py:472} INFO - [base] 		at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+[2026-08-07T08:22:20.299+0000] {pod_manager.py:472} INFO - [base] 		at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:247)
+[2026-08-07T08:22:20.299+0000] {pod_manager.py:472} INFO - [base] 		at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+[2026-08-07T08:22:20.299+0000] {pod_manager.py:472} INFO - [base] 		at py4j.Gateway.invoke(Gateway.java:238)
+[2026-08-07T08:22:20.299+0000] {pod_manager.py:472} INFO - [base] 		at py4j.commands.ConstructorCommand.invokeConstructor(ConstructorCommand.java:80)
+[2026-08-07T08:22:20.300+0000] {pod_manager.py:472} INFO - [base] 		at py4j.commands.ConstructorCommand.execute(ConstructorCommand.java:69)
+[2026-08-07T08:22:20.300+0000] {pod_manager.py:472} INFO - [base] 		at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+[2026-08-07T08:22:20.300+0000] {pod_manager.py:472} INFO - [base] 		at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+[2026-08-07T08:22:20.300+0000] {pod_manager.py:472} INFO - [base] 		... 1 more
+[2026-08-07T08:22:20.300+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO SparkContext: SparkContext is stopping with exitCode 0.
+[2026-08-07T08:22:20.300+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO SparkUI: Stopped Spark web UI at http://medallion-ingest-num31u48:4040
+[2026-08-07T08:22:20.300+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO KubernetesClusterSchedulerBackend: Shutting down all executors
+[2026-08-07T08:22:20.300+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO KubernetesClusterSchedulerBackend$KubernetesDriverEndpoint: Asking each executor to shut down
+[2026-08-07T08:22:20.301+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 ERROR Utils: Uncaught exception in thread Thread-4
+[2026-08-07T08:22:20.301+0000] {pod_manager.py:472} INFO - [base] io.fabric8.kubernetes.client.KubernetesClientException: Failure executing: DELETE at: https://kubernetes.default.svc:443/api/v1/namespaces/default/services?labelSelector=spark-app-selector%3Dspark-4d5b0f929ad34965bbfe99287f3304f1. Message: Forbidden!Configured service account doesn't have access. Service account may have been revoked. services is forbidden: User "system:serviceaccount:default:default" cannot deletecollection resource "services" in API group "" in the namespace "default".
+[2026-08-07T08:22:20.301+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.KubernetesClientException.copyAsCause(KubernetesClientException.java:238)
+[2026-08-07T08:22:20.301+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.waitForResult(OperationSupport.java:518)
+[2026-08-07T08:22:20.301+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.handleResponse(OperationSupport.java:535)
+[2026-08-07T08:22:20.301+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.handleDelete(OperationSupport.java:320)
+[2026-08-07T08:22:20.301+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.deleteAll(BaseOperation.java:504)
+[2026-08-07T08:22:20.302+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.delete(BaseOperation.java:469)
+[2026-08-07T08:22:20.302+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.k8s.KubernetesClusterSchedulerBackend.$anonfun$stop$5(KubernetesClusterSchedulerBackend.scala:142)
+[2026-08-07T08:22:20.302+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.302+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.k8s.KubernetesClusterSchedulerBackend.stop(KubernetesClusterSchedulerBackend.scala:143)
+[2026-08-07T08:22:20.302+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.SchedulerBackend.stop(SchedulerBackend.scala:33)
+[2026-08-07T08:22:20.302+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.SchedulerBackend.stop$(SchedulerBackend.scala:33)
+[2026-08-07T08:22:20.302+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.CoarseGrainedSchedulerBackend.stop(CoarseGrainedSchedulerBackend.scala:54)
+[2026-08-07T08:22:20.303+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.TaskSchedulerImpl.$anonfun$stop$2(TaskSchedulerImpl.scala:992)
+[2026-08-07T08:22:20.303+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.303+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.TaskSchedulerImpl.stop(TaskSchedulerImpl.scala:992)
+[2026-08-07T08:22:20.303+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.DAGScheduler.$anonfun$stop$4(DAGScheduler.scala:3018)
+[2026-08-07T08:22:20.303+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.303+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.DAGScheduler.stop(DAGScheduler.scala:3018)
+[2026-08-07T08:22:20.303+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.$anonfun$stop$12(SparkContext.scala:2258)
+[2026-08-07T08:22:20.303+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.304+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.stop(SparkContext.scala:2258)
+[2026-08-07T08:22:20.304+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.stop(SparkContext.scala:2211)
+[2026-08-07T08:22:20.304+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.<init>(SparkContext.scala:706)
+[2026-08-07T08:22:20.304+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.api.java.JavaSparkContext.<init>(JavaSparkContext.scala:58)
+[2026-08-07T08:22:20.304+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+[2026-08-07T08:22:20.304+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.304+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.304+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+[2026-08-07T08:22:20.305+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+[2026-08-07T08:22:20.305+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:247)
+[2026-08-07T08:22:20.305+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+[2026-08-07T08:22:20.305+0000] {pod_manager.py:472} INFO - [base] 	at py4j.Gateway.invoke(Gateway.java:238)
+[2026-08-07T08:22:20.305+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.invokeConstructor(ConstructorCommand.java:80)
+[2026-08-07T08:22:20.305+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.execute(ConstructorCommand.java:69)
+[2026-08-07T08:22:20.305+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+[2026-08-07T08:22:20.306+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+[2026-08-07T08:22:20.306+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.Thread.run(Unknown Source)
+[2026-08-07T08:22:20.306+0000] {pod_manager.py:472} INFO - [base] Caused by: io.fabric8.kubernetes.client.KubernetesClientException: Failure executing: DELETE at: https://kubernetes.default.svc:443/api/v1/namespaces/default/services?labelSelector=spark-app-selector%3Dspark-4d5b0f929ad34965bbfe99287f3304f1. Message: Forbidden!Configured service account doesn't have access. Service account may have been revoked. services is forbidden: User "system:serviceaccount:default:default" cannot deletecollection resource "services" in API group "" in the namespace "default".
+[2026-08-07T08:22:20.306+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.requestFailure(OperationSupport.java:671)
+[2026-08-07T08:22:20.306+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.requestFailure(OperationSupport.java:651)
+[2026-08-07T08:22:20.306+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.assertResponseCode(OperationSupport.java:597)
+[2026-08-07T08:22:20.306+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.lambda$handleResponse$0(OperationSupport.java:560)
+[2026-08-07T08:22:20.306+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniApply.tryFire(Unknown Source)
+[2026-08-07T08:22:20.307+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.307+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.307+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.StandardHttpClient.lambda$completeOrCancel$10(StandardHttpClient.java:140)
+[2026-08-07T08:22:20.307+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.307+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.307+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.307+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.308+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.ByteArrayBodyHandler.onBodyDone(ByteArrayBodyHandler.java:52)
+[2026-08-07T08:22:20.308+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.308+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.308+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.308+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.308+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.okhttp.OkHttpClientImpl$OkHttpAsyncBody.doConsume(OkHttpClientImpl.java:137)
+[2026-08-07T08:22:20.308+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+[2026-08-07T08:22:20.308+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+[2026-08-07T08:22:20.309+0000] {pod_manager.py:472} INFO - [base] 	... 1 more
+[2026-08-07T08:22:20.309+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 ERROR Utils: Uncaught exception in thread Thread-4
+[2026-08-07T08:22:20.309+0000] {pod_manager.py:472} INFO - [base] io.fabric8.kubernetes.client.KubernetesClientException: Failure executing: DELETE at: https://kubernetes.default.svc:443/api/v1/namespaces/default/persistentvolumeclaims?labelSelector=spark-app-selector%3Dspark-4d5b0f929ad34965bbfe99287f3304f1. Message: Forbidden!Configured service account doesn't have access. Service account may have been revoked. persistentvolumeclaims is forbidden: User "system:serviceaccount:default:default" cannot deletecollection resource "persistentvolumeclaims" in API group "" in the namespace "default".
+[2026-08-07T08:22:20.309+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.KubernetesClientException.copyAsCause(KubernetesClientException.java:238)
+[2026-08-07T08:22:20.309+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.waitForResult(OperationSupport.java:518)
+[2026-08-07T08:22:20.309+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.handleResponse(OperationSupport.java:535)
+[2026-08-07T08:22:20.309+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.handleDelete(OperationSupport.java:320)
+[2026-08-07T08:22:20.310+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.deleteAll(BaseOperation.java:504)
+[2026-08-07T08:22:20.310+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.delete(BaseOperation.java:469)
+[2026-08-07T08:22:20.310+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.k8s.KubernetesClusterSchedulerBackend.$anonfun$stop$6(KubernetesClusterSchedulerBackend.scala:152)
+[2026-08-07T08:22:20.310+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.310+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.k8s.KubernetesClusterSchedulerBackend.stop(KubernetesClusterSchedulerBackend.scala:153)
+[2026-08-07T08:22:20.310+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.SchedulerBackend.stop(SchedulerBackend.scala:33)
+[2026-08-07T08:22:20.310+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.SchedulerBackend.stop$(SchedulerBackend.scala:33)
+[2026-08-07T08:22:20.310+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.CoarseGrainedSchedulerBackend.stop(CoarseGrainedSchedulerBackend.scala:54)
+[2026-08-07T08:22:20.311+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.TaskSchedulerImpl.$anonfun$stop$2(TaskSchedulerImpl.scala:992)
+[2026-08-07T08:22:20.311+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.311+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.TaskSchedulerImpl.stop(TaskSchedulerImpl.scala:992)
+[2026-08-07T08:22:20.311+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.DAGScheduler.$anonfun$stop$4(DAGScheduler.scala:3018)
+[2026-08-07T08:22:20.311+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.311+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.DAGScheduler.stop(DAGScheduler.scala:3018)
+[2026-08-07T08:22:20.311+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.$anonfun$stop$12(SparkContext.scala:2258)
+[2026-08-07T08:22:20.311+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.312+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.stop(SparkContext.scala:2258)
+[2026-08-07T08:22:20.312+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.stop(SparkContext.scala:2211)
+[2026-08-07T08:22:20.312+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.<init>(SparkContext.scala:706)
+[2026-08-07T08:22:20.312+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.api.java.JavaSparkContext.<init>(JavaSparkContext.scala:58)
+[2026-08-07T08:22:20.312+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+[2026-08-07T08:22:20.312+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.312+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.313+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+[2026-08-07T08:22:20.313+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+[2026-08-07T08:22:20.313+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:247)
+[2026-08-07T08:22:20.313+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+[2026-08-07T08:22:20.313+0000] {pod_manager.py:472} INFO - [base] 	at py4j.Gateway.invoke(Gateway.java:238)
+[2026-08-07T08:22:20.313+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.invokeConstructor(ConstructorCommand.java:80)
+[2026-08-07T08:22:20.313+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.execute(ConstructorCommand.java:69)
+[2026-08-07T08:22:20.313+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+[2026-08-07T08:22:20.314+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+[2026-08-07T08:22:20.314+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.Thread.run(Unknown Source)
+[2026-08-07T08:22:20.314+0000] {pod_manager.py:472} INFO - [base] Caused by: io.fabric8.kubernetes.client.KubernetesClientException: Failure executing: DELETE at: https://kubernetes.default.svc:443/api/v1/namespaces/default/persistentvolumeclaims?labelSelector=spark-app-selector%3Dspark-4d5b0f929ad34965bbfe99287f3304f1. Message: Forbidden!Configured service account doesn't have access. Service account may have been revoked. persistentvolumeclaims is forbidden: User "system:serviceaccount:default:default" cannot deletecollection resource "persistentvolumeclaims" in API group "" in the namespace "default".
+[2026-08-07T08:22:20.314+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.requestFailure(OperationSupport.java:671)
+[2026-08-07T08:22:20.314+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.requestFailure(OperationSupport.java:651)
+[2026-08-07T08:22:20.314+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.assertResponseCode(OperationSupport.java:597)
+[2026-08-07T08:22:20.315+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.lambda$handleResponse$0(OperationSupport.java:560)
+[2026-08-07T08:22:20.315+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniApply.tryFire(Unknown Source)
+[2026-08-07T08:22:20.315+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.315+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.315+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.StandardHttpClient.lambda$completeOrCancel$10(StandardHttpClient.java:140)
+[2026-08-07T08:22:20.315+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.315+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.315+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.316+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.316+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.ByteArrayBodyHandler.onBodyDone(ByteArrayBodyHandler.java:52)
+[2026-08-07T08:22:20.316+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.316+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.316+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.316+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.316+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.okhttp.OkHttpClientImpl$OkHttpAsyncBody.doConsume(OkHttpClientImpl.java:137)
+[2026-08-07T08:22:20.317+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+[2026-08-07T08:22:20.317+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+[2026-08-07T08:22:20.317+0000] {pod_manager.py:472} INFO - [base] 	... 1 more
+[2026-08-07T08:22:20.317+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 ERROR Utils: Uncaught exception in thread Thread-4
+[2026-08-07T08:22:20.317+0000] {pod_manager.py:472} INFO - [base] io.fabric8.kubernetes.client.KubernetesClientException: Failure executing: DELETE at: https://kubernetes.default.svc:443/api/v1/namespaces/default/pods?labelSelector=spark-app-selector%3Dspark-4d5b0f929ad34965bbfe99287f3304f1%2Cspark-role%3Dexecutor. Message: Forbidden!Configured service account doesn't have access. Service account may have been revoked. pods is forbidden: User "system:serviceaccount:default:default" cannot deletecollection resource "pods" in API group "" in the namespace "default".
+[2026-08-07T08:22:20.317+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.KubernetesClientException.copyAsCause(KubernetesClientException.java:238)
+[2026-08-07T08:22:20.317+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.waitForResult(OperationSupport.java:518)
+[2026-08-07T08:22:20.318+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.handleResponse(OperationSupport.java:535)
+[2026-08-07T08:22:20.318+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.handleDelete(OperationSupport.java:320)
+[2026-08-07T08:22:20.318+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.deleteAll(BaseOperation.java:504)
+[2026-08-07T08:22:20.318+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.delete(BaseOperation.java:469)
+[2026-08-07T08:22:20.318+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.k8s.ExecutorPodsAllocator.$anonfun$stop$1(ExecutorPodsAllocator.scala:545)
+[2026-08-07T08:22:20.318+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.319+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.k8s.ExecutorPodsAllocator.stop(ExecutorPodsAllocator.scala:546)
+[2026-08-07T08:22:20.319+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.k8s.KubernetesClusterSchedulerBackend.stop(KubernetesClusterSchedulerBackend.scala:159)
+[2026-08-07T08:22:20.319+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.SchedulerBackend.stop(SchedulerBackend.scala:33)
+[2026-08-07T08:22:20.319+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.SchedulerBackend.stop$(SchedulerBackend.scala:33)
+[2026-08-07T08:22:20.319+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.CoarseGrainedSchedulerBackend.stop(CoarseGrainedSchedulerBackend.scala:54)
+[2026-08-07T08:22:20.319+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.TaskSchedulerImpl.$anonfun$stop$2(TaskSchedulerImpl.scala:992)
+[2026-08-07T08:22:20.319+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.319+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.TaskSchedulerImpl.stop(TaskSchedulerImpl.scala:992)
+[2026-08-07T08:22:20.320+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.DAGScheduler.$anonfun$stop$4(DAGScheduler.scala:3018)
+[2026-08-07T08:22:20.320+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.320+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.DAGScheduler.stop(DAGScheduler.scala:3018)
+[2026-08-07T08:22:20.320+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.$anonfun$stop$12(SparkContext.scala:2258)
+[2026-08-07T08:22:20.320+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.320+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.stop(SparkContext.scala:2258)
+[2026-08-07T08:22:20.321+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.stop(SparkContext.scala:2211)
+[2026-08-07T08:22:20.321+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.<init>(SparkContext.scala:706)
+[2026-08-07T08:22:20.321+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.api.java.JavaSparkContext.<init>(JavaSparkContext.scala:58)
+[2026-08-07T08:22:20.321+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+[2026-08-07T08:22:20.321+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.321+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.321+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+[2026-08-07T08:22:20.321+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+[2026-08-07T08:22:20.322+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:247)
+[2026-08-07T08:22:20.322+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+[2026-08-07T08:22:20.322+0000] {pod_manager.py:472} INFO - [base] 	at py4j.Gateway.invoke(Gateway.java:238)
+[2026-08-07T08:22:20.322+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.invokeConstructor(ConstructorCommand.java:80)
+[2026-08-07T08:22:20.322+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.execute(ConstructorCommand.java:69)
+[2026-08-07T08:22:20.322+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+[2026-08-07T08:22:20.322+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+[2026-08-07T08:22:20.323+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.Thread.run(Unknown Source)
+[2026-08-07T08:22:20.323+0000] {pod_manager.py:472} INFO - [base] Caused by: io.fabric8.kubernetes.client.KubernetesClientException: Failure executing: DELETE at: https://kubernetes.default.svc:443/api/v1/namespaces/default/pods?labelSelector=spark-app-selector%3Dspark-4d5b0f929ad34965bbfe99287f3304f1%2Cspark-role%3Dexecutor. Message: Forbidden!Configured service account doesn't have access. Service account may have been revoked. pods is forbidden: User "system:serviceaccount:default:default" cannot deletecollection resource "pods" in API group "" in the namespace "default".
+[2026-08-07T08:22:20.323+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.requestFailure(OperationSupport.java:671)
+[2026-08-07T08:22:20.323+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.requestFailure(OperationSupport.java:651)
+[2026-08-07T08:22:20.323+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.assertResponseCode(OperationSupport.java:597)
+[2026-08-07T08:22:20.323+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.lambda$handleResponse$0(OperationSupport.java:560)
+[2026-08-07T08:22:20.323+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniApply.tryFire(Unknown Source)
+[2026-08-07T08:22:20.324+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.324+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.324+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.StandardHttpClient.lambda$completeOrCancel$10(StandardHttpClient.java:140)
+[2026-08-07T08:22:20.324+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.324+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.324+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.324+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.324+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.ByteArrayBodyHandler.onBodyDone(ByteArrayBodyHandler.java:52)
+[2026-08-07T08:22:20.325+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.325+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.325+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.325+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.325+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.okhttp.OkHttpClientImpl$OkHttpAsyncBody.doConsume(OkHttpClientImpl.java:137)
+[2026-08-07T08:22:20.325+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+[2026-08-07T08:22:20.325+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+[2026-08-07T08:22:20.325+0000] {pod_manager.py:472} INFO - [base] 	... 1 more
+[2026-08-07T08:22:20.326+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 ERROR Utils: Uncaught exception in thread Thread-4
+[2026-08-07T08:22:20.326+0000] {pod_manager.py:472} INFO - [base] io.fabric8.kubernetes.client.KubernetesClientException: Failure executing: DELETE at: https://kubernetes.default.svc:443/api/v1/namespaces/default/configmaps?labelSelector=spark-app-selector%3Dspark-4d5b0f929ad34965bbfe99287f3304f1%2Cspark-role%3Dexecutor. Message: Forbidden!Configured service account doesn't have access. Service account may have been revoked. configmaps is forbidden: User "system:serviceaccount:default:default" cannot deletecollection resource "configmaps" in API group "" in the namespace "default".
+[2026-08-07T08:22:20.326+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.KubernetesClientException.copyAsCause(KubernetesClientException.java:238)
+[2026-08-07T08:22:20.326+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.waitForResult(OperationSupport.java:518)
+[2026-08-07T08:22:20.326+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.handleResponse(OperationSupport.java:535)
+[2026-08-07T08:22:20.326+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.handleDelete(OperationSupport.java:320)
+[2026-08-07T08:22:20.326+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.deleteAll(BaseOperation.java:504)
+[2026-08-07T08:22:20.326+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.delete(BaseOperation.java:469)
+[2026-08-07T08:22:20.327+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.k8s.KubernetesClusterSchedulerBackend.$anonfun$stop$7(KubernetesClusterSchedulerBackend.scala:167)
+[2026-08-07T08:22:20.327+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.327+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.k8s.KubernetesClusterSchedulerBackend.stop(KubernetesClusterSchedulerBackend.scala:168)
+[2026-08-07T08:22:20.327+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.SchedulerBackend.stop(SchedulerBackend.scala:33)
+[2026-08-07T08:22:20.327+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.SchedulerBackend.stop$(SchedulerBackend.scala:33)
+[2026-08-07T08:22:20.327+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.cluster.CoarseGrainedSchedulerBackend.stop(CoarseGrainedSchedulerBackend.scala:54)
+[2026-08-07T08:22:20.327+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.TaskSchedulerImpl.$anonfun$stop$2(TaskSchedulerImpl.scala:992)
+[2026-08-07T08:22:20.327+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.328+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.TaskSchedulerImpl.stop(TaskSchedulerImpl.scala:992)
+[2026-08-07T08:22:20.328+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.DAGScheduler.$anonfun$stop$4(DAGScheduler.scala:3018)
+[2026-08-07T08:22:20.328+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.328+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.DAGScheduler.stop(DAGScheduler.scala:3018)
+[2026-08-07T08:22:20.328+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.$anonfun$stop$12(SparkContext.scala:2258)
+[2026-08-07T08:22:20.328+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1375)
+[2026-08-07T08:22:20.328+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.stop(SparkContext.scala:2258)
+[2026-08-07T08:22:20.329+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.stop(SparkContext.scala:2211)
+[2026-08-07T08:22:20.329+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.<init>(SparkContext.scala:706)
+[2026-08-07T08:22:20.329+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.api.java.JavaSparkContext.<init>(JavaSparkContext.scala:58)
+[2026-08-07T08:22:20.329+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+[2026-08-07T08:22:20.329+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.329+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.329+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+[2026-08-07T08:22:20.329+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+[2026-08-07T08:22:20.330+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:247)
+[2026-08-07T08:22:20.330+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+[2026-08-07T08:22:20.330+0000] {pod_manager.py:472} INFO - [base] 	at py4j.Gateway.invoke(Gateway.java:238)
+[2026-08-07T08:22:20.330+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.invokeConstructor(ConstructorCommand.java:80)
+[2026-08-07T08:22:20.330+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.execute(ConstructorCommand.java:69)
+[2026-08-07T08:22:20.330+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+[2026-08-07T08:22:20.330+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+[2026-08-07T08:22:20.330+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.Thread.run(Unknown Source)
+[2026-08-07T08:22:20.331+0000] {pod_manager.py:472} INFO - [base] Caused by: io.fabric8.kubernetes.client.KubernetesClientException: Failure executing: DELETE at: https://kubernetes.default.svc:443/api/v1/namespaces/default/configmaps?labelSelector=spark-app-selector%3Dspark-4d5b0f929ad34965bbfe99287f3304f1%2Cspark-role%3Dexecutor. Message: Forbidden!Configured service account doesn't have access. Service account may have been revoked. configmaps is forbidden: User "system:serviceaccount:default:default" cannot deletecollection resource "configmaps" in API group "" in the namespace "default".
+[2026-08-07T08:22:20.331+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.requestFailure(OperationSupport.java:671)
+[2026-08-07T08:22:20.331+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.requestFailure(OperationSupport.java:651)
+[2026-08-07T08:22:20.331+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.assertResponseCode(OperationSupport.java:597)
+[2026-08-07T08:22:20.331+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.lambda$handleResponse$0(OperationSupport.java:560)
+[2026-08-07T08:22:20.331+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniApply.tryFire(Unknown Source)
+[2026-08-07T08:22:20.331+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.331+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.332+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.StandardHttpClient.lambda$completeOrCancel$10(StandardHttpClient.java:140)
+[2026-08-07T08:22:20.332+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.332+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.332+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.332+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.332+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.ByteArrayBodyHandler.onBodyDone(ByteArrayBodyHandler.java:52)
+[2026-08-07T08:22:20.332+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.333+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.333+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.333+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.333+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.okhttp.OkHttpClientImpl$OkHttpAsyncBody.doConsume(OkHttpClientImpl.java:137)
+[2026-08-07T08:22:20.333+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+[2026-08-07T08:22:20.333+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+[2026-08-07T08:22:20.333+0000] {pod_manager.py:472} INFO - [base] 	... 1 more
+[2026-08-07T08:22:20.334+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO MapOutputTrackerMasterEndpoint: MapOutputTrackerMasterEndpoint stopped!
+[2026-08-07T08:22:20.334+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO MemoryStore: MemoryStore cleared
+[2026-08-07T08:22:20.334+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO BlockManager: BlockManager stopped
+[2026-08-07T08:22:20.334+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO BlockManagerMaster: BlockManagerMaster stopped
+[2026-08-07T08:22:20.334+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 WARN MetricsSystem: Stopping a MetricsSystem that is not running
+[2026-08-07T08:22:20.334+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO OutputCommitCoordinator$OutputCommitCoordinatorEndpoint: OutputCommitCoordinator stopped!
+[2026-08-07T08:22:20.334+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO SparkContext: Successfully stopped SparkContext
+[2026-08-07T08:22:20.334+0000] {pod_manager.py:472} INFO - [base] Traceback (most recent call last):
+[2026-08-07T08:22:20.335+0000] {pod_manager.py:472} INFO - [base]   File "/opt/spark-jobs/jobs/ingest.py", line 93, in <module>
+[2026-08-07T08:22:20.335+0000] {pod_manager.py:472} INFO - [base]     main()
+[2026-08-07T08:22:20.335+0000] {pod_manager.py:472} INFO - [base]   File "/opt/spark-jobs/jobs/ingest.py", line 80, in main
+[2026-08-07T08:22:20.335+0000] {pod_manager.py:472} INFO - [base]     spark = SparkSession.builder.appName("ingest").getOrCreate()
+[2026-08-07T08:22:20.335+0000] {pod_manager.py:472} INFO - [base]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-08-07T08:22:20.335+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/pyspark.zip/pyspark/sql/session.py", line 497, in getOrCreate
+[2026-08-07T08:22:20.335+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/pyspark.zip/pyspark/context.py", line 515, in getOrCreate
+[2026-08-07T08:22:20.335+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/pyspark.zip/pyspark/context.py", line 203, in __init__
+[2026-08-07T08:22:20.336+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/pyspark.zip/pyspark/context.py", line 296, in _do_init
+[2026-08-07T08:22:20.336+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/pyspark.zip/pyspark/context.py", line 421, in _initialize_context
+[2026-08-07T08:22:20.336+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/java_gateway.py", line 1587, in __call__
+[2026-08-07T08:22:20.336+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/protocol.py", line 326, in get_return_value
+[2026-08-07T08:22:20.336+0000] {pod_manager.py:472} INFO - [base] py4j.protocol.Py4JJavaError: An error occurred while calling None.org.apache.spark.api.java.JavaSparkContext.
+[2026-08-07T08:22:20.336+0000] {pod_manager.py:472} INFO - [base] : io.fabric8.kubernetes.client.KubernetesClientException: Received 403 on websocket. Failure executing: GET at: https://kubernetes.default.svc:443/api/v1/namespaces/default/pods?labelSelector=spark-app-selector%3Dspark-4d5b0f929ad34965bbfe99287f3304f1%2Cspark-role%3Dexecutor&allowWatchBookmarks=true&watch=true. Message: Forbidden.
+[2026-08-07T08:22:20.336+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.OperationSupport.requestFailure(OperationSupport.java:671)
+[2026-08-07T08:22:20.337+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.dsl.internal.WatchConnectionManager.lambda$start$3(WatchConnectionManager.java:86)
+[2026-08-07T08:22:20.337+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniHandle(Unknown Source)
+[2026-08-07T08:22:20.337+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniHandle.tryFire(Unknown Source)
+[2026-08-07T08:22:20.337+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.337+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.completeExceptionally(Unknown Source)
+[2026-08-07T08:22:20.337+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.StandardHttpClient.lambda$completeOrCancel$10(StandardHttpClient.java:138)
+[2026-08-07T08:22:20.337+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.http.StandardHttpClient.lambda$buildWebSocket$17(StandardHttpClient.java:241)
+[2026-08-07T08:22:20.337+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.337+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.338+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.338+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.338+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.utils.AsyncUtils.lambda$retryWithExponentialBackoff$3(AsyncUtils.java:90)
+[2026-08-07T08:22:20.338+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
+[2026-08-07T08:22:20.338+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
+[2026-08-07T08:22:20.338+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
+[2026-08-07T08:22:20.338+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.CompletableFuture.complete(Unknown Source)
+[2026-08-07T08:22:20.338+0000] {pod_manager.py:472} INFO - [base] 	at io.fabric8.kubernetes.client.okhttp.OkHttpWebSocketImpl$1.onFailure(OkHttpWebSocketImpl.java:88)
+[2026-08-07T08:22:20.339+0000] {pod_manager.py:472} INFO - [base] 	at okhttp3.internal.ws.RealWebSocket.failWebSocket(RealWebSocket.java:571)
+[2026-08-07T08:22:20.339+0000] {pod_manager.py:472} INFO - [base] 	at okhttp3.internal.ws.RealWebSocket$2.onResponse(RealWebSocket.java:198)
+[2026-08-07T08:22:20.339+0000] {pod_manager.py:472} INFO - [base] 	at okhttp3.RealCall$AsyncCall.execute(RealCall.java:203)
+[2026-08-07T08:22:20.339+0000] {pod_manager.py:472} INFO - [base] 	at okhttp3.internal.NamedRunnable.run(NamedRunnable.java:32)
+[2026-08-07T08:22:20.339+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+[2026-08-07T08:22:20.339+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+[2026-08-07T08:22:20.339+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.Thread.run(Unknown Source)
+[2026-08-07T08:22:20.339+0000] {pod_manager.py:472} INFO - [base] 	Suppressed: java.lang.Throwable: waiting here
+[2026-08-07T08:22:20.340+0000] {pod_manager.py:472} INFO - [base] 		at io.fabric8.kubernetes.client.utils.Utils.waitUntilReady(Utils.java:174)
+[2026-08-07T08:22:20.340+0000] {pod_manager.py:472} INFO - [base] 		at io.fabric8.kubernetes.client.utils.Utils.waitUntilReadyOrFail(Utils.java:185)
+[2026-08-07T08:22:20.340+0000] {pod_manager.py:472} INFO - [base] 		at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.watch(BaseOperation.java:611)
+[2026-08-07T08:22:20.340+0000] {pod_manager.py:472} INFO - [base] 		at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.watch(BaseOperation.java:598)
+[2026-08-07T08:22:20.340+0000] {pod_manager.py:472} INFO - [base] 		at org.apache.spark.scheduler.cluster.k8s.ExecutorPodsWatchSnapshotSource.start(ExecutorPodsWatchSnapshotSource.scala:67)
+[2026-08-07T08:22:20.340+0000] {pod_manager.py:472} INFO - [base] 		at org.apache.spark.scheduler.cluster.k8s.KubernetesClusterSchedulerBackend.start(KubernetesClusterSchedulerBackend.scala:111)
+[2026-08-07T08:22:20.340+0000] {pod_manager.py:472} INFO - [base] 		at org.apache.spark.scheduler.TaskSchedulerImpl.start(TaskSchedulerImpl.scala:235)
+[2026-08-07T08:22:20.341+0000] {pod_manager.py:472} INFO - [base] 		at org.apache.spark.SparkContext.<init>(SparkContext.scala:599)
+[2026-08-07T08:22:20.341+0000] {pod_manager.py:472} INFO - [base] 		at org.apache.spark.api.java.JavaSparkContext.<init>(JavaSparkContext.scala:58)
+[2026-08-07T08:22:20.341+0000] {pod_manager.py:472} INFO - [base] 		at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+[2026-08-07T08:22:20.341+0000] {pod_manager.py:472} INFO - [base] 		at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.341+0000] {pod_manager.py:472} INFO - [base] 		at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:22:20.341+0000] {pod_manager.py:472} INFO - [base] 		at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+[2026-08-07T08:22:20.341+0000] {pod_manager.py:472} INFO - [base] 		at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+[2026-08-07T08:22:20.341+0000] {pod_manager.py:472} INFO - [base] 		at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:247)
+[2026-08-07T08:22:20.342+0000] {pod_manager.py:472} INFO - [base] 		at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+[2026-08-07T08:22:20.342+0000] {pod_manager.py:472} INFO - [base] 		at py4j.Gateway.invoke(Gateway.java:238)
+[2026-08-07T08:22:20.342+0000] {pod_manager.py:472} INFO - [base] 		at py4j.commands.ConstructorCommand.invokeConstructor(ConstructorCommand.java:80)
+[2026-08-07T08:22:20.342+0000] {pod_manager.py:472} INFO - [base] 		at py4j.commands.ConstructorCommand.execute(ConstructorCommand.java:69)
+[2026-08-07T08:22:20.342+0000] {pod_manager.py:472} INFO - [base] 		at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+[2026-08-07T08:22:20.342+0000] {pod_manager.py:472} INFO - [base] 		at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+[2026-08-07T08:22:20.342+0000] {pod_manager.py:472} INFO - [base] 		... 1 more
+2026-08-07T08:22:19.874910500Z 
+
+[2026-08-07T08:22:20.343+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO ShutdownHookManager: Shutdown hook called
+[2026-08-07T08:22:20.343+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:22:19 INFO ShutdownHookManager: Deleting directory /tmp/spark-ebf19de2-5d31-4641-b793-a46c6365325e
+[2026-08-07T08:22:20.343+0000] {pod_manager.py:490} INFO - [base] 26/08/07 08:22:19 INFO ShutdownHookManager: Deleting directory /tmp/spark-34790a44-9673-4553-84c9-1041d5391ac9
+
+[2026-08-07T08:22:20.344+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:20.350+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:20.356+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:20.362+0000] {pod_manager.py:623} INFO - Pod medallion-ingest-num31u48 has phase Running
+[2026-08-07T08:22:22.363+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:22.373+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:22.381+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:22.389+0000] {pod.py:970} INFO - Deleting pod: medallion-ingest-num31u48
+[2026-08-07T08:22:22.390+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:22:22.404+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2026-08-07T08:22:22.415+0000] {taskinstance.py:2905} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/models/taskinstance.py", line 465, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/models/baseoperator.py", line 401, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/providers/cncf/kubernetes/operators/pod.py", line 591, in execute
+    return self.execute_sync(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/providers/cncf/kubernetes/operators/pod.py", line 641, in execute_sync
+    self.cleanup(
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/providers/cncf/kubernetes/operators/pod.py", line 901, in cleanup
+    raise AirflowException(
+airflow.exceptions.AirflowException: Pod medallion-ingest-num31u48 returned a failure.
+remote_pod: {'api_version': 'v1',
+ 'kind': 'Pod',
+ 'metadata': {'annotations': None,
+              'creation_timestamp': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal()),
+              'deletion_grace_period_seconds': None,
+              'deletion_timestamp': None,
+              'finalizers': None,
+              'generate_name': None,
+              'generation': None,
+              'labels': {'airflow_kpo_in_cluster': 'False',
+                         'airflow_version': '2.9.3',
+                         'dag_id': 'medallion_pipeline',
+                         'kubernetes_pod_operator': 'True',
+                         'run_id': 'manual__2026-08-07T0822130000-c56006760',
+                         'task_id': 'ingest',
+                         'try_number': '1'},
+              'managed_fields': [{'api_version': 'v1',
+                                  'fields_type': 'FieldsV1',
+                                  'fields_v1': {'f:metadata': {'f:labels': {'.': {},
+                                                                            'f:airflow_kpo_in_cluster': {},
+                                                                            'f:airflow_version': {},
+                                                                            'f:dag_id': {},
+                                                                            'f:kubernetes_pod_operator': {},
+                                                                            'f:run_id': {},
+                                                                            'f:task_id': {},
+                                                                            'f:try_number': {}}},
+                                                'f:spec': {'f:affinity': {},
+                                                           'f:containers': {'k:{"name":"base"}': {'.': {},
+                                                                                                  'f:args': {},
+                                                                                                  'f:command': {},
+                                                                                                  'f:env': {'.': {},
+                                                                                                            'k:{"name":"STEAM_API_KEY"}': {'.': {},
+                                                                                                                                           'f:name': {},
+                                                                                                                                           'f:value': {}}},
+                                                                                                  'f:image': {},
+                                                                                                  'f:imagePullPolicy': {},
+                                                                                                  'f:name': {},
+                                                                                                  'f:resources': {},
+                                                                                                  'f:terminationMessagePath': {},
+                                                                                                  'f:terminationMessagePolicy': {}}},
+                                                           'f:dnsPolicy': {},
+                                                           'f:enableServiceLinks': {},
+                                                           'f:restartPolicy': {},
+                                                           'f:schedulerName': {},
+                                                           'f:securityContext': {'.': {},
+                                                                                 'f:runAsUser': {}},
+                                                           'f:terminationGracePeriodSeconds': {}}},
+                                  'manager': 'OpenAPI-Generator',
+                                  'operation': 'Update',
+                                  'subresource': None,
+                                  'time': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal())},
+                                 {'api_version': 'v1',
+                                  'fields_type': 'FieldsV1',
+                                  'fields_v1': {'f:status': {'f:conditions': {'k:{"type":"ContainersReady"}': {'.': {},
+                                                                                                               'f:lastProbeTime': {},
+                                                                                                               'f:lastTransitionTime': {},
+                                                                                                               'f:reason': {},
+                                                                                                               'f:status': {},
+                                                                                                               'f:type': {}},
+                                                                              'k:{"type":"Initialized"}': {'.': {},
+                                                                                                           'f:lastProbeTime': {},
+                                                                                                           'f:lastTransitionTime': {},
+                                                                                                           'f:status': {},
+                                                                                                           'f:type': {}},
+                                                                              'k:{"type":"PodReadyToStartContainers"}': {'.': {},
+                                                                                                                         'f:lastProbeTime': {},
+                                                                                                                         'f:lastTransitionTime': {},
+                                                                                                                         'f:status': {},
+                                                                                                                         'f:type': {}},
+                                                                              'k:{"type":"Ready"}': {'.': {},
+                                                                                                     'f:lastProbeTime': {},
+                                                                                                     'f:lastTransitionTime': {},
+                                                                                                     'f:reason': {},
+                                                                                                     'f:status': {},
+                                                                                                     'f:type': {}}},
+                                                             'f:containerStatuses': {},
+                                                             'f:hostIP': {},
+                                                             'f:hostIPs': {},
+                                                             'f:phase': {},
+                                                             'f:podIP': {},
+                                                             'f:podIPs': {'.': {},
+                                                                          'k:{"ip":"10.42.0.10"}': {'.': {},
+                                                                                                    'f:ip': {}}},
+                                                             'f:startTime': {}}},
+                                  'manager': 'k3s',
+                                  'operation': 'Update',
+                                  'subresource': 'status',
+                                  'time': datetime.datetime(2026, 8, 7, 8, 22, 22, tzinfo=tzlocal())}],
+              'name': 'medallion-ingest-num31u48',
+              'namespace': 'default',
+              'owner_references': None,
+              'resource_version': '3700',
+              'self_link': None,
+              'uid': 'a0535ea5-dfcf-46ab-a367-5b1c3be50f63'},
+ 'spec': {'active_deadline_seconds': None,
+          'affinity': {'node_affinity': None,
+                       'pod_affinity': None,
+                       'pod_anti_affinity': None},
+          'automount_service_account_token': None,
+          'containers': [{'args': ['--master',
+                                   'k8s://https://kubernetes.default.svc:443',
+                                   '--deploy-mode',
+                                   'client',
+                                   '--conf',
+                                   'spark.kubernetes.namespace=default',
+                                   '--conf',
+                                   'spark.kubernetes.authenticate.driver.serviceAccountName=spark',
+                                   '--conf',
+                                   'spark.dynamicAllocation.enabled=true',
+                                   '--conf',
+                                   'spark.dynamicAllocation.shuffleTracking.enabled=true',
+                                   '--conf',
+                                   'spark.dynamicAllocation.minExecutors=0',
+                                   '--conf',
+                                   'spark.dynamicAllocation.maxExecutors=5',
+                                   '--conf',
+                                   'spark.eventLog.enabled=true',
+                                   '--conf',
+                                   'spark.eventLog.dir=s3a://spark-events/',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.endpoint=http://minio:9000',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.path.style.access=true',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.access.key=minioadmin',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.secret.key=***',
+                                   '/opt/spark-jobs/jobs/ingest.py'],
+                          'command': ['spark-submit'],
+                          'env': [{'name': 'STEAM_API_KEY',
+                                   'value': '01F7AF55D0BF761E6593C04F609AAFEA',
+                                   'value_from': None}],
+                          'env_from': None,
+                          'image': 'gamer_publisher/spark-jobs:latest',
+                          'image_pull_policy': 'Never',
+                          'lifecycle': None,
+                          'liveness_probe': None,
+                          'name': 'base',
+                          'ports': None,
+                          'readiness_probe': None,
+                          'resize_policy': None,
+                          'resources': {'claims': None,
+                                        'limits': None,
+                                        'requests': None},
+                          'restart_policy': None,
+                          'security_context': None,
+                          'startup_probe': None,
+                          'stdin': None,
+                          'stdin_once': None,
+                          'termination_message_path': '/dev/termination-log',
+                          'termination_message_policy': 'File',
+                          'tty': None,
+                          'volume_devices': None,
+                          'volume_mounts': [{'mount_path': '/var/run/secrets/kubernetes.io/serviceaccount',
+                                             'mount_propagation': None,
+                                             'name': 'kube-api-access-dtrnr',
+                                             'read_only': True,
+                                             'sub_path': None,
+                                             'sub_path_expr': None}],
+                          'working_dir': None}],
+          'dns_config': None,
+          'dns_policy': 'ClusterFirst',
+          'enable_service_links': True,
+          'ephemeral_containers': None,
+          'host_aliases': None,
+          'host_ipc': None,
+          'host_network': None,
+          'host_pid': None,
+          'host_users': None,
+          'hostname': None,
+          'image_pull_secrets': None,
+          'init_containers': None,
+          'node_name': 'a926e79efba4',
+          'node_selector': None,
+          'os': None,
+          'overhead': None,
+          'preemption_policy': 'PreemptLowerPriority',
+          'priority': 0,
+          'priority_class_name': None,
+          'readiness_gates': None,
+          'resource_claims': None,
+          'restart_policy': 'Never',
+          'runtime_class_name': None,
+          'scheduler_name': 'default-scheduler',
+          'scheduling_gates': None,
+          'security_context': {'fs_group': None,
+                               'fs_group_change_policy': None,
+                               'run_as_group': None,
+                               'run_as_non_root': None,
+                               'run_as_user': 0,
+                               'se_linux_options': None,
+                               'seccomp_profile': None,
+                               'supplemental_groups': None,
+                               'sysctls': None,
+                               'windows_options': None},
+          'service_account': 'default',
+          'service_account_name': 'default',
+          'set_hostname_as_fqdn': None,
+          'share_process_namespace': None,
+          'subdomain': None,
+          'termination_grace_period_seconds': 30,
+          'tolerations': [{'effect': 'NoExecute',
+                           'key': 'node.kubernetes.io/not-ready',
+                           'operator': 'Exists',
+                           'toleration_seconds': 300,
+                           'value': None},
+                          {'effect': 'NoExecute',
+                           'key': 'node.kubernetes.io/unreachable',
+                           'operator': 'Exists',
+                           'toleration_seconds': 300,
+                           'value': None}],
+          'topology_spread_constraints': None,
+          'volumes': [{'aws_elastic_block_store': None,
+                       'azure_disk': None,
+                       'azure_file': None,
+                       'cephfs': None,
+                       'cinder': None,
+                       'config_map': None,
+                       'csi': None,
+                       'downward_api': None,
+                       'empty_dir': None,
+                       'ephemeral': None,
+                       'fc': None,
+                       'flex_volume': None,
+                       'flocker': None,
+                       'gce_persistent_disk': None,
+                       'git_repo': None,
+                       'glusterfs': None,
+                       'host_path': None,
+                       'iscsi': None,
+                       'name': 'kube-api-access-dtrnr',
+                       'nfs': None,
+                       'persistent_volume_claim': None,
+                       'photon_persistent_disk': None,
+                       'portworx_volume': None,
+                       'projected': {'default_mode': 420,
+                                     'sources': [{'cluster_trust_bundle': None,
+                                                  'config_map': None,
+                                                  'downward_api': None,
+                                                  'secret': None,
+                                                  'service_account_token': {'audience': None,
+                                                                            'expiration_seconds': 3607,
+                                                                            'path': 'token'}},
+                                                 {'cluster_trust_bundle': None,
+                                                  'config_map': {'items': [{'key': 'ca.crt',
+                                                                            'mode': None,
+                                                                            'path': 'ca.crt'}],
+                                                                 'name': 'kube-root-ca.crt',
+                                                                 'optional': None},
+                                                  'downward_api': None,
+                                                  'secret': None,
+                                                  'service_account_token': None},
+                                                 {'cluster_trust_bundle': None,
+                                                  'config_map': None,
+                                                  'downward_api': {'items': [{'field_ref': {'api_version': 'v1',
+                                                                                            'field_path': 'metadata.namespace'},
+                                                                              'mode': None,
+                                                                              'path': 'namespace',
+                                                                              'resource_field_ref': None}]},
+                                                  'secret': None,
+                                                  'service_account_token': None}]},
+                       'quobyte': None,
+                       'rbd': None,
+                       'scale_io': None,
+                       'secret': None,
+                       'storageos': None,
+                       'vsphere_volume': None}]},
+ 'status': {'conditions': [{'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 22, 21, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'False',
+                            'type': 'PodReadyToStartContainers'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'True',
+                            'type': 'Initialized'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 22, 20, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': 'PodFailed',
+                            'status': 'False',
+                            'type': 'Ready'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 22, 20, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': 'PodFailed',
+                            'status': 'False',
+                            'type': 'ContainersReady'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'True',
+                            'type': 'PodScheduled'}],
+            'container_statuses': [{'allocated_resources': None,
+                                    'container_id': 'containerd://b303813e9e89a9ea2d6b60ee1718f622e7f289c6f5e68531027a50f0f5bd0ef8',
+                                    'image': 'docker.io/gamer_publisher/spark-jobs:latest',
+                                    'image_id': 'sha256:5bddcfd0b00ccb3b35c42570f5e56f36a6ef229910330d31a389766c9eb3caf3',
+                                    'last_state': {'running': None,
+                                                   'terminated': None,
+                                                   'waiting': None},
+                                    'name': 'base',
+                                    'ready': False,
+                                    'resources': None,
+                                    'restart_count': 0,
+                                    'started': False,
+                                    'state': {'running': None,
+                                              'terminated': {'container_id': 'containerd://b303813e9e89a9ea2d6b60ee1718f622e7f289c6f5e68531027a50f0f5bd0ef8',
+                                                             'exit_code': 1,
+                                                             'finished_at': datetime.datetime(2026, 8, 7, 8, 22, 19, tzinfo=tzlocal()),
+                                                             'message': None,
+                                                             'reason': 'Error',
+                                                             'signal': None,
+                                                             'started_at': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal())},
+                                              'waiting': None}}],
+            'ephemeral_container_statuses': None,
+            'host_i_ps': [{'ip': '172.21.0.5'}],
+            'host_ip': '172.21.0.5',
+            'init_container_statuses': None,
+            'message': None,
+            'nominated_node_name': None,
+            'phase': 'Failed',
+            'pod_i_ps': [{'ip': '10.42.0.10'}],
+            'pod_ip': '10.42.0.10',
+            'qos_class': 'BestEffort',
+            'reason': None,
+            'resize': None,
+            'resource_claim_statuses': None,
+            'start_time': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal())}}
+[2026-08-07T08:22:22.418+0000] {taskinstance.py:1206} INFO - Marking task as FAILED. dag_id=medallion_pipeline, task_id=ingest, run_id=manual__2026-08-07T08:22:13+00:00, execution_date=20260807T082213, start_date=20260807T082214, end_date=20260807T082222
+[2026-08-07T08:22:22.427+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 12 for task ingest (Pod medallion-ingest-num31u48 returned a failure.
+remote_pod: {'api_version': 'v1',
+ 'kind': 'Pod',
+ 'metadata': {'annotations': None,
+              'creation_timestamp': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal()),
+              'deletion_grace_period_seconds': None,
+              'deletion_timestamp': None,
+              'finalizers': None,
+              'generate_name': None,
+              'generation': None,
+              'labels': {'airflow_kpo_in_cluster': 'False',
+                         'airflow_version': '2.9.3',
+                         'dag_id': 'medallion_pipeline',
+                         'kubernetes_pod_operator': 'True',
+                         'run_id': 'manual__2026-08-07T0822130000-c56006760',
+                         'task_id': 'ingest',
+                         'try_number': '1'},
+              'managed_fields': [{'api_version': 'v1',
+                                  'fields_type': 'FieldsV1',
+                                  'fields_v1': {'f:metadata': {'f:labels': {'.': {},
+                                                                            'f:airflow_kpo_in_cluster': {},
+                                                                            'f:airflow_version': {},
+                                                                            'f:dag_id': {},
+                                                                            'f:kubernetes_pod_operator': {},
+                                                                            'f:run_id': {},
+                                                                            'f:task_id': {},
+                                                                            'f:try_number': {}}},
+                                                'f:spec': {'f:affinity': {},
+                                                           'f:containers': {'k:{"name":"base"}': {'.': {},
+                                                                                                  'f:args': {},
+                                                                                                  'f:command': {},
+                                                                                                  'f:env': {'.': {},
+                                                                                                            'k:{"name":"STEAM_API_KEY"}': {'.': {},
+                                                                                                                                           'f:name': {},
+                                                                                                                                           'f:value': {}}},
+                                                                                                  'f:image': {},
+                                                                                                  'f:imagePullPolicy': {},
+                                                                                                  'f:name': {},
+                                                                                                  'f:resources': {},
+                                                                                                  'f:terminationMessagePath': {},
+                                                                                                  'f:terminationMessagePolicy': {}}},
+                                                           'f:dnsPolicy': {},
+                                                           'f:enableServiceLinks': {},
+                                                           'f:restartPolicy': {},
+                                                           'f:schedulerName': {},
+                                                           'f:securityContext': {'.': {},
+                                                                                 'f:runAsUser': {}},
+                                                           'f:terminationGracePeriodSeconds': {}}},
+                                  'manager': 'OpenAPI-Generator',
+                                  'operation': 'Update',
+                                  'subresource': None,
+                                  'time': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal())},
+                                 {'api_version': 'v1',
+                                  'fields_type': 'FieldsV1',
+                                  'fields_v1': {'f:status': {'f:conditions': {'k:{"type":"ContainersReady"}': {'.': {},
+                                                                                                               'f:lastProbeTime': {},
+                                                                                                               'f:lastTransitionTime': {},
+                                                                                                               'f:reason': {},
+                                                                                                               'f:status': {},
+                                                                                                               'f:type': {}},
+                                                                              'k:{"type":"Initialized"}': {'.': {},
+                                                                                                           'f:lastProbeTime': {},
+                                                                                                           'f:lastTransitionTime': {},
+                                                                                                           'f:status': {},
+                                                                                                           'f:type': {}},
+                                                                              'k:{"type":"PodReadyToStartContainers"}': {'.': {},
+                                                                                                                         'f:lastProbeTime': {},
+                                                                                                                         'f:lastTransitionTime': {},
+                                                                                                                         'f:status': {},
+                                                                                                                         'f:type': {}},
+                                                                              'k:{"type":"Ready"}': {'.': {},
+                                                                                                     'f:lastProbeTime': {},
+                                                                                                     'f:lastTransitionTime': {},
+                                                                                                     'f:reason': {},
+                                                                                                     'f:status': {},
+                                                                                                     'f:type': {}}},
+                                                             'f:containerStatuses': {},
+                                                             'f:hostIP': {},
+                                                             'f:hostIPs': {},
+                                                             'f:phase': {},
+                                                             'f:podIP': {},
+                                                             'f:podIPs': {'.': {},
+                                                                          'k:{"ip":"10.42.0.10"}': {'.': {},
+                                                                                                    'f:ip': {}}},
+                                                             'f:startTime': {}}},
+                                  'manager': 'k3s',
+                                  'operation': 'Update',
+                                  'subresource': 'status',
+                                  'time': datetime.datetime(2026, 8, 7, 8, 22, 22, tzinfo=tzlocal())}],
+              'name': 'medallion-ingest-num31u48',
+              'namespace': 'default',
+              'owner_references': None,
+              'resource_version': '3700',
+              'self_link': None,
+              'uid': 'a0535ea5-dfcf-46ab-a367-5b1c3be50f63'},
+ 'spec': {'active_deadline_seconds': None,
+          'affinity': {'node_affinity': None,
+                       'pod_affinity': None,
+                       'pod_anti_affinity': None},
+          'automount_service_account_token': None,
+          'containers': [{'args': ['--master',
+                                   'k8s://https://kubernetes.default.svc:443',
+                                   '--deploy-mode',
+                                   'client',
+                                   '--conf',
+                                   'spark.kubernetes.namespace=default',
+                                   '--conf',
+                                   'spark.kubernetes.authenticate.driver.serviceAccountName=spark',
+                                   '--conf',
+                                   'spark.dynamicAllocation.enabled=true',
+                                   '--conf',
+                                   'spark.dynamicAllocation.shuffleTracking.enabled=true',
+                                   '--conf',
+                                   'spark.dynamicAllocation.minExecutors=0',
+                                   '--conf',
+                                   'spark.dynamicAllocation.maxExecutors=5',
+                                   '--conf',
+                                   'spark.eventLog.enabled=true',
+                                   '--conf',
+                                   'spark.eventLog.dir=s3a://spark-events/',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.endpoint=http://minio:9000',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.path.style.access=true',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.access.key=minioadmin',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.secret.key=***',
+                                   '/opt/spark-jobs/jobs/ingest.py'],
+                          'command': ['spark-submit'],
+                          'env': [{'name': 'STEAM_API_KEY',
+                                   'value': '01F7AF55D0BF761E6593C04F609AAFEA',
+                                   'value_from': None}],
+                          'env_from': None,
+                          'image': 'gamer_publisher/spark-jobs:latest',
+                          'image_pull_policy': 'Never',
+                          'lifecycle': None,
+                          'liveness_probe': None,
+                          'name': 'base',
+                          'ports': None,
+                          'readiness_probe': None,
+                          'resize_policy': None,
+                          'resources': {'claims': None,
+                                        'limits': None,
+                                        'requests': None},
+                          'restart_policy': None,
+                          'security_context': None,
+                          'startup_probe': None,
+                          'stdin': None,
+                          'stdin_once': None,
+                          'termination_message_path': '/dev/termination-log',
+                          'termination_message_policy': 'File',
+                          'tty': None,
+                          'volume_devices': None,
+                          'volume_mounts': [{'mount_path': '/var/run/secrets/kubernetes.io/serviceaccount',
+                                             'mount_propagation': None,
+                                             'name': 'kube-api-access-dtrnr',
+                                             'read_only': True,
+                                             'sub_path': None,
+                                             'sub_path_expr': None}],
+                          'working_dir': None}],
+          'dns_config': None,
+          'dns_policy': 'ClusterFirst',
+          'enable_service_links': True,
+          'ephemeral_containers': None,
+          'host_aliases': None,
+          'host_ipc': None,
+          'host_network': None,
+          'host_pid': None,
+          'host_users': None,
+          'hostname': None,
+          'image_pull_secrets': None,
+          'init_containers': None,
+          'node_name': 'a926e79efba4',
+          'node_selector': None,
+          'os': None,
+          'overhead': None,
+          'preemption_policy': 'PreemptLowerPriority',
+          'priority': 0,
+          'priority_class_name': None,
+          'readiness_gates': None,
+          'resource_claims': None,
+          'restart_policy': 'Never',
+          'runtime_class_name': None,
+          'scheduler_name': 'default-scheduler',
+          'scheduling_gates': None,
+          'security_context': {'fs_group': None,
+                               'fs_group_change_policy': None,
+                               'run_as_group': None,
+                               'run_as_non_root': None,
+                               'run_as_user': 0,
+                               'se_linux_options': None,
+                               'seccomp_profile': None,
+                               'supplemental_groups': None,
+                               'sysctls': None,
+                               'windows_options': None},
+          'service_account': 'default',
+          'service_account_name': 'default',
+          'set_hostname_as_fqdn': None,
+          'share_process_namespace': None,
+          'subdomain': None,
+          'termination_grace_period_seconds': 30,
+          'tolerations': [{'effect': 'NoExecute',
+                           'key': 'node.kubernetes.io/not-ready',
+                           'operator': 'Exists',
+                           'toleration_seconds': 300,
+                           'value': None},
+                          {'effect': 'NoExecute',
+                           'key': 'node.kubernetes.io/unreachable',
+                           'operator': 'Exists',
+                           'toleration_seconds': 300,
+                           'value': None}],
+          'topology_spread_constraints': None,
+          'volumes': [{'aws_elastic_block_store': None,
+                       'azure_disk': None,
+                       'azure_file': None,
+                       'cephfs': None,
+                       'cinder': None,
+                       'config_map': None,
+                       'csi': None,
+                       'downward_api': None,
+                       'empty_dir': None,
+                       'ephemeral': None,
+                       'fc': None,
+                       'flex_volume': None,
+                       'flocker': None,
+                       'gce_persistent_disk': None,
+                       'git_repo': None,
+                       'glusterfs': None,
+                       'host_path': None,
+                       'iscsi': None,
+                       'name': 'kube-api-access-dtrnr',
+                       'nfs': None,
+                       'persistent_volume_claim': None,
+                       'photon_persistent_disk': None,
+                       'portworx_volume': None,
+                       'projected': {'default_mode': 420,
+                                     'sources': [{'cluster_trust_bundle': None,
+                                                  'config_map': None,
+                                                  'downward_api': None,
+                                                  'secret': None,
+                                                  'service_account_token': {'audience': None,
+                                                                            'expiration_seconds': 3607,
+                                                                            'path': 'token'}},
+                                                 {'cluster_trust_bundle': None,
+                                                  'config_map': {'items': [{'key': 'ca.crt',
+                                                                            'mode': None,
+                                                                            'path': 'ca.crt'}],
+                                                                 'name': 'kube-root-ca.crt',
+                                                                 'optional': None},
+                                                  'downward_api': None,
+                                                  'secret': None,
+                                                  'service_account_token': None},
+                                                 {'cluster_trust_bundle': None,
+                                                  'config_map': None,
+                                                  'downward_api': {'items': [{'field_ref': {'api_version': 'v1',
+                                                                                            'field_path': 'metadata.namespace'},
+                                                                              'mode': None,
+                                                                              'path': 'namespace',
+                                                                              'resource_field_ref': None}]},
+                                                  'secret': None,
+                                                  'service_account_token': None}]},
+                       'quobyte': None,
+                       'rbd': None,
+                       'scale_io': None,
+                       'secret': None,
+                       'storageos': None,
+                       'vsphere_volume': None}]},
+ 'status': {'conditions': [{'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 22, 21, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'False',
+                            'type': 'PodReadyToStartContainers'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'True',
+                            'type': 'Initialized'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 22, 20, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': 'PodFailed',
+                            'status': 'False',
+                            'type': 'Ready'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 22, 20, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': 'PodFailed',
+                            'status': 'False',
+                            'type': 'ContainersReady'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'True',
+                            'type': 'PodScheduled'}],
+            'container_statuses': [{'allocated_resources': None,
+                                    'container_id': 'containerd://b303813e9e89a9ea2d6b60ee1718f622e7f289c6f5e68531027a50f0f5bd0ef8',
+                                    'image': 'docker.io/gamer_publisher/spark-jobs:latest',
+                                    'image_id': 'sha256:5bddcfd0b00ccb3b35c42570f5e56f36a6ef229910330d31a389766c9eb3caf3',
+                                    'last_state': {'running': None,
+                                                   'terminated': None,
+                                                   'waiting': None},
+                                    'name': 'base',
+                                    'ready': False,
+                                    'resources': None,
+                                    'restart_count': 0,
+                                    'started': False,
+                                    'state': {'running': None,
+                                              'terminated': {'container_id': 'containerd://b303813e9e89a9ea2d6b60ee1718f622e7f289c6f5e68531027a50f0f5bd0ef8',
+                                                             'exit_code': 1,
+                                                             'finished_at': datetime.datetime(2026, 8, 7, 8, 22, 19, tzinfo=tzlocal()),
+                                                             'message': None,
+                                                             'reason': 'Error',
+                                                             'signal': None,
+                                                             'started_at': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal())},
+                                              'waiting': None}}],
+            'ephemeral_container_statuses': None,
+            'host_i_ps': [{'ip': '172.21.0.5'}],
+            'host_ip': '172.21.0.5',
+            'init_container_statuses': None,
+            'message': None,
+            'nominated_node_name': None,
+            'phase': 'Failed',
+            'pod_i_ps': [{'ip': '10.42.0.10'}],
+            'pod_ip': '10.42.0.10',
+            'qos_class': 'BestEffort',
+            'reason': None,
+            'resize': None,
+            'resource_claim_statuses': None,
+            'start_time': datetime.datetime(2026, 8, 7, 8, 22, 15, tzinfo=tzlocal())}}; 197)
+[2026-08-07T08:22:22.460+0000] {local_task_job_runner.py:243} INFO - Task exited with return code 1
+[2026-08-07T08:22:22.479+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2026-08-07T08:22:22.482+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

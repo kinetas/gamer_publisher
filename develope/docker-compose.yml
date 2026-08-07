@@ -136,17 +136,18 @@ services:
   # eventLog를 MinIO(spark-events 버킷)에 남기고 History Server가 그걸 읽어 UI를 재구성한다.
   # 실제 DAG의 spark-submit에는 아래 옵션이 필요:
   #   --conf spark.eventLog.enabled=true
-  #   --conf spark.eventLog.dir=s3a://spark-events/
+  #   --conf spark.eventLog.dir=s3a://spark-events/logs/
   #   --conf spark.hadoop.fs.s3a.endpoint=http://minio:9000
   #   --conf spark.hadoop.fs.s3a.path.style.access=true
   spark-history-server:
     build: ./spark-jobs
     container_name: spark-history-server
+    user: root
     entrypoint: /opt/bitnami/spark/bin/spark-class
     command: ["org.apache.spark.deploy.history.HistoryServer"]
     environment:
       SPARK_HISTORY_OPTS: >-
-        -Dspark.history.fs.logDirectory=s3a://spark-events/
+        -Dspark.history.fs.logDirectory=s3a://spark-events/logs/
         -Dspark.hadoop.fs.s3a.endpoint=http://minio:9000
         -Dspark.hadoop.fs.s3a.access.key=${MINIO_ROOT_USER}
         -Dspark.hadoop.fs.s3a.secret.key=${MINIO_ROOT_PASSWORD}
@@ -212,7 +213,7 @@ services:
   # Spark의 네이티브 k8s 스케줄러(--master k8s://...)가 executor pod를 만들 수 있도록
   # ServiceAccount/Role/RoleBinding을 1회 적용한다 (k3s/spark-rbac.yaml).
   k3s-bootstrap:
-    image: bitnami/kubectl:1.29
+    image: bitnamilegacy/kubectl:1.29
     container_name: k3s-bootstrap
     depends_on:
       kubeconfig-prep:
@@ -270,6 +271,7 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_POSTGRES_DB}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
     entrypoint: /bin/bash
     command:
       - -c
@@ -302,8 +304,10 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_POSTGRES_DB}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
       KUBECONFIG: /opt/airflow/kube/config
       AIRFLOW_CONN_MINIO_DEFAULT: aws://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@/?endpoint_url=http%3A%2F%2Fminio%3A9000
+      STEAM_API_KEY: ${STEAM_API_KEY}
     volumes:
       - airflow-dags:/opt/airflow/dags
       - kube-config:/opt/airflow/kube:ro
@@ -328,8 +332,10 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_POSTGRES_DB}
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
       KUBECONFIG: /opt/airflow/kube/config
       AIRFLOW_CONN_MINIO_DEFAULT: aws://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@/?endpoint_url=http%3A%2F%2Fminio%3A9000
+      STEAM_API_KEY: ${STEAM_API_KEY}
     volumes:
       - airflow-dags:/opt/airflow/dags
       - kube-config:/opt/airflow/kube:ro

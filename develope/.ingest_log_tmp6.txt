@@ -1,0 +1,959 @@
+[2026-08-07T08:26:49.802+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2026-08-07T08:26:49.817+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: medallion_pipeline.ingest manual__2026-08-07T08:26:48+00:00 [queued]>
+[2026-08-07T08:26:49.823+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: medallion_pipeline.ingest manual__2026-08-07T08:26:48+00:00 [queued]>
+[2026-08-07T08:26:49.824+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 1
+[2026-08-07T08:26:49.832+0000] {taskinstance.py:2330} INFO - Executing <Task(KubernetesPodOperator): ingest> on 2026-08-07 08:26:48+00:00
+[2026-08-07T08:26:49.839+0000] {standard_task_runner.py:64} INFO - Started process 197 to run task
+[2026-08-07T08:26:49.842+0000] {standard_task_runner.py:90} INFO - Running: ['airflow', 'tasks', 'run', 'medallion_pipeline', 'ingest', 'manual__2026-08-07T08:26:48+00:00', '--job-id', '16', '--raw', '--subdir', 'DAGS_FOLDER/medallion_pipeline.py', '--cfg-path', '/tmp/tmpg91z6g2c']
+[2026-08-07T08:26:49.844+0000] {standard_task_runner.py:91} INFO - Job 16: Subtask ingest
+[2026-08-07T08:26:49.894+0000] {task_command.py:426} INFO - Running <TaskInstance: medallion_pipeline.ingest manual__2026-08-07T08:26:48+00:00 [running]> on host a9e22ac38744
+[2026-08-07T08:26:49.978+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='airflow' AIRFLOW_CTX_DAG_ID='medallion_pipeline' AIRFLOW_CTX_TASK_ID='ingest' AIRFLOW_CTX_EXECUTION_DATE='2026-08-07T08:26:48+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-08-07T08:26:48+00:00'
+[2026-08-07T08:26:49.979+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2026-08-07T08:26:49.996+0000] {pod.py:1121} INFO - Building pod medallion-ingest-t7ewn1ww with labels: {'dag_id': 'medallion_pipeline', 'task_id': 'ingest', 'run_id': 'manual__2026-08-07T0826480000-70226a4ee', 'kubernetes_pod_operator': 'True', 'try_number': '1'}
+[2026-08-07T08:26:50.056+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:26:50.066+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:26:50.108+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:26:50.115+0000] {pod.py:553} INFO - Found matching pod medallion-ingest-t7ewn1ww with labels {'airflow_kpo_in_cluster': 'False', 'airflow_version': '2.9.3', 'dag_id': 'medallion_pipeline', 'kubernetes_pod_operator': 'True', 'run_id': 'manual__2026-08-07T0826480000-70226a4ee', 'task_id': 'ingest', 'try_number': '1'}
+[2026-08-07T08:26:50.115+0000] {pod.py:554} INFO - `try_number` of task_instance: 1
+[2026-08-07T08:26:50.115+0000] {pod.py:555} INFO - `try_number` of pod: 1
+[2026-08-07T08:26:50.116+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:26:50.122+0000] {pod_manager.py:378} WARNING - Pod not yet started: medallion-ingest-t7ewn1ww
+[2026-08-07T08:26:55.127+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:26:55.155+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:26:55.168+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:26:55.206+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:26:55.212+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:51 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[2026-08-07T08:26:55.213+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SparkContext: Running Spark version 3.5.6
+[2026-08-07T08:26:55.213+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SparkContext: OS info Linux, 6.18.33.2-microsoft-standard-WSL2, amd64
+[2026-08-07T08:26:55.213+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SparkContext: Java version 17.0.15
+[2026-08-07T08:26:55.213+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO ResourceUtils: ==============================================================
+[2026-08-07T08:26:55.213+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO ResourceUtils: No custom resources configured for spark.driver.
+[2026-08-07T08:26:55.213+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO ResourceUtils: ==============================================================
+[2026-08-07T08:26:55.213+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SparkContext: Submitted application: ingest
+[2026-08-07T08:26:55.214+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(cores -> name: cores, amount: 1, script: , vendor: , memory -> name: memory, amount: 1024, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+[2026-08-07T08:26:55.214+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO ResourceProfile: Limiting resource is cpus at 1 tasks per executor
+[2026-08-07T08:26:55.214+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO ResourceProfileManager: Added ResourceProfile id: 0
+[2026-08-07T08:26:55.214+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SecurityManager: Changing view acls to: root,spark
+[2026-08-07T08:26:55.214+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SecurityManager: Changing modify acls to: root,spark
+[2026-08-07T08:26:55.214+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SecurityManager: Changing view acls groups to:
+[2026-08-07T08:26:55.214+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SecurityManager: Changing modify acls groups to:
+[2026-08-07T08:26:55.214+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: root, spark; groups with view permissions: EMPTY; users with modify permissions: root, spark; groups with modify permissions: EMPTY
+[2026-08-07T08:26:55.215+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO Utils: Successfully started service 'sparkDriver' on port 36031.
+[2026-08-07T08:26:55.215+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SparkEnv: Registering MapOutputTracker
+[2026-08-07T08:26:55.215+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SparkEnv: Registering BlockManagerMaster
+[2026-08-07T08:26:55.215+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+[2026-08-07T08:26:55.215+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+[2026-08-07T08:26:55.215+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+[2026-08-07T08:26:55.215+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-78e81136-8c80-4bd3-a989-9d70cab03a2b
+[2026-08-07T08:26:55.216+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO MemoryStore: MemoryStore started with capacity 434.4 MiB
+[2026-08-07T08:26:55.216+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SparkEnv: Registering OutputCommitCoordinator
+[2026-08-07T08:26:55.216+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
+[2026-08-07T08:26:55.216+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+[2026-08-07T08:26:55.216+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:53 INFO SparkKubernetesClientFactory: Auto-configuring K8S client using current context from users K8S config file
+[2026-08-07T08:26:55.216+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:54 INFO Utils: Using initial executors = 0, max of spark.dynamicAllocation.initialExecutors, spark.dynamicAllocation.minExecutors and spark.executor.instances
+[2026-08-07T08:26:55.216+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:54 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 39107.
+[2026-08-07T08:26:55.216+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:54 INFO NettyBlockTransferService: Server created on medallion-ingest-t7ewn1ww:39107
+[2026-08-07T08:26:55.216+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:54 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+[2026-08-07T08:26:55.217+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:54 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, medallion-ingest-t7ewn1ww, 39107, None)
+[2026-08-07T08:26:55.217+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:54 INFO BlockManagerMasterEndpoint: Registering block manager medallion-ingest-t7ewn1ww:39107 with 434.4 MiB RAM, BlockManagerId(driver, medallion-ingest-t7ewn1ww, 39107, None)
+[2026-08-07T08:26:55.217+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:54 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, medallion-ingest-t7ewn1ww, 39107, None)
+[2026-08-07T08:26:55.217+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:54 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, medallion-ingest-t7ewn1ww, 39107, None)
+[2026-08-07T08:26:55.217+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:54 WARN MetricsConfig: Cannot locate configuration: tried hadoop-metrics2-s3a-file-system.properties,hadoop-metrics2.properties
+[2026-08-07T08:26:55.217+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:26:54 INFO MetricsSystemImpl: Scheduled Metric snapshot period at 10 second(s).
+[2026-08-07T08:31:55.252+0000] {pod_manager.py:490} INFO - [base] 26/08/07 08:26:54 INFO MetricsSystemImpl: s3a-file-system metrics system started
+[2026-08-07T08:31:55.297+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:31:56.305+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:31:56.312+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:36:56.347+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:36:57.353+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:36:57.360+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:39:24.939+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:24 ERROR SparkContext: Error initializing SparkContext.
+[2026-08-07T08:39:24.943+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:39:24.957+0000] {pod_manager.py:472} INFO - [base] org.apache.hadoop.fs.s3a.AWSClientIOException: getFileStatus on s3a://spark-events/logs: com.amazonaws.SdkClientException: Unable to execute HTTP request: minio: Name or service not known: Unable to execute HTTP request: minio: Name or service not known
+[2026-08-07T08:39:24.957+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AUtils.translateException(S3AUtils.java:214)
+[2026-08-07T08:39:24.957+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AUtils.translateException(S3AUtils.java:175)
+[2026-08-07T08:39:24.958+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.s3GetFileStatus(S3AFileSystem.java:3799)
+[2026-08-07T08:39:24.958+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.innerGetFileStatus(S3AFileSystem.java:3688)
+[2026-08-07T08:39:24.958+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.lambda$getFileStatus$24(S3AFileSystem.java:3556)
+[2026-08-07T08:39:24.958+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.statistics.impl.IOStatisticsBinding.lambda$trackDurationOfOperation$5(IOStatisticsBinding.java:499)
+[2026-08-07T08:39:24.959+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.statistics.impl.IOStatisticsBinding.trackDuration(IOStatisticsBinding.java:444)
+[2026-08-07T08:39:24.959+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.trackDurationAndSpan(S3AFileSystem.java:2337)
+[2026-08-07T08:39:24.959+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.trackDurationAndSpan(S3AFileSystem.java:2356)
+[2026-08-07T08:39:24.959+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.getFileStatus(S3AFileSystem.java:3554)
+[2026-08-07T08:39:24.959+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.deploy.history.EventLogFileWriter.requireLogBaseDirAsDirectory(EventLogFileWriters.scala:77)
+[2026-08-07T08:39:24.960+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.deploy.history.SingleEventLogFileWriter.start(EventLogFileWriters.scala:221)
+[2026-08-07T08:39:24.960+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.EventLoggingListener.start(EventLoggingListener.scala:81)
+[2026-08-07T08:39:24.960+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.<init>(SparkContext.scala:632)
+[2026-08-07T08:39:24.961+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.api.java.JavaSparkContext.<init>(JavaSparkContext.scala:58)
+[2026-08-07T08:39:24.961+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+[2026-08-07T08:39:24.961+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:39:24.961+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:39:24.962+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+[2026-08-07T08:39:24.962+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+[2026-08-07T08:39:24.962+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:247)
+[2026-08-07T08:39:24.962+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+[2026-08-07T08:39:24.962+0000] {pod_manager.py:472} INFO - [base] 	at py4j.Gateway.invoke(Gateway.java:238)
+[2026-08-07T08:39:24.963+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.invokeConstructor(ConstructorCommand.java:80)
+[2026-08-07T08:39:24.963+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.execute(ConstructorCommand.java:69)
+[2026-08-07T08:39:24.963+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+[2026-08-07T08:39:24.963+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+[2026-08-07T08:39:24.963+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.Thread.run(Unknown Source)
+[2026-08-07T08:39:24.964+0000] {pod_manager.py:472} INFO - [base] Caused by: com.amazonaws.SdkClientException: Unable to execute HTTP request: minio: Name or service not known
+[2026-08-07T08:39:24.964+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.handleRetryableException(AmazonHttpClient.java:1219)
+[2026-08-07T08:39:24.964+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.executeHelper(AmazonHttpClient.java:1165)
+[2026-08-07T08:39:24.964+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.doExecute(AmazonHttpClient.java:814)
+[2026-08-07T08:39:24.964+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.executeWithTimer(AmazonHttpClient.java:781)
+[2026-08-07T08:39:24.964+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.execute(AmazonHttpClient.java:755)
+[2026-08-07T08:39:24.965+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.access$500(AmazonHttpClient.java:715)
+[2026-08-07T08:39:24.965+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutionBuilderImpl.execute(AmazonHttpClient.java:697)
+[2026-08-07T08:39:24.965+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient.execute(AmazonHttpClient.java:561)
+[2026-08-07T08:39:24.965+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient.execute(AmazonHttpClient.java:541)
+[2026-08-07T08:39:24.965+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.services.s3.AmazonS3Client.invoke(AmazonS3Client.java:5456)
+[2026-08-07T08:39:24.966+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.services.s3.AmazonS3Client.invoke(AmazonS3Client.java:5403)
+[2026-08-07T08:39:24.966+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.services.s3.AmazonS3Client.getObjectMetadata(AmazonS3Client.java:1372)
+[2026-08-07T08:39:24.966+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.lambda$getObjectMetadata$10(S3AFileSystem.java:2545)
+[2026-08-07T08:39:24.966+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.Invoker.retryUntranslated(Invoker.java:414)
+[2026-08-07T08:39:24.966+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.Invoker.retryUntranslated(Invoker.java:377)
+[2026-08-07T08:39:24.967+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.getObjectMetadata(S3AFileSystem.java:2533)
+[2026-08-07T08:39:24.967+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.getObjectMetadata(S3AFileSystem.java:2513)
+[2026-08-07T08:39:24.967+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.s3GetFileStatus(S3AFileSystem.java:3776)
+[2026-08-07T08:39:24.967+0000] {pod_manager.py:472} INFO - [base] 	... 25 more
+[2026-08-07T08:39:24.967+0000] {pod_manager.py:472} INFO - [base] Caused by: java.net.UnknownHostException: minio: Name or service not known
+[2026-08-07T08:39:24.967+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.Inet6AddressImpl.lookupAllHostAddr(Native Method)
+[2026-08-07T08:39:24.968+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress$PlatformNameService.lookupAllHostAddr(Unknown Source)
+[2026-08-07T08:39:24.968+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress.getAddressesFromNameService(Unknown Source)
+[2026-08-07T08:39:24.968+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress$NameServiceAddresses.get(Unknown Source)
+[2026-08-07T08:39:24.968+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress.getAllByName0(Unknown Source)
+[2026-08-07T08:39:24.968+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress.getAllByName(Unknown Source)
+[2026-08-07T08:39:24.968+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress.getAllByName(Unknown Source)
+[2026-08-07T08:39:24.968+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.SystemDefaultDnsResolver.resolve(SystemDefaultDnsResolver.java:27)
+[2026-08-07T08:39:24.969+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.DelegatingDnsResolver.resolve(DelegatingDnsResolver.java:38)
+[2026-08-07T08:39:24.969+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:112)
+[2026-08-07T08:39:24.969+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
+[2026-08-07T08:39:24.969+0000] {pod_manager.py:472} INFO - [base] 	at jdk.internal.reflect.GeneratedMethodAccessor23.invoke(Unknown Source)
+[2026-08-07T08:39:24.969+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+[2026-08-07T08:39:24.969+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+[2026-08-07T08:39:24.970+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.conn.ClientConnectionManagerFactory$Handler.invoke(ClientConnectionManagerFactory.java:76)
+[2026-08-07T08:39:24.970+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.conn.$Proxy40.connect(Unknown Source)
+[2026-08-07T08:39:24.970+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
+[2026-08-07T08:39:24.970+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
+[2026-08-07T08:39:24.970+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
+[2026-08-07T08:39:24.971+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
+[2026-08-07T08:39:24.971+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:83)
+[2026-08-07T08:39:24.971+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:56)
+[2026-08-07T08:39:24.971+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.apache.client.impl.SdkHttpClient.execute(SdkHttpClient.java:72)
+[2026-08-07T08:39:24.971+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.executeOneRequest(AmazonHttpClient.java:1346)
+[2026-08-07T08:39:24.971+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.executeHelper(AmazonHttpClient.java:1157)
+[2026-08-07T08:39:24.972+0000] {pod_manager.py:472} INFO - [base] 	... 41 more
+[2026-08-07T08:39:24.972+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:24 INFO SparkContext: SparkContext is stopping with exitCode 0.
+[2026-08-07T08:39:24.972+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:24 INFO SparkUI: Stopped Spark web UI at http://medallion-ingest-t7ewn1ww:4040
+[2026-08-07T08:39:24.975+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:24 INFO KubernetesClusterSchedulerBackend: Shutting down all executors
+[2026-08-07T08:39:24.980+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:24 INFO KubernetesClusterSchedulerBackend$KubernetesDriverEndpoint: Asking each executor to shut down
+[2026-08-07T08:39:25.028+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:24 WARN ExecutorPodsWatchSnapshotSource: Kubernetes client has been closed.
+[2026-08-07T08:39:25.040+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO MapOutputTrackerMasterEndpoint: MapOutputTrackerMasterEndpoint stopped!
+[2026-08-07T08:39:25.040+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO MemoryStore: MemoryStore cleared
+[2026-08-07T08:39:25.046+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO BlockManager: BlockManager stopped
+[2026-08-07T08:39:25.048+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO BlockManagerMaster: BlockManagerMaster stopped
+[2026-08-07T08:39:25.056+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO OutputCommitCoordinator$OutputCommitCoordinatorEndpoint: OutputCommitCoordinator stopped!
+[2026-08-07T08:39:25.057+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO SparkContext: Successfully stopped SparkContext
+[2026-08-07T08:39:25.057+0000] {pod_manager.py:472} INFO - [base] Traceback (most recent call last):
+[2026-08-07T08:39:25.057+0000] {pod_manager.py:472} INFO - [base]   File "/opt/spark-jobs/jobs/ingest.py", line 93, in <module>
+[2026-08-07T08:39:25.057+0000] {pod_manager.py:472} INFO - [base]     main()
+[2026-08-07T08:39:25.057+0000] {pod_manager.py:472} INFO - [base]   File "/opt/spark-jobs/jobs/ingest.py", line 80, in main
+[2026-08-07T08:39:25.058+0000] {pod_manager.py:472} INFO - [base]     spark = SparkSession.builder.appName("ingest").getOrCreate()
+[2026-08-07T08:39:25.058+0000] {pod_manager.py:472} INFO - [base]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-08-07T08:39:25.058+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/pyspark.zip/pyspark/sql/session.py", line 497, in getOrCreate
+[2026-08-07T08:39:25.058+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/pyspark.zip/pyspark/context.py", line 515, in getOrCreate
+[2026-08-07T08:39:25.058+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/pyspark.zip/pyspark/context.py", line 203, in __init__
+[2026-08-07T08:39:25.059+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/pyspark.zip/pyspark/context.py", line 296, in _do_init
+[2026-08-07T08:39:25.059+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/pyspark.zip/pyspark/context.py", line 421, in _initialize_context
+[2026-08-07T08:39:25.059+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/java_gateway.py", line 1587, in __call__
+[2026-08-07T08:39:25.059+0000] {pod_manager.py:472} INFO - [base]   File "/opt/bitnami/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/protocol.py", line 326, in get_return_value
+[2026-08-07T08:39:25.059+0000] {pod_manager.py:472} INFO - [base] py4j.protocol.Py4JJavaError: An error occurred while calling None.org.apache.spark.api.java.JavaSparkContext.
+[2026-08-07T08:39:25.060+0000] {pod_manager.py:472} INFO - [base] : org.apache.hadoop.fs.s3a.AWSClientIOException: getFileStatus on s3a://spark-events/logs: com.amazonaws.SdkClientException: Unable to execute HTTP request: minio: Name or service not known: Unable to execute HTTP request: minio: Name or service not known
+[2026-08-07T08:39:25.060+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AUtils.translateException(S3AUtils.java:214)
+[2026-08-07T08:39:25.060+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AUtils.translateException(S3AUtils.java:175)
+[2026-08-07T08:39:25.060+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.s3GetFileStatus(S3AFileSystem.java:3799)
+[2026-08-07T08:39:25.060+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.innerGetFileStatus(S3AFileSystem.java:3688)
+[2026-08-07T08:39:25.061+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.lambda$getFileStatus$24(S3AFileSystem.java:3556)
+[2026-08-07T08:39:25.061+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.statistics.impl.IOStatisticsBinding.lambda$trackDurationOfOperation$5(IOStatisticsBinding.java:499)
+[2026-08-07T08:39:25.061+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.statistics.impl.IOStatisticsBinding.trackDuration(IOStatisticsBinding.java:444)
+[2026-08-07T08:39:25.061+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.trackDurationAndSpan(S3AFileSystem.java:2337)
+[2026-08-07T08:39:25.062+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.trackDurationAndSpan(S3AFileSystem.java:2356)
+[2026-08-07T08:39:25.062+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.getFileStatus(S3AFileSystem.java:3554)
+[2026-08-07T08:39:25.062+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.deploy.history.EventLogFileWriter.requireLogBaseDirAsDirectory(EventLogFileWriters.scala:77)
+[2026-08-07T08:39:25.062+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.deploy.history.SingleEventLogFileWriter.start(EventLogFileWriters.scala:221)
+[2026-08-07T08:39:25.062+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.scheduler.EventLoggingListener.start(EventLoggingListener.scala:81)
+[2026-08-07T08:39:25.062+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.SparkContext.<init>(SparkContext.scala:632)
+[2026-08-07T08:39:25.063+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.spark.api.java.JavaSparkContext.<init>(JavaSparkContext.scala:58)
+[2026-08-07T08:39:25.063+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+[2026-08-07T08:39:25.063+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:39:25.063+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+[2026-08-07T08:39:25.063+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+[2026-08-07T08:39:25.064+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+[2026-08-07T08:39:25.064+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:247)
+[2026-08-07T08:39:25.064+0000] {pod_manager.py:472} INFO - [base] 	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+[2026-08-07T08:39:25.064+0000] {pod_manager.py:472} INFO - [base] 	at py4j.Gateway.invoke(Gateway.java:238)
+[2026-08-07T08:39:25.064+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.invokeConstructor(ConstructorCommand.java:80)
+[2026-08-07T08:39:25.064+0000] {pod_manager.py:472} INFO - [base] 	at py4j.commands.ConstructorCommand.execute(ConstructorCommand.java:69)
+[2026-08-07T08:39:25.064+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+[2026-08-07T08:39:25.064+0000] {pod_manager.py:472} INFO - [base] 	at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+[2026-08-07T08:39:25.065+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.Thread.run(Unknown Source)
+[2026-08-07T08:39:25.065+0000] {pod_manager.py:472} INFO - [base] Caused by: com.amazonaws.SdkClientException: Unable to execute HTTP request: minio: Name or service not known
+[2026-08-07T08:39:25.065+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.handleRetryableException(AmazonHttpClient.java:1219)
+[2026-08-07T08:39:25.065+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.executeHelper(AmazonHttpClient.java:1165)
+[2026-08-07T08:39:25.065+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.doExecute(AmazonHttpClient.java:814)
+[2026-08-07T08:39:25.065+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.executeWithTimer(AmazonHttpClient.java:781)
+[2026-08-07T08:39:25.065+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.execute(AmazonHttpClient.java:755)
+[2026-08-07T08:39:25.065+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.access$500(AmazonHttpClient.java:715)
+[2026-08-07T08:39:25.066+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutionBuilderImpl.execute(AmazonHttpClient.java:697)
+[2026-08-07T08:39:25.066+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient.execute(AmazonHttpClient.java:561)
+[2026-08-07T08:39:25.066+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient.execute(AmazonHttpClient.java:541)
+[2026-08-07T08:39:25.066+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.services.s3.AmazonS3Client.invoke(AmazonS3Client.java:5456)
+[2026-08-07T08:39:25.066+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.services.s3.AmazonS3Client.invoke(AmazonS3Client.java:5403)
+[2026-08-07T08:39:25.066+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.services.s3.AmazonS3Client.getObjectMetadata(AmazonS3Client.java:1372)
+[2026-08-07T08:39:25.066+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.lambda$getObjectMetadata$10(S3AFileSystem.java:2545)
+[2026-08-07T08:39:25.067+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.Invoker.retryUntranslated(Invoker.java:414)
+[2026-08-07T08:39:25.067+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.Invoker.retryUntranslated(Invoker.java:377)
+[2026-08-07T08:39:25.067+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.getObjectMetadata(S3AFileSystem.java:2533)
+[2026-08-07T08:39:25.067+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.getObjectMetadata(S3AFileSystem.java:2513)
+[2026-08-07T08:39:25.067+0000] {pod_manager.py:472} INFO - [base] 	at org.apache.hadoop.fs.s3a.S3AFileSystem.s3GetFileStatus(S3AFileSystem.java:3776)
+[2026-08-07T08:39:25.067+0000] {pod_manager.py:472} INFO - [base] 	... 25 more
+[2026-08-07T08:39:25.067+0000] {pod_manager.py:472} INFO - [base] Caused by: java.net.UnknownHostException: minio: Name or service not known
+[2026-08-07T08:39:25.067+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.Inet6AddressImpl.lookupAllHostAddr(Native Method)
+[2026-08-07T08:39:25.068+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress$PlatformNameService.lookupAllHostAddr(Unknown Source)
+[2026-08-07T08:39:25.068+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress.getAddressesFromNameService(Unknown Source)
+[2026-08-07T08:39:25.068+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress$NameServiceAddresses.get(Unknown Source)
+[2026-08-07T08:39:25.068+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress.getAllByName0(Unknown Source)
+[2026-08-07T08:39:25.068+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress.getAllByName(Unknown Source)
+[2026-08-07T08:39:25.068+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.net.InetAddress.getAllByName(Unknown Source)
+[2026-08-07T08:39:25.068+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.SystemDefaultDnsResolver.resolve(SystemDefaultDnsResolver.java:27)
+[2026-08-07T08:39:25.069+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.DelegatingDnsResolver.resolve(DelegatingDnsResolver.java:38)
+[2026-08-07T08:39:25.069+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:112)
+[2026-08-07T08:39:25.069+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
+[2026-08-07T08:39:25.069+0000] {pod_manager.py:472} INFO - [base] 	at jdk.internal.reflect.GeneratedMethodAccessor23.invoke(Unknown Source)
+[2026-08-07T08:39:25.069+0000] {pod_manager.py:472} INFO - [base] 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+[2026-08-07T08:39:25.069+0000] {pod_manager.py:472} INFO - [base] 	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+[2026-08-07T08:39:25.069+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.conn.ClientConnectionManagerFactory$Handler.invoke(ClientConnectionManagerFactory.java:76)
+[2026-08-07T08:39:25.069+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.conn.$Proxy40.connect(Unknown Source)
+[2026-08-07T08:39:25.070+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
+[2026-08-07T08:39:25.070+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
+[2026-08-07T08:39:25.070+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
+[2026-08-07T08:39:25.070+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
+[2026-08-07T08:39:25.070+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:83)
+[2026-08-07T08:39:25.070+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.thirdparty.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:56)
+[2026-08-07T08:39:25.070+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.apache.client.impl.SdkHttpClient.execute(SdkHttpClient.java:72)
+[2026-08-07T08:39:25.071+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.executeOneRequest(AmazonHttpClient.java:1346)
+[2026-08-07T08:39:25.071+0000] {pod_manager.py:472} INFO - [base] 	at com.amazonaws.http.AmazonHttpClient$RequestExecutor.executeHelper(AmazonHttpClient.java:1157)
+[2026-08-07T08:39:25.106+0000] {pod_manager.py:472} INFO - [base] 	... 41 more
+2026-08-07T08:39:25.059475473Z 
+
+[2026-08-07T08:39:25.107+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO ShutdownHookManager: Shutdown hook called
+[2026-08-07T08:39:25.110+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO ShutdownHookManager: Deleting directory /tmp/spark-b22a8dc8-e1b1-4899-9466-7db70177a7e4
+[2026-08-07T08:39:25.117+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO ShutdownHookManager: Deleting directory /tmp/spark-d039cb4f-090e-4de2-a2c7-dbfff79c835e
+[2026-08-07T08:39:25.117+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO MetricsSystemImpl: Stopping s3a-file-system metrics system...
+[2026-08-07T08:39:25.117+0000] {pod_manager.py:472} INFO - [base] 26/08/07 08:39:25 INFO MetricsSystemImpl: s3a-file-system metrics system stopped.
+[2026-08-07T08:39:26.139+0000] {pod_manager.py:490} INFO - [base] 26/08/07 08:39:25 INFO MetricsSystemImpl: s3a-file-system metrics system shutdown complete.
+
+[2026-08-07T08:39:26.143+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:39:26.150+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:39:26.156+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:39:26.161+0000] {pod_manager.py:623} INFO - Pod medallion-ingest-t7ewn1ww has phase Running
+[2026-08-07T08:39:28.162+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:39:28.169+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:39:28.176+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:39:28.184+0000] {pod.py:970} INFO - Deleting pod: medallion-ingest-t7ewn1ww
+[2026-08-07T08:39:28.185+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.11/site-packages/urllib3/connectionpool.py:1100 InsecureRequestWarning: Unverified HTTPS request is being made to host 'k8s-master-node'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+[2026-08-07T08:39:28.201+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2026-08-07T08:39:28.212+0000] {taskinstance.py:2905} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/models/taskinstance.py", line 465, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/models/baseoperator.py", line 401, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/providers/cncf/kubernetes/operators/pod.py", line 591, in execute
+    return self.execute_sync(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/providers/cncf/kubernetes/operators/pod.py", line 641, in execute_sync
+    self.cleanup(
+  File "/home/airflow/.local/lib/python3.11/site-packages/airflow/providers/cncf/kubernetes/operators/pod.py", line 901, in cleanup
+    raise AirflowException(
+airflow.exceptions.AirflowException: Pod medallion-ingest-t7ewn1ww returned a failure.
+remote_pod: {'api_version': 'v1',
+ 'kind': 'Pod',
+ 'metadata': {'annotations': None,
+              'creation_timestamp': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal()),
+              'deletion_grace_period_seconds': None,
+              'deletion_timestamp': None,
+              'finalizers': None,
+              'generate_name': None,
+              'generation': None,
+              'labels': {'airflow_kpo_in_cluster': 'False',
+                         'airflow_version': '2.9.3',
+                         'dag_id': 'medallion_pipeline',
+                         'kubernetes_pod_operator': 'True',
+                         'run_id': 'manual__2026-08-07T0826480000-70226a4ee',
+                         'task_id': 'ingest',
+                         'try_number': '1'},
+              'managed_fields': [{'api_version': 'v1',
+                                  'fields_type': 'FieldsV1',
+                                  'fields_v1': {'f:metadata': {'f:labels': {'.': {},
+                                                                            'f:airflow_kpo_in_cluster': {},
+                                                                            'f:airflow_version': {},
+                                                                            'f:dag_id': {},
+                                                                            'f:kubernetes_pod_operator': {},
+                                                                            'f:run_id': {},
+                                                                            'f:task_id': {},
+                                                                            'f:try_number': {}}},
+                                                'f:spec': {'f:affinity': {},
+                                                           'f:containers': {'k:{"name":"base"}': {'.': {},
+                                                                                                  'f:args': {},
+                                                                                                  'f:command': {},
+                                                                                                  'f:env': {'.': {},
+                                                                                                            'k:{"name":"STEAM_API_KEY"}': {'.': {},
+                                                                                                                                           'f:name': {},
+                                                                                                                                           'f:value': {}}},
+                                                                                                  'f:image': {},
+                                                                                                  'f:imagePullPolicy': {},
+                                                                                                  'f:name': {},
+                                                                                                  'f:resources': {},
+                                                                                                  'f:terminationMessagePath': {},
+                                                                                                  'f:terminationMessagePolicy': {}}},
+                                                           'f:dnsPolicy': {},
+                                                           'f:enableServiceLinks': {},
+                                                           'f:restartPolicy': {},
+                                                           'f:schedulerName': {},
+                                                           'f:securityContext': {'.': {},
+                                                                                 'f:runAsUser': {}},
+                                                           'f:serviceAccount': {},
+                                                           'f:serviceAccountName': {},
+                                                           'f:terminationGracePeriodSeconds': {}}},
+                                  'manager': 'OpenAPI-Generator',
+                                  'operation': 'Update',
+                                  'subresource': None,
+                                  'time': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal())},
+                                 {'api_version': 'v1',
+                                  'fields_type': 'FieldsV1',
+                                  'fields_v1': {'f:status': {'f:conditions': {'k:{"type":"ContainersReady"}': {'.': {},
+                                                                                                               'f:lastProbeTime': {},
+                                                                                                               'f:lastTransitionTime': {},
+                                                                                                               'f:reason': {},
+                                                                                                               'f:status': {},
+                                                                                                               'f:type': {}},
+                                                                              'k:{"type":"Initialized"}': {'.': {},
+                                                                                                           'f:lastProbeTime': {},
+                                                                                                           'f:lastTransitionTime': {},
+                                                                                                           'f:status': {},
+                                                                                                           'f:type': {}},
+                                                                              'k:{"type":"PodReadyToStartContainers"}': {'.': {},
+                                                                                                                         'f:lastProbeTime': {},
+                                                                                                                         'f:lastTransitionTime': {},
+                                                                                                                         'f:status': {},
+                                                                                                                         'f:type': {}},
+                                                                              'k:{"type":"Ready"}': {'.': {},
+                                                                                                     'f:lastProbeTime': {},
+                                                                                                     'f:lastTransitionTime': {},
+                                                                                                     'f:reason': {},
+                                                                                                     'f:status': {},
+                                                                                                     'f:type': {}}},
+                                                             'f:containerStatuses': {},
+                                                             'f:hostIP': {},
+                                                             'f:hostIPs': {},
+                                                             'f:phase': {},
+                                                             'f:podIP': {},
+                                                             'f:podIPs': {'.': {},
+                                                                          'k:{"ip":"10.42.0.12"}': {'.': {},
+                                                                                                    'f:ip': {}}},
+                                                             'f:startTime': {}}},
+                                  'manager': 'k3s',
+                                  'operation': 'Update',
+                                  'subresource': 'status',
+                                  'time': datetime.datetime(2026, 8, 7, 8, 39, 27, tzinfo=tzlocal())}],
+              'name': 'medallion-ingest-t7ewn1ww',
+              'namespace': 'default',
+              'owner_references': None,
+              'resource_version': '4039',
+              'self_link': None,
+              'uid': '68abb344-dc1e-4822-97d2-26eb3d3c3eeb'},
+ 'spec': {'active_deadline_seconds': None,
+          'affinity': {'node_affinity': None,
+                       'pod_affinity': None,
+                       'pod_anti_affinity': None},
+          'automount_service_account_token': None,
+          'containers': [{'args': ['--master',
+                                   'k8s://https://kubernetes.default.svc:443',
+                                   '--deploy-mode',
+                                   'client',
+                                   '--conf',
+                                   'spark.kubernetes.namespace=default',
+                                   '--conf',
+                                   'spark.kubernetes.authenticate.driver.serviceAccountName=spark',
+                                   '--conf',
+                                   'spark.dynamicAllocation.enabled=true',
+                                   '--conf',
+                                   'spark.dynamicAllocation.shuffleTracking.enabled=true',
+                                   '--conf',
+                                   'spark.dynamicAllocation.minExecutors=0',
+                                   '--conf',
+                                   'spark.dynamicAllocation.maxExecutors=5',
+                                   '--conf',
+                                   'spark.eventLog.enabled=true',
+                                   '--conf',
+                                   'spark.eventLog.dir=s3a://spark-events/logs/',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.endpoint=http://minio:9000',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.path.style.access=true',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.access.key=minioadmin',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.secret.key=***',
+                                   '/opt/spark-jobs/jobs/ingest.py'],
+                          'command': ['spark-submit'],
+                          'env': [{'name': 'STEAM_API_KEY',
+                                   'value': '01F7AF55D0BF761E6593C04F609AAFEA',
+                                   'value_from': None}],
+                          'env_from': None,
+                          'image': 'gamer_publisher/spark-jobs:latest',
+                          'image_pull_policy': 'Never',
+                          'lifecycle': None,
+                          'liveness_probe': None,
+                          'name': 'base',
+                          'ports': None,
+                          'readiness_probe': None,
+                          'resize_policy': None,
+                          'resources': {'claims': None,
+                                        'limits': None,
+                                        'requests': None},
+                          'restart_policy': None,
+                          'security_context': None,
+                          'startup_probe': None,
+                          'stdin': None,
+                          'stdin_once': None,
+                          'termination_message_path': '/dev/termination-log',
+                          'termination_message_policy': 'File',
+                          'tty': None,
+                          'volume_devices': None,
+                          'volume_mounts': [{'mount_path': '/var/run/secrets/kubernetes.io/serviceaccount',
+                                             'mount_propagation': None,
+                                             'name': 'kube-api-access-2bmzv',
+                                             'read_only': True,
+                                             'sub_path': None,
+                                             'sub_path_expr': None}],
+                          'working_dir': None}],
+          'dns_config': None,
+          'dns_policy': 'ClusterFirst',
+          'enable_service_links': True,
+          'ephemeral_containers': None,
+          'host_aliases': None,
+          'host_ipc': None,
+          'host_network': None,
+          'host_pid': None,
+          'host_users': None,
+          'hostname': None,
+          'image_pull_secrets': None,
+          'init_containers': None,
+          'node_name': 'a926e79efba4',
+          'node_selector': None,
+          'os': None,
+          'overhead': None,
+          'preemption_policy': 'PreemptLowerPriority',
+          'priority': 0,
+          'priority_class_name': None,
+          'readiness_gates': None,
+          'resource_claims': None,
+          'restart_policy': 'Never',
+          'runtime_class_name': None,
+          'scheduler_name': 'default-scheduler',
+          'scheduling_gates': None,
+          'security_context': {'fs_group': None,
+                               'fs_group_change_policy': None,
+                               'run_as_group': None,
+                               'run_as_non_root': None,
+                               'run_as_user': 0,
+                               'se_linux_options': None,
+                               'seccomp_profile': None,
+                               'supplemental_groups': None,
+                               'sysctls': None,
+                               'windows_options': None},
+          'service_account': 'spark',
+          'service_account_name': 'spark',
+          'set_hostname_as_fqdn': None,
+          'share_process_namespace': None,
+          'subdomain': None,
+          'termination_grace_period_seconds': 30,
+          'tolerations': [{'effect': 'NoExecute',
+                           'key': 'node.kubernetes.io/not-ready',
+                           'operator': 'Exists',
+                           'toleration_seconds': 300,
+                           'value': None},
+                          {'effect': 'NoExecute',
+                           'key': 'node.kubernetes.io/unreachable',
+                           'operator': 'Exists',
+                           'toleration_seconds': 300,
+                           'value': None}],
+          'topology_spread_constraints': None,
+          'volumes': [{'aws_elastic_block_store': None,
+                       'azure_disk': None,
+                       'azure_file': None,
+                       'cephfs': None,
+                       'cinder': None,
+                       'config_map': None,
+                       'csi': None,
+                       'downward_api': None,
+                       'empty_dir': None,
+                       'ephemeral': None,
+                       'fc': None,
+                       'flex_volume': None,
+                       'flocker': None,
+                       'gce_persistent_disk': None,
+                       'git_repo': None,
+                       'glusterfs': None,
+                       'host_path': None,
+                       'iscsi': None,
+                       'name': 'kube-api-access-2bmzv',
+                       'nfs': None,
+                       'persistent_volume_claim': None,
+                       'photon_persistent_disk': None,
+                       'portworx_volume': None,
+                       'projected': {'default_mode': 420,
+                                     'sources': [{'cluster_trust_bundle': None,
+                                                  'config_map': None,
+                                                  'downward_api': None,
+                                                  'secret': None,
+                                                  'service_account_token': {'audience': None,
+                                                                            'expiration_seconds': 3607,
+                                                                            'path': 'token'}},
+                                                 {'cluster_trust_bundle': None,
+                                                  'config_map': {'items': [{'key': 'ca.crt',
+                                                                            'mode': None,
+                                                                            'path': 'ca.crt'}],
+                                                                 'name': 'kube-root-ca.crt',
+                                                                 'optional': None},
+                                                  'downward_api': None,
+                                                  'secret': None,
+                                                  'service_account_token': None},
+                                                 {'cluster_trust_bundle': None,
+                                                  'config_map': None,
+                                                  'downward_api': {'items': [{'field_ref': {'api_version': 'v1',
+                                                                                            'field_path': 'metadata.namespace'},
+                                                                              'mode': None,
+                                                                              'path': 'namespace',
+                                                                              'resource_field_ref': None}]},
+                                                  'secret': None,
+                                                  'service_account_token': None}]},
+                       'quobyte': None,
+                       'rbd': None,
+                       'scale_io': None,
+                       'secret': None,
+                       'storageos': None,
+                       'vsphere_volume': None}]},
+ 'status': {'conditions': [{'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 39, 26, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'False',
+                            'type': 'PodReadyToStartContainers'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'True',
+                            'type': 'Initialized'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 39, 25, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': 'PodFailed',
+                            'status': 'False',
+                            'type': 'Ready'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 39, 25, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': 'PodFailed',
+                            'status': 'False',
+                            'type': 'ContainersReady'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'True',
+                            'type': 'PodScheduled'}],
+            'container_statuses': [{'allocated_resources': None,
+                                    'container_id': 'containerd://3edd3714b47b46665efca843095103b85a02527117e1e8ebc3130bb4dfcc0a4d',
+                                    'image': 'docker.io/gamer_publisher/spark-jobs:latest',
+                                    'image_id': 'sha256:5bddcfd0b00ccb3b35c42570f5e56f36a6ef229910330d31a389766c9eb3caf3',
+                                    'last_state': {'running': None,
+                                                   'terminated': None,
+                                                   'waiting': None},
+                                    'name': 'base',
+                                    'ready': False,
+                                    'resources': None,
+                                    'restart_count': 0,
+                                    'started': False,
+                                    'state': {'running': None,
+                                              'terminated': {'container_id': 'containerd://3edd3714b47b46665efca843095103b85a02527117e1e8ebc3130bb4dfcc0a4d',
+                                                             'exit_code': 1,
+                                                             'finished_at': datetime.datetime(2026, 8, 7, 8, 39, 25, tzinfo=tzlocal()),
+                                                             'message': None,
+                                                             'reason': 'Error',
+                                                             'signal': None,
+                                                             'started_at': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal())},
+                                              'waiting': None}}],
+            'ephemeral_container_statuses': None,
+            'host_i_ps': [{'ip': '172.21.0.5'}],
+            'host_ip': '172.21.0.5',
+            'init_container_statuses': None,
+            'message': None,
+            'nominated_node_name': None,
+            'phase': 'Failed',
+            'pod_i_ps': [{'ip': '10.42.0.12'}],
+            'pod_ip': '10.42.0.12',
+            'qos_class': 'BestEffort',
+            'reason': None,
+            'resize': None,
+            'resource_claim_statuses': None,
+            'start_time': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal())}}
+[2026-08-07T08:39:28.215+0000] {taskinstance.py:1206} INFO - Marking task as FAILED. dag_id=medallion_pipeline, task_id=ingest, run_id=manual__2026-08-07T08:26:48+00:00, execution_date=20260807T082648, start_date=20260807T082649, end_date=20260807T083928
+[2026-08-07T08:39:28.224+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 16 for task ingest (Pod medallion-ingest-t7ewn1ww returned a failure.
+remote_pod: {'api_version': 'v1',
+ 'kind': 'Pod',
+ 'metadata': {'annotations': None,
+              'creation_timestamp': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal()),
+              'deletion_grace_period_seconds': None,
+              'deletion_timestamp': None,
+              'finalizers': None,
+              'generate_name': None,
+              'generation': None,
+              'labels': {'airflow_kpo_in_cluster': 'False',
+                         'airflow_version': '2.9.3',
+                         'dag_id': 'medallion_pipeline',
+                         'kubernetes_pod_operator': 'True',
+                         'run_id': 'manual__2026-08-07T0826480000-70226a4ee',
+                         'task_id': 'ingest',
+                         'try_number': '1'},
+              'managed_fields': [{'api_version': 'v1',
+                                  'fields_type': 'FieldsV1',
+                                  'fields_v1': {'f:metadata': {'f:labels': {'.': {},
+                                                                            'f:airflow_kpo_in_cluster': {},
+                                                                            'f:airflow_version': {},
+                                                                            'f:dag_id': {},
+                                                                            'f:kubernetes_pod_operator': {},
+                                                                            'f:run_id': {},
+                                                                            'f:task_id': {},
+                                                                            'f:try_number': {}}},
+                                                'f:spec': {'f:affinity': {},
+                                                           'f:containers': {'k:{"name":"base"}': {'.': {},
+                                                                                                  'f:args': {},
+                                                                                                  'f:command': {},
+                                                                                                  'f:env': {'.': {},
+                                                                                                            'k:{"name":"STEAM_API_KEY"}': {'.': {},
+                                                                                                                                           'f:name': {},
+                                                                                                                                           'f:value': {}}},
+                                                                                                  'f:image': {},
+                                                                                                  'f:imagePullPolicy': {},
+                                                                                                  'f:name': {},
+                                                                                                  'f:resources': {},
+                                                                                                  'f:terminationMessagePath': {},
+                                                                                                  'f:terminationMessagePolicy': {}}},
+                                                           'f:dnsPolicy': {},
+                                                           'f:enableServiceLinks': {},
+                                                           'f:restartPolicy': {},
+                                                           'f:schedulerName': {},
+                                                           'f:securityContext': {'.': {},
+                                                                                 'f:runAsUser': {}},
+                                                           'f:serviceAccount': {},
+                                                           'f:serviceAccountName': {},
+                                                           'f:terminationGracePeriodSeconds': {}}},
+                                  'manager': 'OpenAPI-Generator',
+                                  'operation': 'Update',
+                                  'subresource': None,
+                                  'time': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal())},
+                                 {'api_version': 'v1',
+                                  'fields_type': 'FieldsV1',
+                                  'fields_v1': {'f:status': {'f:conditions': {'k:{"type":"ContainersReady"}': {'.': {},
+                                                                                                               'f:lastProbeTime': {},
+                                                                                                               'f:lastTransitionTime': {},
+                                                                                                               'f:reason': {},
+                                                                                                               'f:status': {},
+                                                                                                               'f:type': {}},
+                                                                              'k:{"type":"Initialized"}': {'.': {},
+                                                                                                           'f:lastProbeTime': {},
+                                                                                                           'f:lastTransitionTime': {},
+                                                                                                           'f:status': {},
+                                                                                                           'f:type': {}},
+                                                                              'k:{"type":"PodReadyToStartContainers"}': {'.': {},
+                                                                                                                         'f:lastProbeTime': {},
+                                                                                                                         'f:lastTransitionTime': {},
+                                                                                                                         'f:status': {},
+                                                                                                                         'f:type': {}},
+                                                                              'k:{"type":"Ready"}': {'.': {},
+                                                                                                     'f:lastProbeTime': {},
+                                                                                                     'f:lastTransitionTime': {},
+                                                                                                     'f:reason': {},
+                                                                                                     'f:status': {},
+                                                                                                     'f:type': {}}},
+                                                             'f:containerStatuses': {},
+                                                             'f:hostIP': {},
+                                                             'f:hostIPs': {},
+                                                             'f:phase': {},
+                                                             'f:podIP': {},
+                                                             'f:podIPs': {'.': {},
+                                                                          'k:{"ip":"10.42.0.12"}': {'.': {},
+                                                                                                    'f:ip': {}}},
+                                                             'f:startTime': {}}},
+                                  'manager': 'k3s',
+                                  'operation': 'Update',
+                                  'subresource': 'status',
+                                  'time': datetime.datetime(2026, 8, 7, 8, 39, 27, tzinfo=tzlocal())}],
+              'name': 'medallion-ingest-t7ewn1ww',
+              'namespace': 'default',
+              'owner_references': None,
+              'resource_version': '4039',
+              'self_link': None,
+              'uid': '68abb344-dc1e-4822-97d2-26eb3d3c3eeb'},
+ 'spec': {'active_deadline_seconds': None,
+          'affinity': {'node_affinity': None,
+                       'pod_affinity': None,
+                       'pod_anti_affinity': None},
+          'automount_service_account_token': None,
+          'containers': [{'args': ['--master',
+                                   'k8s://https://kubernetes.default.svc:443',
+                                   '--deploy-mode',
+                                   'client',
+                                   '--conf',
+                                   'spark.kubernetes.namespace=default',
+                                   '--conf',
+                                   'spark.kubernetes.authenticate.driver.serviceAccountName=spark',
+                                   '--conf',
+                                   'spark.dynamicAllocation.enabled=true',
+                                   '--conf',
+                                   'spark.dynamicAllocation.shuffleTracking.enabled=true',
+                                   '--conf',
+                                   'spark.dynamicAllocation.minExecutors=0',
+                                   '--conf',
+                                   'spark.dynamicAllocation.maxExecutors=5',
+                                   '--conf',
+                                   'spark.eventLog.enabled=true',
+                                   '--conf',
+                                   'spark.eventLog.dir=s3a://spark-events/logs/',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.endpoint=http://minio:9000',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.path.style.access=true',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.access.key=minioadmin',
+                                   '--conf',
+                                   'spark.hadoop.fs.s3a.secret.key=***',
+                                   '/opt/spark-jobs/jobs/ingest.py'],
+                          'command': ['spark-submit'],
+                          'env': [{'name': 'STEAM_API_KEY',
+                                   'value': '01F7AF55D0BF761E6593C04F609AAFEA',
+                                   'value_from': None}],
+                          'env_from': None,
+                          'image': 'gamer_publisher/spark-jobs:latest',
+                          'image_pull_policy': 'Never',
+                          'lifecycle': None,
+                          'liveness_probe': None,
+                          'name': 'base',
+                          'ports': None,
+                          'readiness_probe': None,
+                          'resize_policy': None,
+                          'resources': {'claims': None,
+                                        'limits': None,
+                                        'requests': None},
+                          'restart_policy': None,
+                          'security_context': None,
+                          'startup_probe': None,
+                          'stdin': None,
+                          'stdin_once': None,
+                          'termination_message_path': '/dev/termination-log',
+                          'termination_message_policy': 'File',
+                          'tty': None,
+                          'volume_devices': None,
+                          'volume_mounts': [{'mount_path': '/var/run/secrets/kubernetes.io/serviceaccount',
+                                             'mount_propagation': None,
+                                             'name': 'kube-api-access-2bmzv',
+                                             'read_only': True,
+                                             'sub_path': None,
+                                             'sub_path_expr': None}],
+                          'working_dir': None}],
+          'dns_config': None,
+          'dns_policy': 'ClusterFirst',
+          'enable_service_links': True,
+          'ephemeral_containers': None,
+          'host_aliases': None,
+          'host_ipc': None,
+          'host_network': None,
+          'host_pid': None,
+          'host_users': None,
+          'hostname': None,
+          'image_pull_secrets': None,
+          'init_containers': None,
+          'node_name': 'a926e79efba4',
+          'node_selector': None,
+          'os': None,
+          'overhead': None,
+          'preemption_policy': 'PreemptLowerPriority',
+          'priority': 0,
+          'priority_class_name': None,
+          'readiness_gates': None,
+          'resource_claims': None,
+          'restart_policy': 'Never',
+          'runtime_class_name': None,
+          'scheduler_name': 'default-scheduler',
+          'scheduling_gates': None,
+          'security_context': {'fs_group': None,
+                               'fs_group_change_policy': None,
+                               'run_as_group': None,
+                               'run_as_non_root': None,
+                               'run_as_user': 0,
+                               'se_linux_options': None,
+                               'seccomp_profile': None,
+                               'supplemental_groups': None,
+                               'sysctls': None,
+                               'windows_options': None},
+          'service_account': 'spark',
+          'service_account_name': 'spark',
+          'set_hostname_as_fqdn': None,
+          'share_process_namespace': None,
+          'subdomain': None,
+          'termination_grace_period_seconds': 30,
+          'tolerations': [{'effect': 'NoExecute',
+                           'key': 'node.kubernetes.io/not-ready',
+                           'operator': 'Exists',
+                           'toleration_seconds': 300,
+                           'value': None},
+                          {'effect': 'NoExecute',
+                           'key': 'node.kubernetes.io/unreachable',
+                           'operator': 'Exists',
+                           'toleration_seconds': 300,
+                           'value': None}],
+          'topology_spread_constraints': None,
+          'volumes': [{'aws_elastic_block_store': None,
+                       'azure_disk': None,
+                       'azure_file': None,
+                       'cephfs': None,
+                       'cinder': None,
+                       'config_map': None,
+                       'csi': None,
+                       'downward_api': None,
+                       'empty_dir': None,
+                       'ephemeral': None,
+                       'fc': None,
+                       'flex_volume': None,
+                       'flocker': None,
+                       'gce_persistent_disk': None,
+                       'git_repo': None,
+                       'glusterfs': None,
+                       'host_path': None,
+                       'iscsi': None,
+                       'name': 'kube-api-access-2bmzv',
+                       'nfs': None,
+                       'persistent_volume_claim': None,
+                       'photon_persistent_disk': None,
+                       'portworx_volume': None,
+                       'projected': {'default_mode': 420,
+                                     'sources': [{'cluster_trust_bundle': None,
+                                                  'config_map': None,
+                                                  'downward_api': None,
+                                                  'secret': None,
+                                                  'service_account_token': {'audience': None,
+                                                                            'expiration_seconds': 3607,
+                                                                            'path': 'token'}},
+                                                 {'cluster_trust_bundle': None,
+                                                  'config_map': {'items': [{'key': 'ca.crt',
+                                                                            'mode': None,
+                                                                            'path': 'ca.crt'}],
+                                                                 'name': 'kube-root-ca.crt',
+                                                                 'optional': None},
+                                                  'downward_api': None,
+                                                  'secret': None,
+                                                  'service_account_token': None},
+                                                 {'cluster_trust_bundle': None,
+                                                  'config_map': None,
+                                                  'downward_api': {'items': [{'field_ref': {'api_version': 'v1',
+                                                                                            'field_path': 'metadata.namespace'},
+                                                                              'mode': None,
+                                                                              'path': 'namespace',
+                                                                              'resource_field_ref': None}]},
+                                                  'secret': None,
+                                                  'service_account_token': None}]},
+                       'quobyte': None,
+                       'rbd': None,
+                       'scale_io': None,
+                       'secret': None,
+                       'storageos': None,
+                       'vsphere_volume': None}]},
+ 'status': {'conditions': [{'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 39, 26, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'False',
+                            'type': 'PodReadyToStartContainers'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'True',
+                            'type': 'Initialized'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 39, 25, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': 'PodFailed',
+                            'status': 'False',
+                            'type': 'Ready'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 39, 25, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': 'PodFailed',
+                            'status': 'False',
+                            'type': 'ContainersReady'},
+                           {'last_probe_time': None,
+                            'last_transition_time': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal()),
+                            'message': None,
+                            'reason': None,
+                            'status': 'True',
+                            'type': 'PodScheduled'}],
+            'container_statuses': [{'allocated_resources': None,
+                                    'container_id': 'containerd://3edd3714b47b46665efca843095103b85a02527117e1e8ebc3130bb4dfcc0a4d',
+                                    'image': 'docker.io/gamer_publisher/spark-jobs:latest',
+                                    'image_id': 'sha256:5bddcfd0b00ccb3b35c42570f5e56f36a6ef229910330d31a389766c9eb3caf3',
+                                    'last_state': {'running': None,
+                                                   'terminated': None,
+                                                   'waiting': None},
+                                    'name': 'base',
+                                    'ready': False,
+                                    'resources': None,
+                                    'restart_count': 0,
+                                    'started': False,
+                                    'state': {'running': None,
+                                              'terminated': {'container_id': 'containerd://3edd3714b47b46665efca843095103b85a02527117e1e8ebc3130bb4dfcc0a4d',
+                                                             'exit_code': 1,
+                                                             'finished_at': datetime.datetime(2026, 8, 7, 8, 39, 25, tzinfo=tzlocal()),
+                                                             'message': None,
+                                                             'reason': 'Error',
+                                                             'signal': None,
+                                                             'started_at': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal())},
+                                              'waiting': None}}],
+            'ephemeral_container_statuses': None,
+            'host_i_ps': [{'ip': '172.21.0.5'}],
+            'host_ip': '172.21.0.5',
+            'init_container_statuses': None,
+            'message': None,
+            'nominated_node_name': None,
+            'phase': 'Failed',
+            'pod_i_ps': [{'ip': '10.42.0.12'}],
+            'pod_ip': '10.42.0.12',
+            'qos_class': 'BestEffort',
+            'reason': None,
+            'resize': None,
+            'resource_claim_statuses': None,
+            'start_time': datetime.datetime(2026, 8, 7, 8, 26, 50, tzinfo=tzlocal())}}; 197)
+[2026-08-07T08:39:28.239+0000] {local_task_job_runner.py:243} INFO - Task exited with return code 1
+[2026-08-07T08:39:28.260+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2026-08-07T08:39:28.264+0000] {local_task_job_runner.py:222} INFO - ::endgroup::
