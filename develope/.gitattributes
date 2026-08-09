@@ -1,0 +1,5 @@
+# 컨테이너(Linux) 안에서 실행되는 스크립트류는 로컬 core.autocrlf 설정과 무관하게 LF로 고정.
+# (Windows에서 CRLF로 체크아웃되면 "env: 'bash\r': No such file or directory" 로 실행 자체가 깨짐)
+*.sh text eol=lf
+*.py text eol=lf
+Dockerfile text eol=lf

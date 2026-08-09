@@ -63,7 +63,7 @@ ingest >> bronze >> silver >> gold
 |---|---|---|
 | Airflow Webserver | http://localhost:8080 | DAG 관리/모니터링 |
 | Spark History Server | http://localhost:18080 | 종료된 Spark 잡의 UI (eventLog 기반) |
-| Spark Driver UI | `./scripts/spark-driver-ui.sh <pod-name>` 실행 후 http://localhost:4040 | 잡 실행 중에만 존재, 끝나면 History Server로 확인 |
+| Spark Driver UI | http://localhost:4040 | k3s의 NodePort Service(`k3s/spark-driver-ui-service.yaml`)가 실행 중인 드라이버 pod를 자동으로 찾아 연결. 잡 실행 중에만 응답하고, 끝나면 History Server로 확인. (`scripts/spark-driver-ui.sh <pod-name>`은 pod 이름을 직접 지정해 수동으로 포워딩하고 싶을 때 쓰는 대안) |
 | MinIO Console | http://localhost:9001 | 버킷/오브젝트 관리 |
 | Frontend | http://localhost:3000 | placeholder |
 | FastAPI | http://localhost:8000 | `/health` |

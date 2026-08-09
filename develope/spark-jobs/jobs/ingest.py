@@ -48,11 +48,15 @@ def fetch_steam_official_app_list(api_key: str) -> list[dict]:
     return apps
 
 
-def fetch_all_steamspy_pages() -> list[dict]:
-    """SteamSpy `all` 엔드포인트를 page=0부터 빈 페이지가 나올 때까지 순회한다."""
+def fetch_all_steamspy_pages(max_pages: int | None = None) -> list[dict]:
+    """SteamSpy `all` 엔드포인트를 page=0부터 빈 페이지가 나올 때까지 순회한다.
+
+    페이지당 1000개, 요청 제한 1req/60s라 전체 목록(50페이지+)을 다 받으려면
+    50분 이상 걸린다. max_pages가 주어지면 그만큼만 받고 멈춘다 (개발/테스트용).
+    """
     games = []
     page = 0
-    while True:
+    while max_pages is None or page < max_pages:
         response = requests.get(
             STEAMSPY_URL,
             params={"request": "all", "page": page},
@@ -64,7 +68,8 @@ def fetch_all_steamspy_pages() -> list[dict]:
             break
         games.extend(page_data.values())
         page += 1
-        time.sleep(STEAMSPY_REQUEST_INTERVAL_SECONDS)
+        if max_pages is None or page < max_pages:
+            time.sleep(STEAMSPY_REQUEST_INTERVAL_SECONDS)
     return games
 
 
@@ -83,7 +88,11 @@ def main() -> None:
     apps = fetch_steam_official_app_list(steam_api_key)
     write_raw_json(spark, apps, "s3a://datalake/raw/steam/app_list/")
 
-    games = fetch_all_steamspy_pages()
+    # 비워두면(미설정) 전체 수집(운영 배치용, 50분+). 개발/테스트 시에는 DAG의
+    # env_vars로 STEAMSPY_MAX_PAGES를 넘겨 페이지 수를 제한한다.
+    max_pages_env = os.environ.get("STEAMSPY_MAX_PAGES", "")
+    max_pages = int(max_pages_env) if max_pages_env else None
+    games = fetch_all_steamspy_pages(max_pages=max_pages)
     write_raw_json(spark, games, "s3a://datalake/raw/steam/steamspy_all/")
 
     spark.stop()

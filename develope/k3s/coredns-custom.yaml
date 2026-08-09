@@ -1,0 +1,24 @@
+# k3s는 kube-system/coredns-custom ConfigMap을 Corefile에서
+# `import /etc/coredns/custom/*.override` 로 항상 불러온다 (공식 지원 커스텀 훅).
+# docker-compose의 backend-net은 k3s 컨테이너 자신에게만 Docker 내장 DNS로 보이고,
+# k3s가 띄우는 Spark pod(별도 CNI 네트워크)에는 보이지 않는다. 그래서 pod 안에서
+# "minio" 를 못 찾는다 (UnknownHostException). minio를 backend-net에서 고정 IP로
+# 고정해두고(docker-compose.yml 참고) 여기서 이어준다.
+#
+# k3s 기본 Corefile은 이미 `hosts /etc/coredns/NodeHosts { ... }` 를 쓰고 있어서
+# (NodeHosts 파일로 노드 IP를 서빙) 같은 서버 블록에 hosts 플러그인을 또 쓰면
+# "plugin/hosts: this plugin can only be used once per Server Block" 로 coredns가
+# CrashLoopBackOff에 빠진다. 그래서 hosts 대신 template 플러그인으로 minio에 대한
+# A 레코드만 합성해서 응답한다 (다른 이름은 그대로 fallthrough).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  minio.override: |
+    template IN A . {
+      match "^minio\.$"
+      answer "{{ .Name }} 60 IN A 172.28.0.10"
+      fallthrough
+    }

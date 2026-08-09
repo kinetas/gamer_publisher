@@ -12,7 +12,9 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
     ports:
-      - "5432:5432"
+      # 호스트 5432는 Windows(Hyper-V/WSL) 동적 포트 예약 범위와 겹쳐 바인딩이 실패할 수 있어 15432로 노출.
+      # 컨테이너 내부/다른 서비스 간 통신은 그대로 5432(postgres:5432) 사용.
+      - "15432:5432"
     networks:
       - backend-net
 
@@ -38,7 +40,10 @@ services:
       - "9000:9000"   # API
       - "9001:9001"   # Console UI
     networks:
-      - backend-net
+      backend-net:
+        # 고정 IP: k3s 안의 Spark pod는 Docker 내장 DNS(127.0.0.11)를 못 보므로
+        # coredns-custom(k3s/coredns-custom.yaml)에서 이 IP를 "minio" 호스트로 등록해준다.
+        ipv4_address: 172.28.0.10
 
   # 버킷을 최초 1회 생성.
   #   datalake     : 수집 원본(raw) + 메달리언 가공 데이터 (raw/bronze/silver/gold 프리픽스)
@@ -66,6 +71,10 @@ services:
         mc mb -p local/code
         mc mb -p local/reports
         mc mb -p local/spark-events
+        # S3에는 실제 디렉터리가 없어서 spark-jobs가 한 번도 안 돈 상태에서는
+        # logs/ 프리픽스 자체가 없다. spark-history-server가 시작 시점에 이 경로를
+        # stat해서 없으면 FileNotFoundException으로 죽으므로 빈 마커 오브젝트로 미리 만들어둔다.
+        echo -n | mc pipe local/spark-events/logs/.keep
         echo 'minio buckets ready'
     networks:
       - backend-net
@@ -177,8 +186,9 @@ services:
       - k3s-kubeconfig:/etc/rancher/k3s
     ports:
       - "6443:6443"
-      # Spark Driver UI(4040)는 여기서 상시 열어두지 않는다. 잡 실행 중에만
-      # scripts/spark-driver-ui.sh <pod-name> 으로 그때그때 4040에 포워딩한다.
+      # Spark Driver UI: k3s/spark-driver-ui-service.yaml의 NodePort(30040)를 호스트 4040에
+      # 고정 매핑. 잡이 실행 중일 때만(라벨 매칭되는 pod가 떠 있을 때만) 실제로 응답한다.
+      - "4040:30040"
     networks:
       - k8s-net
       - backend-net
@@ -229,8 +239,16 @@ services:
       - |
         set -e
         until kubectl get nodes >/dev/null 2>&1; do echo 'k3s API 대기 중...'; sleep 2; done
+        # 완전히 새로 초기화된 클러스터에서는 API가 응답을 시작한 뒤에도 coredns
+        # deployment가 k3s의 내장 addon 컨트롤러에 의해 비동기로 조금 늦게 생성된다.
+        # 이 대기 없이 바로 rollout restart를 하면 "deployments.apps coredns not found"로 실패한다.
+        until kubectl -n kube-system get deployment/coredns >/dev/null 2>&1; do echo 'coredns deployment 대기 중...'; sleep 2; done
         kubectl apply -f /manifests/spark-rbac.yaml
-        echo 'RBAC 적용 완료'
+        kubectl apply -f /manifests/coredns-custom.yaml
+        kubectl apply -f /manifests/spark-driver-ui-service.yaml
+        kubectl -n kube-system rollout restart deployment/coredns
+        kubectl -n kube-system rollout status deployment/coredns --timeout=60s
+        echo 'RBAC + coredns-custom + spark-driver-ui Service 적용 완료'
     networks:
       - k8s-net
 
@@ -347,7 +365,12 @@ networks:
   # 데이터 저장 계층 전용. frontend/k8s-net 쪽에서는 직접 못 붙고,
   # fastapi-server/langgraph-server/airflow/spark-history-server 처럼 실제로
   # postgres/minio/chromadb가 필요한 서비스만 올라온다.
+  # minio에 고정 IP(172.28.0.10)를 줘야 k3s의 coredns-custom hosts 오버라이드로
+  # pod 안에서도 "minio" 이름을 해석할 수 있다 (k3s/coredns-custom.yaml 참고).
   backend-net:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
   # 사용자 대면 앱 계층. frontend는 fastapi-server를 통해서만 데이터에 접근한다.
   app-net:
   # k3s 컨트롤플레인 + Airflow의 KubernetesPodOperator 연동 전용.

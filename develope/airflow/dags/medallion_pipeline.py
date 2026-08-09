@@ -17,6 +17,7 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.hooks.base import BaseHook
+from airflow.models import Variable
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 
 # MinIO 자격증명은 코드에 넣지 않고, docker-compose.yml의
@@ -26,6 +27,12 @@ minio_conn = BaseHook.get_connection("minio_default")
 # Steam API 키는 docker-compose.yml의 STEAM_API_KEY 환경변수로 스케줄러/웹서버에
 # 전달되고, 여기서 읽어 ingest pod에만 env_vars로 주입한다.
 steam_api_key = os.environ["STEAM_API_KEY"]
+
+# SteamSpy `all`은 페이지당 1000개, 요청 제한 1req/60s라 전체 수집에 50분+ 걸린다.
+# Airflow Variable "steamspy_max_pages"로 페이지 수를 제한할 수 있다 (기본값 3 = 몇 분 내 완료,
+# 개발/파이프라인 동작 확인용). 실제 전체 배치 수집을 돌리려면 Airflow UI에서 이 Variable을
+# 빈 문자열로 비우거나 지우면 된다 (ingest.py: 미설정 시 전체 수집).
+steamspy_max_pages = Variable.get("steamspy_max_pages", default_var="3")
 
 # 모든 단계가 공유하는 spark-submit 옵션.
 # --master/--deploy-mode: k3s 위에 떠 있는 이 pod 자신이 Spark 드라이버가 되어
@@ -64,6 +71,10 @@ def make_stage_task(
         # 설정(별도 드라이버 pod를 만들 때만 적용됨)과 무관하게 이 pod에 SA를 직접 지정해야
         # k3s-bootstrap이 만든 spark-role(RBAC)로 executor pod를 만들 권한이 생긴다.
         service_account_name="spark",
+        # k3s/spark-driver-ui-service.yaml의 NodePort Service가 이 라벨로 "현재 실행 중인
+        # 드라이버 pod"를 찾아서 localhost:4040에 연결해준다 (--deploy-mode client라서
+        # 이 pod 자신이 드라이버).
+        labels={"spark-driver-ui": "true"},
         image="gamer_publisher/spark-jobs:latest",
         image_pull_policy="Never",  # load-image-to-k3s.sh로 containerd에 반입한 로컬 전용 이미지
         cmds=["spark-submit"],
@@ -87,7 +98,13 @@ with DAG(
     catchup=False,
     tags=["spark", "kubernetes", "medallion"],
 ) as dag:
-    ingest = make_stage_task("ingest", env_vars={"STEAM_API_KEY": steam_api_key})
+    ingest = make_stage_task(
+        "ingest",
+        env_vars={
+            "STEAM_API_KEY": steam_api_key,
+            "STEAMSPY_MAX_PAGES": steamspy_max_pages,
+        },
+    )
     bronze = make_stage_task("bronze")
     silver = make_stage_task("silver")
     gold = make_stage_task("gold")

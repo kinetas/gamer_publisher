@@ -1,0 +1,20 @@
+# 실행 중인 Spark 드라이버(--deploy-mode client이므로 KubernetesPodOperator가 띄운
+# 그 pod 자신)의 UI(4040)를 고정 NodePort로 노출한다. selector가 라벨로 "현재 떠 있는"
+# 드라이버 pod를 자동으로 찾으므로, scripts/spark-driver-ui.sh처럼 매번 pod 이름을
+# 알아내서 port-forward를 수동 실행할 필요 없이 docker-compose가 이 NodePort를
+# 호스트 4040에 고정 매핑해서 http://localhost:4040 으로 바로 볼 수 있다.
+# (라벨과 매칭되는 pod가 없는 동안 = 잡이 안 도는 동안은 그냥 연결이 안 될 뿐이고,
+#  종료된 잡은 항상 Spark History Server(18080)에서 본다.)
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-driver-ui
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    spark-driver-ui: "true"
+  ports:
+    - port: 4040
+      targetPort: 4040
+      nodePort: 30040
