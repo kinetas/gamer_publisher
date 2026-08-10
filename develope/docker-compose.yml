@@ -19,7 +19,10 @@ services:
       - backend-net
 
   chromadb:
-    image: chromadb/chroma:latest
+    # langgraph-server가 chromadb-client==1.0.21(경량 HTTP 클라이언트)로 접속한다.
+    # 서버 이미지 태그를 클라이언트 버전과 맞춰 고정 — latest로 두면 클라이언트가
+    # 조용히 호환 안 되는 서버와 통신하게 될 수 있다.
+    image: chromadb/chroma:1.0.21
     volumes:
       - chromadb-data:/chroma/chroma
     ports:
@@ -111,6 +114,11 @@ services:
     environment:
       CHROMADB_HOST: chromadb
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # 기자(reporter)가 게임 반응 취재에 쓰는 Reddit read-only script app 자격증명.
+      # 비어 있으면(REDDIT_CLIENT_ID/SECRET 미설정) 조용히 스킵하고 그 부분 취재 없이 진행한다.
+      REDDIT_CLIENT_ID: ${REDDIT_CLIENT_ID}
+      REDDIT_CLIENT_SECRET: ${REDDIT_CLIENT_SECRET}
+      REDDIT_USER_AGENT: ${REDDIT_USER_AGENT:-python:gamer-publisher:0.1.0 (weekly game report bot)}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}

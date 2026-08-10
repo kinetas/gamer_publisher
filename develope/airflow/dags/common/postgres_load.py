@@ -24,10 +24,11 @@ GOLD_COLUMNS = [
     "positive", "negative", "owners", "ccu", "ingested_at",
 ]
 
-# 주간 리포트 슬롯 개수. old/신규/다시추천 세 카테고리는 서로 다른 테이블/기준에서 뽑는다.
-OLD_SLOT_COUNT = 3
-RECENT_NEW_SLOT_COUNT = 3
-RECENT_REPLAY_SLOT_COUNT = 2
+# 주간 리포트 슬롯 개수 (총 15개 = 프론트 1행 5열 그리드 x 3섹션에 맞춤).
+# old/신규/다시추천 세 카테고리는 서로 다른 테이블/기준에서 뽑는다.
+OLD_SLOT_COUNT = 5
+RECENT_NEW_SLOT_COUNT = 5
+RECENT_REPLAY_SLOT_COUNT = 5
 
 LANGGRAPH_REPORT_URL = "http://langgraph-server:8100/reports/weekly"
 FASTAPI_ARCHIVE_URL = "http://fastapi-server:8000/reports/archive-current"
@@ -200,7 +201,12 @@ def notify_langgraph(**context) -> None:
     report = context["ti"].xcom_pull(task_ids="select_weekly_report", key="weekly_report")
 
     try:
-        response = requests.post(LANGGRAPH_REPORT_URL, json=report, timeout=120)
+        # langgraph-server가 편집국장->데스크->기자->교열부->편집부 병렬 그래프로
+        # 바뀌면서 정상 케이스도 Steam/Reddit 취재 + LLM 호출 30건이 걸린다
+        # (실측 45~60초). Reddit/OpenAI 쪽 백오프가 겹치면 꼬리가 길어질 수 있어
+        # 여유를 크게 둔다 — 실패해도 soft-fail이라 DAG은 안 죽지만, 타임아웃이
+        # 너무 짧으면 "리포트는 잘 만들어졌는데 경고 로그만 뜨는" 상황이 반복된다.
+        response = requests.post(LANGGRAPH_REPORT_URL, json=report, timeout=600)
     except requests.RequestException as exc:
         logger.warning("langgraph-server 호출 실패: %s", exc)
         return

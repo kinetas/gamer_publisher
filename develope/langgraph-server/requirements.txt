@@ -1,7 +1,13 @@
 fastapi
 uvicorn[standard]
-langgraph
-langchain
-chromadb
+# Send/Command API가 langgraph.constants -> langgraph.types로 옮겨간 이력이 있어
+# 메이저 업이 조용히 빌드를 깰 수 있음 -> 이 프로젝트에서 유일하게 버전을 고정.
+langgraph>=1.2,<2
+# chromadb(풀버전)는 onnxruntime/tokenizers/grpcio까지 끌고 와 이미지가 커짐.
+# 임베딩은 clients/rag.py에서 OpenAI로 직접 계산해서 넘기므로 경량 HTTP 클라이언트만
+# 있으면 됨. 버전은 docker-compose.yml의 chromadb 서버 이미지 태그와 반드시 일치시킬 것.
+chromadb-client==1.0.21
 openai
+httpx
+praw
 psycopg2-binary
