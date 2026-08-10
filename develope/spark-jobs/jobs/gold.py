@@ -1,20 +1,31 @@
 """메달리언 파이프라인 4단계: gold.
 
-datalake/silver/ 를 집계해 프론트엔드/보고서가 바로 쓰기 좋은 형태로
-datalake/gold/ 에 적재한다.
+datalake/silver/ 의 정제된 후보 목록에 수집 시각(ingested_at)을 붙여
+datalake/gold/ 에 최종 스냅샷으로 적재한다. 이 스냅샷을 Airflow의 후속
+Python task가 읽어서 postgres(old_games/recent_games)로 upsert한다
+(Spark의 JDBC writer는 진짜 upsert를 지원하지 않아서, 관계형 upsert는
+Spark 밖에서 처리한다).
 
-Airflow와는 무관하지만, 필요하면 이 gold 데이터의 요약본을 Postgres(app_db)에도
-동기화해 프론트엔드가 MinIO를 거치지 않고 조회할 수 있게 한다 (선택 사항).
+POOL 환경변수(old/recent)로 silver/gold 경로 및 postgres 테이블명을 분기한다.
 """
+import os
+
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import current_timestamp
 
 
 def main() -> None:
     spark = SparkSession.builder.appName("gold").getOrCreate()
-    # TODO: spark.read.parquet("s3a://datalake/silver/...") 로 silver 데이터 로드
-    # TODO: 집계/랭킹 등 프론트엔드 조회에 맞는 형태로 가공
-    # TODO: df.write.mode("overwrite").parquet("s3a://datalake/gold/<view>/")
-    # TODO(optional): 요약 테이블을 postgres(app_db)에도 JDBC로 upsert
+
+    pool = os.environ.get("POOL", "old")
+    source = "steamspy_recent" if pool == "recent" else "steamspy_all"
+    table = "recent_games" if pool == "recent" else "old_games"
+
+    silver = spark.read.parquet(f"s3a://datalake/silver/{source}/")
+    gold = silver.withColumn("ingested_at", current_timestamp())
+
+    gold.write.mode("overwrite").parquet(f"s3a://datalake/gold/{table}/")
+
     spark.stop()
 
 

@@ -1,0 +1,4 @@
+{"ts":"2026-08-10T03:56:13.547Z","cmd":"goto","args":"http://localhost:5173/","origin":"http://localhost:5173/","durationMs":188,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T03:56:13.751Z","cmd":"viewport","args":"1440x1000","origin":"http://localhost:5173/","durationMs":3,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T03:56:14.219Z","cmd":"screenshot","args":"C:\\Users\\Administrator\\GP\\develope\\frontend\\_preview.png","origin":"http://localhost:5173/","durationMs":320,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T03:56:31.872Z","cmd":"console","args":"--errors","origin":"http://localhost:5173/","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}

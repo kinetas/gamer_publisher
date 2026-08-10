@@ -1,4 +1,9 @@
 apache-airflow-providers-cncf-kubernetes
 apache-airflow-providers-amazon
+apache-airflow-providers-postgres
 praw
 requests
+pandas
+pyarrow
+s3fs
+psycopg2-binary

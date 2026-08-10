@@ -325,6 +325,8 @@ services:
       AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
       KUBECONFIG: /opt/airflow/kube/config
       AIRFLOW_CONN_MINIO_DEFAULT: aws://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@/?endpoint_url=http%3A%2F%2Fminio%3A9000
+      # old_games/recent_games 추천 이력 테이블이 있는 app db (airflow 자체 메타 DB와는 다름).
+      AIRFLOW_CONN_POSTGRES_APP: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       STEAM_API_KEY: ${STEAM_API_KEY}
     volumes:
       - airflow-dags:/opt/airflow/dags
@@ -353,6 +355,8 @@ services:
       AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
       KUBECONFIG: /opt/airflow/kube/config
       AIRFLOW_CONN_MINIO_DEFAULT: aws://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@/?endpoint_url=http%3A%2F%2Fminio%3A9000
+      # old_games/recent_games 추천 이력 테이블이 있는 app db (airflow 자체 메타 DB와는 다름).
+      AIRFLOW_CONN_POSTGRES_APP: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       STEAM_API_KEY: ${STEAM_API_KEY}
     volumes:
       - airflow-dags:/opt/airflow/dags

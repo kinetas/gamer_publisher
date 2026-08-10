@@ -5,7 +5,12 @@ datalake/bronze/ 에 적재한다. 비즈니스 로직 정제/중복 제거는 �
 
 steam_app_list와 steamspy_all은 아직 통합하지 않고 각각 스키마 적용만 한다.
 소스 간 통합(appid 기준 join)은 다음 단계(silver.py)에서 수행한다.
+
+POOL 환경변수(old/recent)로 raw/bronze 경로를 분기한다. SteamSpy `appdetails`
+(recent pool)와 `all`(old pool) 응답은 필드 구성이 같아서 스키마는 공유한다.
 """
+import os
+
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql.types import (
@@ -57,13 +62,14 @@ def clean(spark: SparkSession, schema: StructType, raw_path: str) -> DataFrame:
 def main() -> None:
     spark = SparkSession.builder.appName("bronze").getOrCreate()
 
-    app_list = clean(spark, STEAM_APP_LIST_SCHEMA, "s3a://datalake/raw/steam/app_list/")
-    app_list.write.mode("append").parquet("s3a://datalake/bronze/steam_app_list/")
+    pool = os.environ.get("POOL", "old")
+    source = "steamspy_recent" if pool == "recent" else "steamspy_all"
 
-    steamspy_all = clean(
-        spark, STEAMSPY_ALL_SCHEMA, "s3a://datalake/raw/steam/steamspy_all/"
-    )
-    steamspy_all.write.mode("append").parquet("s3a://datalake/bronze/steamspy_all/")
+    # app_list = clean(spark, STEAM_APP_LIST_SCHEMA, "s3a://datalake/raw/steam/app_list/")
+    # app_list.write.mode("append").parquet("s3a://datalake/bronze/steam_app_list/")
+
+    steamspy = clean(spark, STEAMSPY_ALL_SCHEMA, f"s3a://datalake/raw/steam/{source}/")
+    steamspy.write.mode("append").parquet(f"s3a://datalake/bronze/{source}/")
 
     spark.stop()
 
