@@ -23,6 +23,6 @@ export interface ReportListItem {
   /** YYYY-MM-DD */
   date: string;
   title: string;
-  /** MinIO에 저장된 PDF 경로 (reports 버킷) */
-  pdfUrl: string;
+  /** 아직 PDF로 archive 안 됐으면(가장 최근 리포트는 보통 그렇다) null */
+  pdfUrl: string | null;
 }

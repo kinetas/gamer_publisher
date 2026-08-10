@@ -30,6 +30,7 @@ RECENT_NEW_SLOT_COUNT = 3
 RECENT_REPLAY_SLOT_COUNT = 2
 
 LANGGRAPH_REPORT_URL = "http://langgraph-server:8100/reports/weekly"
+FASTAPI_ARCHIVE_URL = "http://fastapi-server:8000/reports/archive-current"
 
 
 def _minio_storage_options() -> dict:
@@ -111,7 +112,7 @@ def select_weekly_report(**context) -> None:
             # (NULL이 ASC 정렬에서 뒤로 가는 postgres 기본 동작을 NULLS FIRST로 뒤집는다).
             cur.execute(
                 """
-                SELECT appid, name, ccu, positive, negative, last_recommended_at
+                SELECT appid, name, developer, publisher, ccu, positive, negative, last_recommended_at
                 FROM old_games
                 ORDER BY last_recommended_at ASC NULLS FIRST, ccu ASC
                 LIMIT %s
@@ -124,7 +125,7 @@ def select_weekly_report(**context) -> None:
             # 혹시 모를 재실행 대비로 "진짜 처음"인 것만 추가로 거른다.
             cur.execute(
                 """
-                SELECT appid, name, ccu, positive, negative
+                SELECT appid, name, developer, publisher, ccu, positive, negative
                 FROM recent_games
                 WHERE first_recommended_at IS NULL
                 ORDER BY ccu ASC
@@ -137,7 +138,7 @@ def select_weekly_report(**context) -> None:
             # 다시 추천: 새 후보 풀이 아니라 "신규 추천" 이력 자체에서 오래된 것을 재소환.
             cur.execute(
                 """
-                SELECT appid, name, ccu, positive, negative, last_recommended_at
+                SELECT appid, name, developer, publisher, ccu, positive, negative, last_recommended_at
                 FROM recent_games
                 WHERE first_recommended_at IS NOT NULL
                 ORDER BY last_recommended_at ASC NULLS FIRST
@@ -189,24 +190,45 @@ def select_weekly_report(**context) -> None:
 
 
 def notify_langgraph(**context) -> None:
-    """선정된 리포트 후보를 langgraph-server로 넘겨 실제 리포트 글 생성을 요청한다.
+    """선정된 리포트 후보를 langgraph-server로 넘겨 게임별 소개 글을 생성하고
+    weekly_reports에 저장하도록 요청한다.
 
-    langgraph-server는 아직 구현 전(스텁만 존재)이라, 실패/501 응답이어도
-    파이프라인 전체를 실패시키지 않고 로그만 남기고 넘어간다.
+    langgraph-server 쪽 문제(OPENAI_API_KEY 미설정 등)로 실패해도 이 task 때문에
+    파이프라인 전체가 죽지 않도록 로그만 남기고 넘어간다 (리포트 생성은 매주 갱신되는
+    부가 산출물이라, 이거 하나 실패했다고 postgres upsert까지 롤백할 이유는 없음).
     """
     report = context["ti"].xcom_pull(task_ids="select_weekly_report", key="weekly_report")
 
     try:
-        response = requests.post(LANGGRAPH_REPORT_URL, json=report, timeout=30)
+        response = requests.post(LANGGRAPH_REPORT_URL, json=report, timeout=120)
     except requests.RequestException as exc:
-        logger.warning("langgraph-server 호출 실패 (아직 미구현일 수 있음): %s", exc)
+        logger.warning("langgraph-server 호출 실패: %s", exc)
         return
 
-    if response.status_code == 501:
-        logger.info("langgraph-server: 리포트 생성 아직 미구현(501) - 이번 주는 skip")
-    elif response.ok:
-        logger.info("langgraph-server 리포트 생성 요청 성공: %s", response.status_code)
+    if response.ok:
+        logger.info("langgraph-server 리포트 생성 성공: %s", response.text[:300])
     else:
         logger.warning(
             "langgraph-server 예상 밖 응답: %s %s", response.status_code, response.text[:500]
+        )
+
+
+def archive_current_report() -> None:
+    """새 리포트를 만들기 전에, 지금까지 '최신'이던 리포트를 PDF로 archive하도록
+    fastapi-server에 요청한다 (recent_games_pipeline의 맨 앞 task).
+
+    헤드리스 브라우저 구동 + 페이지 로드가 걸리는 작업이라 timeout을 넉넉히 준다.
+    archive가 실패해도(예: 아직 리포트가 하나도 없음) 이번 주 파이프라인은 계속 진행한다.
+    """
+    try:
+        response = requests.post(FASTAPI_ARCHIVE_URL, timeout=120)
+    except requests.RequestException as exc:
+        logger.warning("fastapi-server 리포트 archive 호출 실패: %s", exc)
+        return
+
+    if response.ok:
+        logger.info("리포트 archive 요청 결과: %s", response.text[:300])
+    else:
+        logger.warning(
+            "리포트 archive 예상 밖 응답: %s %s", response.status_code, response.text[:500]
         )

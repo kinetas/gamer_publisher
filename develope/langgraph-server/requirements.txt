@@ -4,3 +4,4 @@ langgraph
 langchain
 chromadb
 openai
+psycopg2-binary

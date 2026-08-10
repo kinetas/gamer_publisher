@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { reportDownloadUrl } from "../api";
 import type { ReportListItem } from "../types";
 
 interface SidebarProps {
@@ -6,9 +7,8 @@ interface SidebarProps {
 }
 
 function downloadReport(report: ReportListItem | undefined) {
-  if (!report) return;
-  // TODO: pdfUrl이 실제 MinIO(reports 버킷) 경로로 채워지면 그대로 다운로드된다.
-  window.open(report.pdfUrl, "_blank");
+  if (!report?.pdfUrl) return;
+  window.open(reportDownloadUrl(report.pdfUrl), "_blank");
 }
 
 export function Sidebar({ reports }: SidebarProps) {
@@ -44,14 +44,16 @@ export function Sidebar({ reports }: SidebarProps) {
             <span style={{ fontSize: 13 }}>{report.title}</span>
             <button
               onClick={() => downloadReport(report)}
+              disabled={!report.pdfUrl}
               aria-label={`${report.title} 다운로드`}
+              title={report.pdfUrl ? undefined : "아직 PDF로 보관되지 않았습니다"}
               style={{
                 border: "1px solid var(--color-border)",
                 background: "transparent",
-                color: "var(--color-text)",
+                color: report.pdfUrl ? "var(--color-text)" : "var(--color-text-muted)",
                 padding: "4px 8px",
                 fontSize: 12,
-                cursor: "pointer",
+                cursor: report.pdfUrl ? "pointer" : "not-allowed",
               }}
             >
               ↓
@@ -84,14 +86,17 @@ export function Sidebar({ reports }: SidebarProps) {
         </select>
         <button
           onClick={() => downloadReport(reports.find((r) => r.id === selectedId))}
+          disabled={!reports.find((r) => r.id === selectedId)?.pdfUrl}
           style={{
             width: "100%",
             padding: "8px",
-            background: "var(--color-accent)",
+            background: reports.find((r) => r.id === selectedId)?.pdfUrl
+              ? "var(--color-accent)"
+              : "var(--color-placeholder)",
             border: "none",
             color: "#12151a",
             fontWeight: 600,
-            cursor: "pointer",
+            cursor: reports.find((r) => r.id === selectedId)?.pdfUrl ? "pointer" : "not-allowed",
           }}
         >
           다운로드

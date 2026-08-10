@@ -2,3 +2,11 @@
 {"ts":"2026-08-10T03:56:13.751Z","cmd":"viewport","args":"1440x1000","origin":"http://localhost:5173/","durationMs":3,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-08-10T03:56:14.219Z","cmd":"screenshot","args":"C:\\Users\\Administrator\\GP\\develope\\frontend\\_preview.png","origin":"http://localhost:5173/","durationMs":320,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-08-10T03:56:31.872Z","cmd":"console","args":"--errors","origin":"http://localhost:5173/","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T05:27:58.927Z","cmd":"goto","args":"http://localhost:3000/","origin":"http://localhost:3000/","durationMs":71,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T05:27:59.101Z","cmd":"viewport","args":"1440x1000","origin":"http://localhost:3000/","durationMs":2,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T05:27:59.492Z","cmd":"screenshot","args":"C:\\Users\\Administrator\\GP\\develope\\frontend\\_preview.png","origin":"http://localhost:3000/","durationMs":239,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T05:27:59.678Z","cmd":"console","args":"--errors","origin":"http://localhost:3000/","durationMs":2,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T05:28:12.356Z","cmd":"goto","args":"http://localhost:3000/print/1","origin":"http://localhost:3000/print/1","durationMs":17,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T05:28:12.505Z","cmd":"text","args":"","origin":"http://localhost:3000/print/1","durationMs":10,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T05:33:40.546Z","cmd":"goto","args":"http://localhost:3000/","origin":"http://localhost:3000/","durationMs":26,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-08-10T05:33:40.934Z","cmd":"screenshot","args":"C:\\Users\\Administrator\\GP\\develope\\frontend\\_final.png","origin":"http://localhost:3000/","durationMs":238,"status":"ok","hasCookies":false,"mode":"launched"}
