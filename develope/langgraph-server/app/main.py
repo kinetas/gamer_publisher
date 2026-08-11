@@ -8,6 +8,7 @@ from datetime import date
 
 from fastapi import FastAPI, HTTPException
 
+from .clients import gamemeca, rag
 from .clients.http import close_http_client, init_http_client
 from .graph import GRAPH
 from .schemas import WeeklyReportRequest
@@ -37,6 +38,21 @@ def health() -> dict:
 def graph_mermaid() -> dict:
     """디버그용: 현재 컴파일된 그래프 구조를 mermaid로 반환한다."""
     return {"mermaid": GRAPH.get_graph().draw_mermaid()}
+
+
+@app.post("/ingest/gamemeca")
+async def ingest_gamemeca() -> dict:
+    """게임메카 RSS를 가져와 game_news_refs(chromadb)에 색인한다.
+
+    Airflow에서 주기 실행한다 (dags/gamemeca_ingest_pipeline.py). 실패해도
+    다음 주기에 다시 시도하면 되므로 500 대신 상태만 돌려준다.
+    """
+    articles = await gamemeca.fetch_latest_articles()
+    if not articles:
+        return {"status": "skipped", "reason": "no articles fetched", "count": 0}
+
+    await rag.upsert_articles(articles)
+    return {"status": "ok", "count": len(articles)}
 
 
 @app.post("/reports/weekly")

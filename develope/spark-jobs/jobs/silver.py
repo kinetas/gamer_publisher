@@ -3,8 +3,11 @@
 datalake/bronze/ 의 소스별 원시 테이블들을 정제/중복제거하고 공통 스키마로 통합하여
 datalake/silver/ 에 적재한다. 이후 보고서 생성(LangGraph)과 반응 분석의 기반 데이터가 된다.
 
-POOL 환경변수(old/recent)로 bronze/silver 경로를 분기한다. 필터 로직(평점 좋음 +
-ccu 평균 이하)은 두 풀 모두 "사람들이 잘 못 찾은 좋은 게임"이라는 같은 기준이라 공유한다.
+POOL 환경변수(old/recent)로 bronze/silver 경로를 분기한다. 평점 좋음(positive >=
+negative) 필터는 두 풀 다 적용하지만, ccu 평균 이하 필터는 old pool 전용이다 -
+old는 "사람들이 잘 못 찾은 좋은 게임"(옛 명작 발굴)이 목적이라 인기 없는 쪽을
+일부러 찾지만, recent는 그냥 최근작 소개라 인기 있어도 상관없다 (오히려 인기
+많은 신작일수록 리뷰가 많아서 나중 감정분석 파이프라인 원본으로도 낫다).
 """
 import os
 
@@ -36,12 +39,14 @@ def main() -> None:
         .dropDuplicates(["appid"])
     )
 
-    # 전체 ccu 평균을 구하는 집계라 셔플이 발생한다 (파티션별 부분합 -> 최종 합산).
-    ccu_avg = steamspy.select(avg("ccu")).first()[0]
+    rated_well = steamspy.filter(col("positive") >= col("negative"))
 
-    filtered = steamspy.filter(
-        (col("ccu") <= ccu_avg) & (col("positive") >= col("negative"))
-    )
+    if pool == "recent":
+        filtered = rated_well
+    else:
+        # 전체 ccu 평균을 구하는 집계라 셔플이 발생한다 (파티션별 부분합 -> 최종 합산).
+        ccu_avg = rated_well.select(avg("ccu")).first()[0]
+        filtered = rated_well.filter(col("ccu") <= ccu_avg)
 
     # dropDuplicates가 셔플을 일으켜 파티션이 다시 늘어나는데(기본 200), 이 파이프라인의
     # 데이터 규모(수천 row)에서는 대부분 빈 파티션이 되어 MinIO(S3A) 커밋 단계에서

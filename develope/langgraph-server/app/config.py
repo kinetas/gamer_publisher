@@ -25,7 +25,10 @@ REDDIT_USER_AGENT = os.environ.get(
 
 CHROMADB_HOST = os.environ.get("CHROMADB_HOST", "chromadb")
 CHROMADB_PORT = int(os.environ.get("CHROMADB_PORT", "8000"))
-CHROMA_COLLECTION = "weekly_writeups"
+# 게임메카 등에서 모아온 실제 근거자료(제목+짧은 요약+원문 링크)를 의미 검색으로
+# 찾는 용도. "같은 게임 과거 소개글" 조회는 완전일치라 postgres로 옮겼다
+# (db.lookup_past_writeups) — chromadb는 이제 이 용도 하나만 쓴다.
+CHROMA_NEWS_COLLECTION = os.environ.get("CHROMA_NEWS_COLLECTION", "game_news_refs")
 
 # 로컬 서버로 돌릴 때는 여기 기본값이 아니라 그쪽에 실제로 받아둔(pull/load한)
 # 모델 식별자와 정확히 일치해야 한다 (예: Ollama면 "qwen2.5:3b"). env로 덮어쓴다.

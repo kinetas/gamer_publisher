@@ -27,6 +27,7 @@ from pyspark.sql import SparkSession
 
 STEAM_APP_LIST_URL = "https://api.steampowered.com/IStoreService/GetAppList/v1/"
 STEAM_SEARCH_URL = "https://store.steampowered.com/search/results/"
+STEAM_APPDETAILS_URL = "https://store.steampowered.com/api/appdetails"
 STEAMSPY_URL = "https://steamspy.com/api.php"
 
 STEAMSPY_REQUEST_INTERVAL_SECONDS = 60  # SteamSpy `all` 요청 제한 (1req/60s)
@@ -153,8 +154,43 @@ def fetch_recent_release_appids(
     return appids
 
 
+def fetch_steam_official_name(appid: int) -> dict | None:
+    """SteamSpy가 아직 못 채운 신작(appid는 있는데 name 등이 빈 문자열)을 보강한다.
+
+    SteamSpy는 커뮤니티가 스크래핑해서 채우는 데이터라 출시 2개월 시점(recent
+    pool이 노리는 창)의 신작, 특히 인지도 낮은 인디는 appid만 인식하고 name/
+    developer/publisher가 통째로 빈 채로 오는 경우가 잦다 (실측: appid는
+    맞는데 나머지 필드 전부 "" — 에러가 아니라 SteamSpy 쪽 데이터 공백).
+    Steam 공식 storefront API(키 불필요)는 출시 즉시 채워지므로 이걸로 메운다.
+    owners/ccu 같은 SteamSpy 고유 추정치는 이 API에 없어서 SteamSpy를
+    완전히 대체하진 않는다 - 딱 이름/개발사/배급사만 보강한다.
+    """
+    response = requests.get(
+        STEAM_APPDETAILS_URL,
+        params={"appids": appid, "l": "english"},
+        headers={"User-Agent": "gamer-publisher-ingest-bot/0.1"},
+        timeout=30,
+    )
+    if response.status_code != 200:
+        return None
+    payload = response.json().get(str(appid))
+    if not payload or not payload.get("success"):
+        return None
+    data = payload.get("data") or {}
+    if not data.get("name"):
+        return None
+    return {
+        "name": data["name"],
+        "developer": ", ".join(data.get("developers") or []),
+        "publisher": ", ".join(data.get("publishers") or []),
+    }
+
+
 def fetch_steamspy_appdetails(appids: list[int]) -> list[dict]:
-    """SteamSpy `appdetails`로 appid별 소유자/리뷰 추정치를 순회 조회한다."""
+    """SteamSpy `appdetails`로 appid별 소유자/리뷰 추정치를 순회 조회한다.
+
+    name이 비어있으면(위 docstring 참고) Steam 공식 API로 보강 시도한다.
+    """
     games = []
     for i, appid in enumerate(appids):
         response = requests.get(
@@ -165,6 +201,11 @@ def fetch_steamspy_appdetails(appids: list[int]) -> list[dict]:
         response.raise_for_status()
         data = response.json()
         if data and data.get("appid"):
+            if not data.get("name"):
+                fallback = fetch_steam_official_name(appid)
+                if fallback:
+                    data.update(fallback)
+                time.sleep(STEAMSPY_APPDETAILS_INTERVAL_SECONDS)
             games.append(data)
         if i < len(appids) - 1:
             time.sleep(STEAMSPY_APPDETAILS_INTERVAL_SECONDS)

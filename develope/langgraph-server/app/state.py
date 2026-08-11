@@ -41,10 +41,18 @@ class GameRef(TypedDict):
     order_index: int
 
 
+class NewsRef(TypedDict):
+    title: str
+    excerpt: str
+    link: str
+    source: str
+
+
 class Research(TypedDict, total=False):
     steam: SteamDetail | None
     reddit: RedditBuzz | None
     past_writeups: list[str]
+    news_refs: list[NewsRef]
 
 
 class Draft(TypedDict):

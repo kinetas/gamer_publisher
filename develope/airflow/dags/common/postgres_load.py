@@ -31,6 +31,7 @@ RECENT_NEW_SLOT_COUNT = 5
 RECENT_REPLAY_SLOT_COUNT = 5
 
 LANGGRAPH_REPORT_URL = "http://langgraph-server:8100/reports/weekly"
+LANGGRAPH_INGEST_GAMEMECA_URL = "http://langgraph-server:8100/ingest/gamemeca"
 FASTAPI_ARCHIVE_URL = "http://fastapi-server:8000/reports/archive-current"
 
 
@@ -111,10 +112,14 @@ def select_weekly_report(**context) -> None:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             # 옛 작품 소개: 한번도 추천 안 된 것 우선, 부족하면 오래전에 추천된 것으로 채움
             # (NULL이 ASC 정렬에서 뒤로 가는 postgres 기본 동작을 NULLS FIRST로 뒤집는다).
+            # name이 빈 게 섞여 들어오면(SteamSpy가 아직 못 채운 신작 등, ingest.py의
+            # Steam 공식 API 보강으로 대부분 막히지만 방어적으로 한 번 더 거른다)
+            # 리포트에 이름 없는 게임이 나가버리므로 여기서 확실히 배제한다.
             cur.execute(
                 """
                 SELECT appid, name, developer, publisher, ccu, positive, negative, last_recommended_at
                 FROM old_games
+                WHERE name IS NOT NULL AND name != ''
                 ORDER BY last_recommended_at ASC NULLS FIRST, ccu ASC
                 LIMIT %s
                 """,
@@ -122,32 +127,47 @@ def select_weekly_report(**context) -> None:
             )
             old_picks = cur.fetchall()
 
-            # 신규 추천: 이번 풀 자체가 시간 윈도우로 이미 새 게임만 들어오지만,
-            # 혹시 모를 재실행 대비로 "진짜 처음"인 것만 추가로 거른다.
-            cur.execute(
-                """
-                SELECT appid, name, developer, publisher, ccu, positive, negative
-                FROM recent_games
-                WHERE first_recommended_at IS NULL
-                ORDER BY ccu ASC
-                LIMIT %s
-                """,
-                (RECENT_NEW_SLOT_COUNT,),
-            )
-            recent_new_picks = cur.fetchall()
+            # 두 쿼리 다 공통으로 recent_games 풀 자체를 "1년 이내 수집된 것"으로
+            # 제한하고(1년 넘으면 old_games 영역과 개념이 겹치므로 recent 후보에서
+            # 아예 배제), 그 안에서 positive=0(리뷰 하나도 못 받은 것)인 것도 뺀다.
+            recent_pool_filter = "ingested_at >= now() - interval '1 year' AND positive != 0"
 
-            # 다시 추천: 새 후보 풀이 아니라 "신규 추천" 이력 자체에서 오래된 것을 재소환.
+            # 다시 추천: 한 번이라도 추천된 것 중, 적게 추천된 것부터 우선 (recommend_count
+            # ASC). 신규 추천을 먼저 정하지 않고 이걸 먼저 뽑는 이유는 아래 신규 추천이
+            # 이 결과와 안 겹치게 걸러야 하기 때문.
             cur.execute(
-                """
+                f"""
                 SELECT appid, name, developer, publisher, ccu, positive, negative, last_recommended_at
                 FROM recent_games
-                WHERE first_recommended_at IS NOT NULL
-                ORDER BY last_recommended_at ASC NULLS FIRST
+                WHERE first_recommended_at IS NOT NULL AND name IS NOT NULL AND name != ''
+                  AND {recent_pool_filter}
+                ORDER BY recommend_count ASC, last_recommended_at ASC NULLS FIRST
                 LIMIT %s
                 """,
                 (RECENT_REPLAY_SLOT_COUNT,),
             )
             recent_replay_picks = cur.fetchall()
+            replay_appids = {r["appid"] for r in recent_replay_picks}
+
+            # 신규 추천: 추천 안 한 것(first_recommended_at IS NULL) 우선, 모자라면
+            # 추천 적게 한 것으로 채운다 - 단 다시 추천에 이미 뽑힌 appid와는 겹치면
+            # 안 되므로, 여유 있게 뽑은 뒤 파이썬에서 걸러낸다. ccu는 여전히 인기
+            # 많은 신작 우선(DESC) - old_games와 달리 "묻힌 걸 찾는다"는 취지가 아니다.
+            cur.execute(
+                f"""
+                SELECT appid, name, developer, publisher, ccu, positive, negative,
+                       first_recommended_at, recommend_count
+                FROM recent_games
+                WHERE name IS NOT NULL AND name != '' AND {recent_pool_filter}
+                ORDER BY (first_recommended_at IS NOT NULL), recommend_count ASC, ccu DESC
+                LIMIT %s
+                """,
+                (RECENT_NEW_SLOT_COUNT + len(replay_appids) + 10,),
+            )
+            recent_new_candidates = cur.fetchall()
+            recent_new_picks = [
+                r for r in recent_new_candidates if r["appid"] not in replay_appids
+            ][:RECENT_NEW_SLOT_COUNT]
 
             old_appids = [r["appid"] for r in old_picks]
             recent_appids = [r["appid"] for r in recent_new_picks + recent_replay_picks]
@@ -216,6 +236,25 @@ def notify_langgraph(**context) -> None:
     else:
         logger.warning(
             "langgraph-server 예상 밖 응답: %s %s", response.status_code, response.text[:500]
+        )
+
+
+def ingest_gamemeca_news() -> None:
+    """게임메카 RSS를 langgraph-server가 chromadb(game_news_refs)에 색인하도록 요청한다.
+
+    실패해도(예: 게임메카 일시 장애) 다음 주기에 다시 시도하면 되므로 warning만 남긴다.
+    """
+    try:
+        response = requests.post(LANGGRAPH_INGEST_GAMEMECA_URL, timeout=60)
+    except requests.RequestException as exc:
+        logger.warning("게임메카 RSS 색인 요청 실패: %s", exc)
+        return
+
+    if response.ok:
+        logger.info("게임메카 RSS 색인 결과: %s", response.text[:300])
+    else:
+        logger.warning(
+            "게임메카 RSS 색인 예상 밖 응답: %s %s", response.status_code, response.text[:500]
         )
 
 
