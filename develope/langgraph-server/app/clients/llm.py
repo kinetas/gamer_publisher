@@ -1,18 +1,23 @@
-"""AsyncOpenAI 래퍼. OPENAI_API_KEY가 없으면 client가 None이 되고, complete()/
-embed_batch()는 그때 그냥 None을 돌려준다 — 호출부(기자/교열/RAG)가 기존
-main.py의 `openai_client is None` 자리에 있던 placeholder 대체 로직을 그대로
-쓸 수 있게 하기 위함.
+"""AsyncOpenAI 래퍼. LLM_API_KEY가 없으면(OPENAI_API_KEY도 LLM_BASE_URL도 둘 다
+없을 때) client가 None이 되고, complete()/embed_batch()는 그때 그냥 None을
+돌려준다 — 호출부(기자/교열/RAG)가 기존 main.py의 `openai_client is None` 자리에
+있던 placeholder 대체 로직을 그대로 쓸 수 있게 하기 위함.
+
+LLM_BASE_URL이 설정돼 있으면(LM Studio 등 OpenAI 호환 로컬 서버) 그쪽으로 붙는다 —
+config.py 참고.
 """
 import logging
 
 from openai import AsyncOpenAI
 
-from ..config import LLM_SEM, OPENAI_API_KEY
+from ..config import LLM_API_KEY, LLM_BASE_URL, LLM_SEM
 from ._retry import retry_async
 
 logger = logging.getLogger(__name__)
 
-client: AsyncOpenAI | None = AsyncOpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+client: AsyncOpenAI | None = (
+    AsyncOpenAI(api_key=LLM_API_KEY, base_url=LLM_BASE_URL) if LLM_API_KEY else None
+)
 
 
 async def complete(prompt: str, *, model: str, max_tokens: int = 300, label: str = "llm") -> str | None:

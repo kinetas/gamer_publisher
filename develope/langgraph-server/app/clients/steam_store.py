@@ -50,6 +50,8 @@ async def fetch_appdetails_kr(appid: int) -> SteamDetail | None:
     detail: SteamDetail = {}
     if data.get("short_description"):
         detail["short_description"] = data["short_description"]
+    if data.get("header_image"):
+        detail["image"] = data["header_image"]
     if genres:
         detail["genres"] = genres
     release = data.get("release_date") or {}

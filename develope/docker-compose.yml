@@ -114,6 +114,23 @@ services:
     environment:
       CHROMADB_HOST: chromadb
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # 아래 ollama 서비스 등 OpenAI 호환 로컬 서버를 쓰려면 .env에서 채운다
+      # (예: http://ollama:11434/v1 — 같은 backend-net 안이라 서비스명으로 붙는다).
+      # 비어있으면(기본값) 실제 OpenAI API로 붙는다.
+      LLM_BASE_URL: ${LLM_BASE_URL}
+      REPORTER_MODEL: ${REPORTER_MODEL:-gpt-4o-mini}
+      COPY_DESK_MODEL: ${COPY_DESK_MODEL:-gpt-4o-mini}
+      EDITORIAL_MODEL: ${EDITORIAL_MODEL:-gpt-4o-mini}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
+      # GPU 없는 CPU 전용 로컬 서버는 컨테이너 하나가 사실상 순차 처리라, 기본
+      # 8(OpenAI 네트워크 병목 기준)을 그대로 쓰면 서로 자원만 나눠 쓰며 다같이
+      # 느려진다. .env에서 낮게(예: 2) 잡는다 — config.py 참고.
+      LLM_CONCURRENCY: ${LLM_CONCURRENCY:-8}
+      # LangSmith 트레이싱. langchain-core가 langgraph 의존성으로 이미 깔려있어서
+      # 이 3개 env만 채우면 코드 변경 없이 그래프 실행이 자동으로 추적된다.
+      LANGCHAIN_TRACING_V2: ${LANGCHAIN_TRACING_V2:-false}
+      LANGCHAIN_API_KEY: ${LANGCHAIN_API_KEY}
+      LANGCHAIN_PROJECT: ${LANGCHAIN_PROJECT:-gamer-publisher}
       # 기자(reporter)가 게임 반응 취재에 쓰는 Reddit read-only script app 자격증명.
       # 비어 있으면(REDDIT_CLIENT_ID/SECRET 미설정) 조용히 스킵하고 그 부분 취재 없이 진행한다.
       REDDIT_CLIENT_ID: ${REDDIT_CLIENT_ID}
@@ -133,16 +150,93 @@ services:
         condition: service_started
       minio-init:
         condition: service_completed_successfully
+      ollama-init:
+        condition: service_completed_successfully
     ports:
       - "8100:8100"
     networks:
       - backend-net
       - app-net
 
+  # 로컬 CPU 전용 LLM 서버 (OpenAI 대신 쓸 때). GPU가 없어서 3B급 이하 작은
+  # 모델로만 현실적인 속도가 나온다. 실제 OpenAI로 되돌리려면 .env에서
+  # LLM_BASE_URL을 비우면 되고, 이 서비스 자체는 안 떠도 무방하다.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    environment:
+      # 이 머신은 GPU 없이 CPU repack(가중치 재배치) 단계만으로도 몇 분씩 걸려서
+      # 기본 5분 로드 타임아웃에 걸린다. 넉넉하게 늘려둔다 - 최초 1회만 느리고,
+      # 로드된 뒤에는(OLLAMA_KEEP_ALIVE 동안) 재요청이 빠르다.
+      OLLAMA_LOAD_TIMEOUT: 20m
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  # 최초 1회 채팅/임베딩 모델을 받아둔다. ollama-data 볼륨에 캐시되므로
+  # 컨테이너를 재생성해도 두 번째부터는 바로 스킵된다(이미 있으면 pull이 no-op).
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      LLM_BASE_URL: ${LLM_BASE_URL}
+      REPORTER_MODEL: ${REPORTER_MODEL:-gpt-4o-mini}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        set -e
+        if [ -n "$$LLM_BASE_URL" ]; then
+          ollama pull "$$REPORTER_MODEL"
+          ollama pull "$$EMBEDDING_MODEL"
+        else
+          echo 'LLM_BASE_URL 비어있음(OpenAI 모드) - ollama 모델 pull 스킵'
+        fi
+    networks:
+      - backend-net
+
+  # Ollama 채팅 테스트용 웹 UI. 브라우저로 http://localhost:3001 접속.
+  # frontend가 이미 3000을 쓰고 있어서 3001로 노출.
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      WEBUI_AUTH: "false"
+    volumes:
+      - open-webui-data:/app/backend/data
+    depends_on:
+      ollama:
+        condition: service_healthy
+    ports:
+      - "3001:8080"
+    networks:
+      - backend-net
+
   # 프론트엔드 기술스택 미정 -> 자리만 확보한 placeholder (frontend/Dockerfile 참고).
   # backend-net에는 올리지 않는다: 데이터는 항상 fastapi-server(app-net)를 거쳐서만 접근.
   frontend:
     build: ./frontend
+    # nginx가 proxy_pass http://fastapi-server:8000/ 를 시작 시점에 한 번 resolve하는데,
+    # depends_on 없이 동시에 뜨면 fastapi-server 컨테이너가 아직 네트워크에 안 붙어있어
+    # "host not found in upstream"으로 즉시 죽는다 (재시작 정책도 없어서 그대로 exited).
+    depends_on:
+      fastapi-server:
+        condition: service_started
+    restart: unless-stopped
     ports:
       - "3000:80"
     networks:
@@ -399,6 +493,8 @@ volumes:
   postgres-data:
   chromadb-data:
   minio-data:
+  ollama-data:
+  open-webui-data:
   k3s-data:
   k3s-kubeconfig:
   kube-config:

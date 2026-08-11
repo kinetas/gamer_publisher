@@ -21,6 +21,7 @@ class SteamDetail(TypedDict, total=False):
     genres: list[str]
     release_date: str
     is_free: bool
+    image: str  # Steam appdetails의 header_image URL. 없으면 프론트가 placeholder를 그린다.
 
 
 class RedditBuzz(TypedDict, total=False):
@@ -51,6 +52,8 @@ class Draft(TypedDict):
     research: Research
     draft_text: str
     error: str | None
+    retry_count: int
+    started_at: float
 
 
 class CheckedDraft(TypedDict):
@@ -58,6 +61,7 @@ class CheckedDraft(TypedDict):
     final_text: str
     corrections: list[str]
     embed_doc: str
+    image: str  # research.steam.image를 그대로 실어나른다 (없으면 "").
 
 
 # --- Send payload 타입 (Send로 도달하는 노드는 전역 state가 아니라 이 payload만 본다) ---
@@ -71,11 +75,18 @@ class DeskState(TypedDict):
     started_at: float
 
 
-class ReporterState(TypedDict):
+class ReporterState(TypedDict, total=False):
     game: GameRef
     desk_name: str
     report_date: str
     started_at: float
+    # 교열부 반려 -> 재작성 경로에서만 쓰는 필드. 최초 호출(desk가 보낸 Send)에는
+    # 없고, reporter.py가 .get()으로 기본값 처리한다.
+    is_revision: bool
+    retry_count: int
+    revision_feedback: str
+    previous_draft_text: str
+    research: Research  # 있으면 재취재(Steam/Reddit/RAG) 없이 그대로 재사용
 
 
 class CopyState(TypedDict):

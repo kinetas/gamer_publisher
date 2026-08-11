@@ -32,6 +32,7 @@ def _game_dict(checked_item: CheckedDraft) -> dict:
         "negative": game.get("negative") or 0,
         "ccu": game.get("ccu") or 0,
         "description": checked_item["final_text"],
+        "image": checked_item.get("image") or "",
     }
 
 

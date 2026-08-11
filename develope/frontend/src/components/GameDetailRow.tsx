@@ -9,7 +9,7 @@ export function GameDetailRow({ game }: GameDetailRowProps) {
   return (
     <div style={{ display: "flex", gap: 20, marginBottom: 24 }}>
       <div style={{ width: 140, flexShrink: 0, aspectRatio: "3 / 4" }}>
-        <PlaceholderImage />
+        <PlaceholderImage src={game.image} alt={game.name} />
       </div>
       <div>
         <h4 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 700 }}>{game.name}</h4>

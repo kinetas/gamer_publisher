@@ -11,7 +11,7 @@ _CATEGORY_LABEL = {
 
 
 def placeholder_description(name: str) -> str:
-    return f"{name} 소개 글 (OPENAI_API_KEY 미설정으로 자동 생성 안 됨)"
+    return f"{name} 소개 글 (LLM 미설정 또는 호출 실패로 자동 생성 안 됨)"
 
 
 def reporter_prompt(game: GameRef, research: Research) -> str:
@@ -49,11 +49,50 @@ def reporter_prompt(game: GameRef, research: Research) -> str:
     return "\n".join(lines)
 
 
+def reporter_revision_prompt(game: GameRef, research: Research, previous_text: str, feedback: str) -> str:
+    """교열부가 반려한 초고를 재작성할 때 쓰는 프롬프트. Steam/Reddit/RAG는
+    재취재하지 않고 원래 취재 자료를 그대로 재사용한다(reporter.py 참고).
+    """
+    lines = [
+        "다음은 게임 소개 초고인데, 교열 데스크가 근거 부족/사실 왜곡 문제로 반려했다.",
+        "아래 반려 사유를 반영해서 2~3문장으로 처음부터 다시 써줘.",
+        "제공된 자료에 없는 내용은 쓰지 말고, 자료가 부족하면 단정적 표현 대신",
+        "절제된 표현을 써라.",
+        f"반려 사유: {feedback}",
+        f"이전 초고: {previous_text}",
+        "",
+        f"이름: {game['name']}",
+        f"개발사: {game.get('developer') or '알 수 없음'}",
+    ]
+
+    steam = research.get("steam")
+    if steam:
+        if steam.get("genres"):
+            lines.append(f"장르: {', '.join(steam['genres'])}")
+        if steam.get("short_description"):
+            lines.append(f"공식 소개(참고용): {steam['short_description']}")
+
+    reddit = research.get("reddit")
+    if reddit and (reddit.get("titles") or reddit.get("comments")):
+        lines.append("Reddit 취재자료:")
+        for title in reddit.get("titles", [])[:3]:
+            lines.append(f"- 게시글: {title}")
+        for comment in reddit.get("comments", [])[:3]:
+            lines.append(f"- 댓글: {comment}")
+
+    return "\n".join(lines)
+
+
 def copy_desk_prompt(draft_text: str, research: Research) -> str:
     lines = [
-        "다음은 게임 소개 초고야. 아래 Reddit/Steam 취재자료로 뒷받침되지 않는",
-        "단정적 주장만 완화하거나 삭제해줘. 새로운 정보를 추가하지 말고,",
-        "문장 수와 말투는 그대로 유지해줘. 문제가 없으면 원문을 그대로 돌려줘.",
+        "다음은 게임 소개 초고야. 아래 Reddit/Steam 취재자료를 기준으로 점검해줘.",
+        "",
+        "- 제공된 자료와 무관하게 사실을 지어냈거나 문장 단위 수정으로는 못 고칠",
+        "  정도로 근거가 없으면: 첫 줄에 정확히 `REWRITE_NEEDED: <반려 사유 한 문장>`만",
+        "  쓰고 그 외에는 아무것도 쓰지 마.",
+        "- 그 정도가 아니면: 근거로 뒷받침되지 않는 단정적 주장만 완화하거나",
+        "  삭제한 최종 문구를 그대로 출력해. 새로운 정보를 추가하지 말고,",
+        "  문장 수와 말투는 그대로 유지해줘. 문제가 없으면 원문을 그대로 돌려줘.",
         "",
         f"초고: {draft_text}",
     ]

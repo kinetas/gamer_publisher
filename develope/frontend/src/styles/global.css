@@ -57,3 +57,23 @@ a {
     transparent 12px
   );
 }
+
+/* PrintReport(/print/:id)의 window.print() 폴백용 - archive-current의
+   Playwright page.pdf({ print_background: true })와 달리 브라우저 기본
+   인쇄는 배경을 날리고 흰 배경에 옅은 글자색을 그대로 써서 거의 안 보이게
+   만든다. print-color-adjust로 다크 테마를 그대로 강제하고, PageSheet
+   단위로 페이지를 나눈다. */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .page-sheet {
+    break-after: page;
+  }
+
+  .page-sheet:last-child {
+    break-after: auto;
+  }
+}

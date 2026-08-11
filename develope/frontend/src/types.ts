@@ -8,6 +8,8 @@ export interface GameEntry {
   ccu: number;
   /** langgraph-server가 생성할 추천 사유/설명 문구. 지금은 mock 텍스트. */
   description: string;
+  /** Steam header_image URL. 취재 실패 등으로 없으면 빈 문자열. */
+  image: string;
 }
 
 export interface WeeklyReport {

@@ -1,4 +1,8 @@
 .env
+.env.studio
 frontend/node_modules
 __pycache__/
 *.pyc
+langgraph-server/.venv_check3/
+langgraph-server/.langgraph_api/
+langgraph-server/studio.log

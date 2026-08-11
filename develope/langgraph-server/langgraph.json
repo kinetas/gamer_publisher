@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "gamer_publisher_report": "app.graph:GRAPH"
+  },
+  "env": ".env.studio"
+}

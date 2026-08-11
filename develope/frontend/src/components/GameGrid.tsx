@@ -32,7 +32,7 @@ export function GameGrid({ title, games }: GameGridProps) {
         {games.map((game) => (
           <div key={game.appid}>
             <div style={{ aspectRatio: "3 / 4" }}>
-              <PlaceholderImage />
+              <PlaceholderImage src={game.image} alt={game.name} />
             </div>
             <p
               style={{

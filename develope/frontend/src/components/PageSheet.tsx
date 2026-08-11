@@ -10,6 +10,7 @@ interface PageSheetProps {
 export function PageSheet({ pageLabel, children }: PageSheetProps) {
   return (
     <section
+      className="page-sheet"
       style={{
         width: "var(--page-width)",
         maxWidth: "100%",

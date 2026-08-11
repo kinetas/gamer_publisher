@@ -7,8 +7,14 @@ interface SidebarProps {
 }
 
 function downloadReport(report: ReportListItem | undefined) {
-  if (!report?.pdfUrl) return;
-  window.open(reportDownloadUrl(report.pdfUrl), "_blank");
+  if (!report) return;
+  if (report.pdfUrl) {
+    window.open(reportDownloadUrl(report.pdfUrl), "_blank");
+    return;
+  }
+  // 아직 MinIO에 보관된 PDF가 없는 리포트(대개 이번 주 최신 리포트) - 현재
+  // 페이지 내용을 그대로 브라우저 인쇄 다이얼로그로 띄워서 받게 한다.
+  window.open(`/print/${report.id}?print=1`, "_blank");
 }
 
 export function Sidebar({ reports }: SidebarProps) {
@@ -44,16 +50,15 @@ export function Sidebar({ reports }: SidebarProps) {
             <span style={{ fontSize: 13 }}>{report.title}</span>
             <button
               onClick={() => downloadReport(report)}
-              disabled={!report.pdfUrl}
               aria-label={`${report.title} 다운로드`}
-              title={report.pdfUrl ? undefined : "아직 PDF로 보관되지 않았습니다"}
+              title={report.pdfUrl ? undefined : "아직 PDF로 보관되지 않아 현재 페이지를 인쇄합니다"}
               style={{
                 border: "1px solid var(--color-border)",
                 background: "transparent",
-                color: report.pdfUrl ? "var(--color-text)" : "var(--color-text-muted)",
+                color: "var(--color-text)",
                 padding: "4px 8px",
                 fontSize: 12,
-                cursor: report.pdfUrl ? "pointer" : "not-allowed",
+                cursor: "pointer",
               }}
             >
               ↓
@@ -86,17 +91,19 @@ export function Sidebar({ reports }: SidebarProps) {
         </select>
         <button
           onClick={() => downloadReport(reports.find((r) => r.id === selectedId))}
-          disabled={!reports.find((r) => r.id === selectedId)?.pdfUrl}
+          title={
+            reports.find((r) => r.id === selectedId)?.pdfUrl
+              ? undefined
+              : "아직 PDF로 보관되지 않아 현재 페이지를 인쇄합니다"
+          }
           style={{
             width: "100%",
             padding: "8px",
-            background: reports.find((r) => r.id === selectedId)?.pdfUrl
-              ? "var(--color-accent)"
-              : "var(--color-placeholder)",
+            background: "var(--color-accent)",
             border: "none",
             color: "#12151a",
             fontWeight: 600,
-            cursor: reports.find((r) => r.id === selectedId)?.pdfUrl ? "pointer" : "not-allowed",
+            cursor: "pointer",
           }}
         >
           다운로드
