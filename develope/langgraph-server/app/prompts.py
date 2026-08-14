@@ -32,10 +32,39 @@ def _news_refs_lines(research: Research) -> list[str]:
     return lines
 
 
+def _tone_guidance(positive: int | None) -> list[str]:
+    """리뷰 수 대비 과장된 톤으로 쓰지 않도록 하는 가드.
+
+    사용자 피드백: 긍정 리뷰가 몇백 개 수준인 게임을 마치 유명 대작인 것처럼
+    화려하게 소개하는 문제가 있었음 — positive < 1000이면 "숨겨진 맛집" 톤으로
+    담백하게, positive < 100은 애초에 select_weekly_report(postgres_load.py)
+    단계에서 후보군에서 제외된다.
+    """
+    if positive is None or positive >= 1000:
+        return []
+    return [
+        f"- 이 게임은 긍정 리뷰가 {positive}개로 아직 많지 않다. 마치 유명 대작인",
+        "  것처럼 과장하지 말고, '입소문은 안 났지만 괜찮은 숨은 게임'을 소개하는",
+        "  '숨겨진 맛집' 톤으로 담백하게 써라. '엄청난', '대박', '화제의' 같은",
+        "  과장된 수식어는 쓰지 마라.",
+    ]
+
+
 def reporter_prompt(game: GameRef, research: Research) -> str:
     lines = [
-        "다음 스팀 게임을 한국어로 2~3문장 소개하는 글을 써줘.",
+        f"다음 스팀 게임 '{game['name']}'을(를) 한국어로 2~3문장 소개하는 글을 써줘.",
         "게임 리포트 큐레이터 말투로, 과장 없이 담백하게.",
+        "",
+        "반드시 지킬 것:",
+        f"- 오직 '{game['name']}' 이 게임 하나에 대해서만 써라. 아래 취재자료에",
+        "  다른 게임 이름, 이벤트, 캐릭터, 할인/쿠폰 소식이 섞여 있어도 그건 이",
+        f"  게임과 무관한 자료다 — 절대 가져다 쓰지 마라. '{game['name']}'과",
+        "  직접 관련 없는 내용이면 그 자료 자체를 무시해라.",
+        "- 글에는 게임명, 장르, 게임 소개(플레이 방식/특징), 평가(리뷰 반응)",
+        "  네 가지 요소만 자연스럽게 녹여 써라. 그 외 잡다한 정보는 넣지 마라.",
+        "- 아래 제공된 사실(장르/리뷰 수/ccu/공식 소개 등) 밖의 내용은 지어내지 마라.",
+        *_tone_guidance(game.get("positive")),
+        "",
         f"카테고리: {_CATEGORY_LABEL.get(game['category'], game['category'])}",
         f"이름: {game['name']}",
         f"개발사: {game.get('developer') or '알 수 없음'}",
@@ -78,6 +107,9 @@ def reporter_revision_prompt(game: GameRef, research: Research, previous_text: s
         "아래 반려 사유를 반영해서 2~3문장으로 처음부터 다시 써줘.",
         "제공된 자료에 없는 내용은 쓰지 말고, 자료가 부족하면 단정적 표현 대신",
         "절제된 표현을 써라.",
+        f"오직 '{game['name']}' 이 게임에 대해서만 써라 — 취재자료에 다른 게임/이벤트",
+        "얘기가 섞여 있어도 그건 무관한 자료이니 절대 가져다 쓰지 마라.",
+        *_tone_guidance(game.get("positive")),
         f"반려 사유: {feedback}",
         f"이전 초고: {previous_text}",
         "",
@@ -105,21 +137,42 @@ def reporter_revision_prompt(game: GameRef, research: Research, previous_text: s
     return "\n".join(lines)
 
 
-def copy_desk_prompt(draft_text: str, research: Research) -> str:
+def copy_desk_prompt(draft_text: str, game: GameRef, research: Research) -> str:
+    game_name = game["name"]
+    positive = game.get("positive")
     lines = [
         "다음은 게임 소개 초고야. 아래 Reddit/Steam/관련기사 취재자료를 기준으로 점검해줘.",
         "",
-        "- 제공된 자료와 무관하게 사실을 지어냈거나 문장 단위 수정으로는 못 고칠",
-        "  정도로 근거가 없으면: 첫 줄에 정확히 `REWRITE_NEEDED: <반려 사유 한 문장>`만",
-        "  쓰고 그 외에는 아무것도 쓰지 마.",
-        "- 그 정도가 아니면: 근거로 뒷받침되지 않는 단정적 주장만 완화하거나",
-        "  삭제한 최종 문구를 그대로 출력해. 새로운 정보를 추가하지 말고,",
-        "  문장 수와 말투는 그대로 유지해줘. 문제가 없으면 원문을 그대로 돌려줘.",
-        "- 마지막 줄이 `출처: <링크>` 형식이면 그건 관련기사 인용 표시니까 절대",
-        "  지우거나 고치지 말고 그대로 유지해라.",
-        "",
-        f"초고: {draft_text}",
+        f"- 가장 먼저 확인할 것: 이 초고가 정말 '{game_name}'이라는 이 게임 하나에",
+        "  대한 설명인지 봐라. 다른 게임 이름/캐릭터/이벤트가 섞여 있거나, 이",
+        "  게임과 무관한 내용(예: 취재자료에 있던 다른 게임 소식)이 그대로 들어가",
+        "  있으면 그건 사실 왜곡이다 -> 아래 REWRITE_NEEDED 처리.",
     ]
+    if positive is not None and positive < 1000:
+        lines.append(
+            f"- 이 게임은 긍정 리뷰가 {positive}개뿐이다. 그런데 초고가 '엄청난',"
+        )
+        lines.append(
+            "  '대박', '화제의', '명작' 같은 표현으로 유명 대작인 것처럼 과장하고"
+        )
+        lines.append(
+            "  있으면 리뷰 수와 안 맞는 과장이다 -> 아래 REWRITE_NEEDED 처리."
+        )
+    lines.extend(
+        [
+            "- 그 외에 제공된 자료와 무관하게 사실을 지어냈거나 문장 단위 수정으로는",
+            "  못 고칠 정도로 근거가 없으면: 첫 줄에 정확히",
+            "  `REWRITE_NEEDED: <반려 사유 한 문장>`만 쓰고 그 외에는 아무것도 쓰지 마.",
+            "- 그 정도가 아니면: 근거로 뒷받침되지 않는 단정적 주장만 완화하거나",
+            "  삭제한 최종 문구를 그대로 출력해. 새로운 정보를 추가하지 말고,",
+            "  문장 수와 말투는 그대로 유지해줘. 문제가 없으면 원문을 그대로 돌려줘.",
+            "- 마지막 줄이 `출처: <링크>` 형식이면 그건 관련기사 인용 표시니까 절대",
+            "  지우거나 고치지 말고 그대로 유지해라.",
+            "",
+            f"게임명: {game_name}",
+            f"초고: {draft_text}",
+        ]
+    )
 
     lines.extend(_news_refs_lines(research))
 

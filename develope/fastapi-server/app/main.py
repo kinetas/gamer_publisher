@@ -136,6 +136,12 @@ async def archive_current_report() -> dict:
         browser = await playwright.chromium.launch()
         page = await browser.new_page()
         await page.goto(f"{FRONTEND_BASE_URL}/print/{report_id}", wait_until="networkidle")
+        # page.pdf()는 기본적으로 print 미디어를 자동 적용하지 않는다(screen 그대로
+        # 렌더링) — 이걸 안 하면 global.css의 @media print 블록(PageSheet 페이지
+        # 나눔 break-after: page 등)이 통째로 무시돼서, 사용자가 직접 브라우저로
+        # 인쇄(window.print() — 항상 print 미디어 적용됨)한 결과와 페이지 구성이
+        # 달라진다.
+        await page.emulate_media(media="print")
         pdf_bytes = await page.pdf(format="A4", print_background=True)
         await browser.close()
 

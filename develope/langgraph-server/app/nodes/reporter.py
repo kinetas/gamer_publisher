@@ -49,7 +49,7 @@ async def reporter(payload: ReporterState) -> dict | Command[Literal["copy_edito
         # 관련 기사가 더 잘 걸린다.
         genres = (steam_detail or {}).get("genres") or []
         news_query = " ".join([game["name"], *genres])
-        news_refs = await rag.search_relevant_articles(news_query)
+        news_refs = await rag.search_relevant_articles(news_query, game_name=game["name"])
         research = {
             "steam": steam_detail,
             "reddit": reddit_buzz,
@@ -93,8 +93,16 @@ async def reporter(payload: ReporterState) -> dict | Command[Literal["copy_edito
 
     if is_revision:
         # barrier(copy_desk)를 우회해서 이 게임 하나만 다시 교열로 보낸다.
+        # drafts는 여기서 절대 건드리면 안 된다 - copy_desk/dispatch_copy_editors만
+        # 읽는 채널인데(layout_desk는 checked만 봄), 여기서도 계속 add해버리면
+        # drafts가 재작성마다 계속 불어나고, 그때마다 copy_desk가 다시 트리거되어
+        # dispatch_copy_editors가 "이미 끝난 원본 draft(retry_count=0)"까지
+        # 포함해서 전부 다시 fan-out한다 - 그 원본은 retry_count가 그대로 0이라
+        # 몇 번이고 다시 반려될 수 있어서 사실상 무한루프(checked가 계속 불어나며
+        # 같은 게임이 수십 번 저장됨)로 이어졌다. 이 Send payload 자체가 copy_editor가
+        # 필요로 하는 draft 전체를 담고 있으므로 drafts 채널에 또 넣을 이유가 없다.
         return Command(
-            update={"drafts": [draft], "logs": [log_line]},
+            update={"logs": [log_line]},
             goto=[Send("copy_editor", {"draft": draft})],
         )
 

@@ -3,10 +3,9 @@
 archive_current_report >> ingest >> bronze >> silver >> gold >> load_to_postgres
     >> select_weekly_report >> notify_langgraph
 
-Steam Store 검색으로 "2개월 전 ~ 2개월 전+1주"에 출시된 게임의 appid를 뽑고,
-SteamSpy appdetails로 지표를 채워 ccu 낮고 평점 좋은 최근작을 발굴한다. 이 창은
-매주 실행 시점 기준으로 한 칸씩 뒤로 밀리므로, 별도 dedup 없이도 주차별로
-겹치지 않는 게임이 자연스럽게 나온다 (ingest.py 참고).
+Steam Store 검색(평가 좋은 순)으로 "출시일 기준 3개월 전 ~ 오늘"에 출시된
+게임의 appid를 뽑고(DLC/사운드트랙/데모 등은 걸러냄), SteamSpy appdetails로
+지표를 채워 평점 좋은 최근작을 발굴한다(ingest.py 참고).
 
 맨 앞의 archive_current_report는 이번 주 새 리포트로 덮어쓰기 전에, 지금까지
 '최신'이었던 리포트를 fastapi-server가 헤드리스 브라우저로 프론트 /print/:id를

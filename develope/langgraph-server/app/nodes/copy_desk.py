@@ -51,12 +51,41 @@ async def copy_desk(state: ReportState) -> dict:
 
 def dispatch_copy_editors(state: ReportState) -> list[Send]:
     """최초 배치만 여기서 fan-out한다. 재작성분은 reporter가 Command로 이 barrier를
-    우회해서 copy_editor에게 직접 보낸다 (docstring 참고)."""
-    return [Send("copy_editor", {"draft": d}) for d in state.get("drafts") or []]
+    우회해서 copy_editor에게 직접 보낸다 (docstring 참고).
+
+    이미 checked에 들어간(=copy_editor를 이미 거친) appid는 다시 안 보낸다.
+    이 함수는 정상적으로는 copy_desk barrier당 정확히 한 번만 불려야 하지만,
+    reporter->copy_desk 고정 edge가 예상과 달리 재작성 경로에서도 다시 걸려
+    이 함수가 중복 호출되는 경우를 실제로 겪었다 - 그때 이 가드가 없으면
+    이미 끝난 원본 draft(retry_count=0)가 매번 다시 fan-out되어, 불안정한
+    로컬 LLM이 계속 REWRITE_NEEDED를 내는 한 사실상 무한루프(같은 게임이
+    수십 번 재작성/재검수되며 checked도 계속 불어남)로 이어진다. "몇 번
+    불리는지"를 정확히 막기보다 "몇 번 불려도 같은 게임을 두 번 처리하지
+    않는다"가 훨씬 견고한 방어다.
+    """
+    already_checked = {c["game"]["appid"] for c in (state.get("checked") or [])}
+    return [
+        Send("copy_editor", {"draft": d})
+        for d in state.get("drafts") or []
+        if d["game"]["appid"] not in already_checked
+    ]
 
 
 def _is_rewrite_needed(result_text: str | None) -> bool:
     return bool(result_text) and result_text.strip().upper().startswith(_REWRITE_MARKER)
+
+
+def _is_malformed(result_text: str | None) -> bool:
+    """지시사항(첫 줄에 정확히 REWRITE_NEEDED만 쓰거나, 아예 안 쓰거나)을 못 지키고
+    본문 뒤에 REWRITE_NEEDED 마커를 덧붙이는 등 형식이 깨진 응답을 걸러낸다.
+    로컬 소형 모델(qwen2.5:3b 등)이 실제로 이렇게 마커를 본문에 흘리는 경우가
+    있어서, 이런 응답을 그대로 final_text로 쓰면 사용자에게 내부 지시문이
+    그대로 노출된다. 첫 줄에 마커가 있는 정상 케이스(_is_rewrite_needed)는
+    여기서 안 걸린다.
+    """
+    return bool(result_text) and _REWRITE_MARKER in result_text.upper() and not _is_rewrite_needed(
+        result_text
+    )
 
 
 async def copy_editor(payload: CopyState) -> dict | Command[Literal["reporter"]]:
@@ -65,7 +94,7 @@ async def copy_editor(payload: CopyState) -> dict | Command[Literal["reporter"]]
     research = draft["research"]
     retry_count = draft.get("retry_count", 0)
 
-    prompt = prompts.copy_desk_prompt(draft["draft_text"], research)
+    prompt = prompts.copy_desk_prompt(draft["draft_text"], game, research)
     result_text = await llm.complete(
         prompt, model=COPY_DESK_MODEL, label=f"copy_editor({game['appid']})"
     )
@@ -100,6 +129,10 @@ async def copy_editor(payload: CopyState) -> dict | Command[Literal["reporter"]]
         final_text = draft["draft_text"]
     elif _is_rewrite_needed(result_text):
         # 재작성 상한에 걸려 더 반려할 수 없다 -> 강제 통과, 초고를 그대로 쓴다.
+        final_text = draft["draft_text"]
+    elif _is_malformed(result_text):
+        # 형식이 깨진 응답(본문 뒤에 REWRITE_NEEDED가 새어 들어간 경우 등)을
+        # 그대로 쓰면 내부 지시문이 사용자에게 노출된다 - 안전하게 초고로 폴백.
         final_text = draft["draft_text"]
     else:
         final_text = result_text

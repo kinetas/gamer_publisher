@@ -44,6 +44,16 @@ def _game_dict(checked_item: CheckedDraft) -> dict:
 
 async def layout_desk(state: ReportState) -> dict:
     checked = state.get("checked") or []
+    # checked는 병렬 브랜치가 operator.add로 누적하는 채널이라, copy_editor가
+    # (반려/재작성 루프의 barrier 재실행 등으로) 같은 게임을 두 번 이상 처리하면
+    # appid가 중복으로 쌓일 수 있다. 여기서 appid당 마지막 항목만 남긴다 -
+    # "몇 번 처리됐는지"보다 "최종 결과에 중복이 없어야 한다"가 우선이라, 원인을
+    # 완전히 막기보다 최종 취합 단계에서 확실히 걸러낸다.
+    deduped: dict[int, CheckedDraft] = {}
+    for item in checked:
+        deduped[item["game"]["appid"]] = item
+    checked = list(deduped.values())
+
     by_category: dict[str, list[CheckedDraft]] = {c: [] for c in _CATEGORIES}
     for item in checked:
         by_category.setdefault(item["game"]["category"], []).append(item)

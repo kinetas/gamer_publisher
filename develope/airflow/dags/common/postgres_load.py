@@ -67,6 +67,12 @@ def load_gold_to_postgres(pool: str) -> None:
         for row in df[GOLD_COLUMNS].itertuples(index=False, name=None)
     ]
 
+    if not rows:
+        # recent pool은 이번 실행에서 RECENT_MIN_POSITIVE_REVIEWS(ingest.py) 기준을
+        # 통과한 후보가 0개일 수 있다 - 정상 상황이니 upsert만 스킵하고 넘어간다.
+        logger.info("%s: 이번 gold 스냅샷에 upsert할 행 없음, 스킵", table)
+        return
+
     conn = PostgresHook(postgres_conn_id="postgres_app").get_conn()
     try:
         with conn.cursor() as cur:
@@ -142,7 +148,11 @@ def select_weekly_report(**context) -> None:
             # 전부 미리 제외한다 — appid 전역 유일성상 이론적으로만 가능한 케이스지만
             # 방어적으로 막아둔다.
             old_appids = {r["appid"] for r in old_picks}
-            recent_pool_filter = "ingested_at >= now() - interval '1 year' AND positive != 0"
+            # positive < 100은 후보에서 아예 제외한다 - 리뷰가 그 정도로 적으면
+            # "추천"이라는 형식 자체가 안 맞는다는 사용자 피드백. 100~999는 후보에는
+            # 들어가되 langgraph-server 쪽(prompts.py _tone_guidance/copy_desk_prompt)이
+            # "숨겨진 맛집" 톤으로 담백하게 쓰고, 과장하면 교열 단계에서 반려한다.
+            recent_pool_filter = "ingested_at >= now() - interval '1 year' AND positive >= 100"
 
             # 다시 추천: recommend_count > 1(두 번 이상 추천된 적 있는 것)을 주 후보로
             # 삼아 적게 추천된 것부터 우선(ASC)으로 5개를 채운다. 그것만으로 5개가

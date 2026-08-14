@@ -4,10 +4,11 @@ POOL 환경변수로 두 가지 모드로 동작한다 (old_games_pipeline / rec
 
 - POOL=old (기본값): SteamSpy `all` API를 페이지네이션으로 순회해 게임별
   소유자/리뷰 추정치를 raw로 적재한다 (옛 명작 발굴용, 월간 배치).
-- POOL=recent: Steam Store 검색으로 "2개월 전 ~ 2개월 전+1주" 구간에 출시된
-  게임의 appid를 뽑고, 그 appid들로 SteamSpy `appdetails`를 개별 조회해 raw로
-  적재한다 (최근작 발굴용, 주간 배치). 창이 매주 한 칸씩 뒤로 밀리기 때문에
-  주차별로 겹치지 않는 게임이 자연스럽게 나온다.
+- POOL=recent: Steam Store 검색(평가 좋은 순)으로 "출시일 기준 3개월 전 ~ 오늘"
+  구간에 출시된 게임 중 DLC/사운드트랙/데모 등을 뺀 진짜 게임(type=="game")의
+  appid를 뽑고, 그 appid들로 SteamSpy `appdetails`를 개별 조회해 raw로
+  적재한다 (최근작 발굴용, 주간 배치). 창이 매주 조금씩 밀리므로, 재실행은
+  새 후보 발굴과 이미 아는 appid들의 positive/negative/ccu 갱신을 겸한다.
 
 가공 없이 그대로 MinIO datalake 버킷의 raw 영역에 적재한다 (착륙 영역).
 이후 단계(bronze.py)가 이 raw 데이터를 읽어 스키마 적용/정제를 시작한다.
@@ -20,7 +21,7 @@ import json
 import os
 import re
 import time
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 import requests
 from pyspark.sql import SparkSession
@@ -36,15 +37,38 @@ STEAMSPY_REQUEST_INTERVAL_SECONDS = 60  # SteamSpy `all` 요청 제한 (1req/60s
 STEAMSPY_APPDETAILS_INTERVAL_SECONDS = 1
 STEAM_APP_LIST_MAX_RESULTS = 50000  # IStoreService/GetAppList 페이지당 최대값
 
-# 최근작 발굴 윈도우: 리뷰가 어느 정도 쌓이도록 "갓 나온 신작"은 제외하고,
-# 출시 2개월 시점을 기준으로 1주일 폭만 본다. 파이프라인이 매주 실행되면서
-# 이 창(from~to)이 달력 기준으로 한 칸씩 뒤로 밀리기 때문에, 주차별로
-# 겹치지 않는 게임 목록이 자연스럽게 나온다 (recent_games 테이블의 dedup은
-# 그래서 필수가 아니라 같은 주 재실행 시를 위한 안전장치).
-RECENT_WINDOW_OFFSET_DAYS = 60
-RECENT_WINDOW_SPAN_DAYS = 7
+# 최근작 발굴 창: 출시일 기준 "3개월 전부터 오늘까지"를 매번 훑는다. 1개월로
+# 해봤더니(실측) sort_by=Reviews_DESC 조합에서 밀도가 너무 낮았다 - 이 정렬은
+# 이미 평판이 쌓인 게임 위주라, 출시 30일 이내 게임은 아무리 좋아도 그 정도
+# 평판을 쌓을 시간이 없어서 상위권에 잘 안 나온다. 몇 개월 정도는 지나야
+# Reviews_DESC 앞쪽에 등장할 시간이 생긴다.
+#
+# 실측으로 확인한 중요한 제약: store.steampowered.com/search/results 의
+# released=Custom&from=&to= 날짜 필터는 sort_by 값과 무관하게 완전히 무시된다 -
+# 뭘 넘기든 그냥 "지금 인기/최신 목록"만 반환한다(PUBG/Palworld 같은 상시
+# 인기작이나, 요청한 과거 구간과 무관하게 항상 오늘 날짜 게임만 나오는 걸
+# 직접 확인함). 그래서 이 API로는 서버 쪽 날짜 필터링이 불가능하다.
+#
+# 또한 sort_by=Released_DESC(출시일순)로 최신순 훑기도 시도해봤는데, Steam이
+# 하루에도 저품질 신작을 수백 건씩 등록하는 탓에 최신 100개를 확인해도 전부
+# 리뷰 0개였다(실측). 그래서 discover_recent_game_appids는 sort_by=Reviews_DESC
+# (평가 좋은 순)로 후보를 받고, 후보마다 Steam 공식 appdetails로 실제 출시일을
+# 직접 확인해 이 창 안에 있는 것만 남긴다 - "일단 평가 좋은 순으로 넓게 긁고
+# 하나하나 실제 값으로 거른다". 1년처럼 넓은 창에서는 이 방식으로도 몇백 번째
+# 안에 리뷰 있는 최근작이 나왔지만(실측), 창을 1개월로 좁히면 그 안에서 조건에
+# 맞는 후보를 만날 확률이 낮아지므로 STEAM_SEARCH_MAX_PAGES를 넉넉히 잡는다.
+RECENT_WINDOW_SPAN_DAYS = 90
+# 긍정 리뷰 100개 미만은 postgres(recent_games)에 저장조차 하지 않는다 -
+# select_weekly_report(airflow/dags/common/postgres_load.py)가 어차피 이
+# 기준으로 후보에서 뺀다면, gold까지 다 거쳐서 postgres에 넣어봤자 다시는
+# 안 뽑힐 row로 용량만 차지한다. 여기서 SteamSpy 응답을 받은 직후(=positive를
+# 이미 아는 시점) 바로 걸러낸다. 두 값은 반드시 같이 맞춰야 한다.
+RECENT_MIN_POSITIVE_REVIEWS = 100
 STEAM_SEARCH_PAGE_SIZE = 25  # Store 검색 API가 count 파라미터를 무시하고 고정 반환하는 개수
-STEAM_SEARCH_MAX_PAGES = 40  # 안전장치 (최대 1000개까지)
+# 안전장치: sort_by=Reviews_DESC는 날짜순이 아니라서 "경계를 넘으면 멈춘다"를
+# 못 쓰고 max_count를 채우거나 여기 도달할 때까지 계속 훑는다. 페이지당 최대
+# 25개 후보 * appdetails 1회씩(1req/s) 순차 호출이라 값이 크면 오래 걸린다.
+STEAM_SEARCH_MAX_PAGES = 300
 STEAM_SEARCH_REQUEST_INTERVAL_SECONDS = 1  # 비공식 API라 너무 빨리 페이지네이션하면 429가 남
 
 APPID_FROM_LOGO_RE = re.compile(r"/apps/(\d+)/")
@@ -99,67 +123,56 @@ def fetch_all_steamspy_pages(max_pages: int | None = None) -> list[dict]:
     return games
 
 
-def fetch_recent_release_appids(
-    window_offset_days: int = RECENT_WINDOW_OFFSET_DAYS,
-    window_span_days: int = RECENT_WINDOW_SPAN_DAYS,
-) -> list[int]:
-    """Steam Store 검색(비공식 API)으로 지정된 출시일 구간의 appid 목록을 가져온다.
-
-    store.steampowered.com/search/results 는 공식 문서화된 API가 아니라 언제든
-    바뀔 수 있다. count 파라미터는 무시되고 한 번에 STEAM_SEARCH_PAGE_SIZE개씩
-    고정 반환하며, start로 페이지네이션한다. appid는 응답 필드에 직접 없고
-    logo 이미지 URL(.../apps/{appid}/...)에서 정규식으로 추출한다.
-    """
-    to_date = date.today() - timedelta(days=window_offset_days)
-    from_date = to_date - timedelta(days=window_span_days)
-
-    appids: list[int] = []
-    seen: set[int] = set()
-    start = 0
-    for i in range(STEAM_SEARCH_MAX_PAGES):
-        response = requests.get(
-            STEAM_SEARCH_URL,
-            params={
-                "query": "",
-                "start": start,
-                "sort_by": "Released_DESC",
-                "released": "Custom",
-                "from": from_date.isoformat(),
-                "to": to_date.isoformat(),
-                "ndl": 1,
-                "supportedlang": "english",
-                "json": 1,
-            },
-            timeout=30,
-        )
-        if response.status_code == 429:
-            # 비공식 API라 문서화된 제한이 없다. 막히면 에러로 죽지 않고
-            # 지금까지 모은 appid만으로 계속 진행한다.
-            break
-        response.raise_for_status()
-        items = response.json().get("items", [])
-        if not items:
-            break
-        for item in items:
-            match = APPID_FROM_LOGO_RE.search(item.get("logo", ""))
-            if not match:
-                continue
-            appid = int(match.group(1))
-            if appid not in seen:
-                seen.add(appid)
-                appids.append(appid)
-        start += STEAM_SEARCH_PAGE_SIZE
-        if i < STEAM_SEARCH_MAX_PAGES - 1:
-            time.sleep(STEAM_SEARCH_REQUEST_INTERVAL_SECONDS)
+def _fetch_release_search_page(start: int, sort_by: str = "Reviews_DESC") -> list[int]:
+    """지정된 정렬로 검색 결과 한 페이지(최대 STEAM_SEARCH_PAGE_SIZE개)의 appid를
+    가져온다. released=Custom 등 날짜 파라미터는 일부러 안 쓴다 -
+    discover_recent_game_appids의 모듈 docstring 참고(날짜 필터가 무시되는
+    문제가 있어서, 정렬만 쓰고 날짜 판단은 호출부가 appdetails로 직접 한다)."""
+    response = requests.get(
+        STEAM_SEARCH_URL,
+        params={
+            "query": "",
+            "start": start,
+            "sort_by": sort_by,
+            "ndl": 1,
+            "supportedlang": "english",
+            "json": 1,
+        },
+        timeout=30,
+    )
+    if response.status_code == 429:
+        return []
+    response.raise_for_status()
+    items = response.json().get("items", [])
+    appids = []
+    for item in items:
+        match = APPID_FROM_LOGO_RE.search(item.get("logo", ""))
+        if match:
+            appids.append(int(match.group(1)))
     return appids
+
+
+def _parse_steam_release_date(release_date_field: dict) -> date | None:
+    """Steam appdetails의 release_date.date 문자열을 파싱한다. "Coming soon"이거나
+    알려진 형식이 아니면(예: "Q1 2026"처럼 날짜가 불확실한 경우) None을 돌려준다 -
+    판단 불가능한 건 window 경계를 넘겼다는 신호로 쓰지 않고 그냥 건너뛴다."""
+    if release_date_field.get("coming_soon"):
+        return None
+    raw = release_date_field.get("date") or ""
+    for fmt in ("%d %b, %Y", "%b %d, %Y"):
+        try:
+            return datetime.strptime(raw, fmt).date()
+        except ValueError:
+            continue
+    return None
 
 
 def fetch_steam_official_appdetails(appid: int) -> dict | None:
     """Steam 공식 storefront API(appdetails)로 앱 상세를 조회한다 (키 불필요).
 
     SteamSpy가 아직 못 채운 신작 name/developer/publisher 보강(아래
-    fetch_steam_official_name)과, DLC/사운드트랙/데모 등 게임이 아닌 항목을
-    걸러내는 type 필터링(아래 filter_game_appids) 양쪽에서 공유해서 쓴다.
+    fetch_steam_official_name)과, discover_recent_game_appids의 type/출시일
+    판단 양쪽에서 공유해서 쓴다.
     """
     response = requests.get(
         STEAM_APPDETAILS_URL,
@@ -196,26 +209,61 @@ def fetch_steam_official_name(appid: int) -> dict | None:
     }
 
 
-def filter_game_appids(appids: list[int], max_count: int | None = None) -> list[int]:
-    """type == "game"인 appid만 남긴다.
+def discover_recent_game_appids(
+    window_span_days: int = RECENT_WINDOW_SPAN_DAYS,
+    max_count: int | None = None,
+) -> list[int]:
+    """출시일 기준 "오늘부터 window_span_days일 전까지" 안에 나온, 평가가 좋은
+    진짜 게임(type=="game", DLC/사운드트랙/데모/소프트웨어 제외)의 appid를 찾는다.
 
-    fetch_recent_release_appids()가 쓰는 비공식 store 검색은 출시일 구간만
-    걸러서 DLC/사운드트랙/데모/소프트웨어 등 게임이 아닌 항목도 그대로 섞어
-    반환한다(실측: "Yesterday's News - Health & Lifestyle DLC", "Dream about
-    yoU Soundtrack" 등이 recent_games 후보에 섞여 들어옴 — doc/error.md #9,
-    doc/session-2026-08-11-local-llm-and-studio.md §9 참고). max_count가
-    있으면(RECENT_MAX_CANDIDATES 등) 그 개수의 진짜 게임을 채우는 즉시
-    중단한다 — appid당 API 호출 1회라 후보 전부를 검사하면 느리다.
+    store.steampowered.com/search/results의 released=Custom&from=&to= 날짜
+    필터는 sort_by 값과 무관하게 실제로는 완전히 무시된다는 걸 확인했다 - 뭘
+    넘기든 그냥 "지금 인기/최신 목록"만 돌아온다. 그래서 날짜 파라미터 없이
+    sort_by=Reviews_DESC(평가 좋은 순 - 정확한 정렬 기준은 비공개지만, 실측상
+    여러 연도에 걸친 우수작들이 우선 나옴)만 써서 후보를 받고, 후보마다 Steam
+    공식 appdetails로 실제 출시일을 직접 확인해 window 안에 있는지 우리가
+    스스로 판단한다 - "일단 넓게 긁고 하나하나 실제 값으로 거른다".
+
+    sort_by=Released_DESC(출시일순)로 시도했을 때는 Steam이 하루에도 저품질
+    신작을 수백 건씩 등록하는 탓에 최신순 100개를 확인해도 전부 리뷰 0개였다
+    (실측). Reviews_DESC는 애초에 평가 좋은 게임 위주로 나와서, 좁은 최근 창
+    안에서도 리뷰 100개 이상인 후보를 훨씬 잘 만난다(실측: 300번째 안에서
+    바로 리뷰 수백 개짜리 최근작이 나옴). 대신 이 정렬은 날짜순이 아니라서
+    "경계를 넘으면 멈춘다" 최적화는 못 쓰고, max_count를 채우거나
+    STEAM_SEARCH_MAX_PAGES에 도달할 때까지 계속 훑으며 걸러야 한다.
     """
+    window_start = date.today() - timedelta(days=window_span_days)
+    today = date.today()
+
     result: list[int] = []
-    for i, appid in enumerate(appids):
-        if max_count is not None and len(result) >= max_count:
+    seen: set[int] = set()
+    start = 0
+    for _ in range(STEAM_SEARCH_MAX_PAGES):
+        page_appids = _fetch_release_search_page(start, sort_by="Reviews_DESC")
+        if not page_appids:
             break
-        data = fetch_steam_official_appdetails(appid)
-        if data and data.get("type") == "game":
-            result.append(appid)
-        if i < len(appids) - 1:
+        for appid in page_appids:
+            if appid in seen:
+                continue
+            seen.add(appid)
+
+            data = fetch_steam_official_appdetails(appid)
             time.sleep(STEAM_SEARCH_REQUEST_INTERVAL_SECONDS)
+            if not data:
+                continue
+
+            release = _parse_steam_release_date(data.get("release_date") or {})
+            if release is None or release > today or release < window_start:
+                # 파싱 불가("Coming soon" 등), 미래 날짜(이상치), window보다
+                # 오래됨(Reviews_DESC는 날짜순이 아니라 언제든 나올 수 있음)
+                # 전부 그냥 건너뛴다 - 멈추는 신호로는 안 쓴다.
+                continue
+            if data.get("type") == "game":
+                result.append(appid)
+                if max_count is not None and len(result) >= max_count:
+                    return result
+
+        start += STEAM_SEARCH_PAGE_SIZE
     return result
 
 
@@ -267,15 +315,14 @@ def main() -> None:
     pool = os.environ.get("POOL", "old")
 
     if pool == "recent":
-        appids = fetch_recent_release_appids()
         # 개발/테스트 시 DAG의 env_vars로 RECENT_MAX_CANDIDATES를 넘겨 appdetails
-        # 호출 개수를 제한한다 (appid당 1초, 미설정 시 수백 개라 10분+ 걸릴 수 있음).
+        # 호출 개수를 제한한다 (appid당 1초, 미설정 시 1년치 전부 훑어서 몇 시간
+        # 걸릴 수 있음 - discover_recent_game_appids 참고).
         max_candidates_env = os.environ.get("RECENT_MAX_CANDIDATES", "")
         max_candidates = int(max_candidates_env) if max_candidates_env else None
-        # DLC/사운드트랙/데모 등을 먼저 걸러낸 뒤에 개수를 제한해야, 그 제한이
-        # "진짜 게임 몇 개"를 뜻하게 된다 (filter_game_appids 참고).
-        appids = filter_game_appids(appids, max_count=max_candidates)
+        appids = discover_recent_game_appids(max_count=max_candidates)
         games = fetch_steamspy_appdetails(appids)
+        games = [g for g in games if (g.get("positive") or 0) >= RECENT_MIN_POSITIVE_REVIEWS]
         write_raw_json(spark, games, "s3a://datalake/raw/steam/steamspy_recent/")
     else:
         # steam_api_key = os.environ["STEAM_API_KEY"]

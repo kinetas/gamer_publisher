@@ -29,12 +29,21 @@ def _get_collection():
     return _client.get_or_create_collection(CHROMA_NEWS_COLLECTION)
 
 
-async def search_relevant_articles(query: str, *, limit: int = 3) -> list[dict]:
+async def search_relevant_articles(query: str, *, game_name: str, limit: int = 3) -> list[dict]:
     """query(게임 이름 + 장르 등)와 의미상 가까운 기사를 최대 limit개 돌려준다.
 
+    chroma의 벡터 검색은 유사도 임계값이 없어서 - 컬렉션에 이 게임과 관련된
+    기사가 하나도 없어도 "그나마 제일 가까운" top-N을 무조건 돌려준다. 로컬
+    소형 임베딩 모델(예: qwen2.5:3b/bge-m3)에서는 이게 실제로 전혀 무관한
+    기사(예: 다른 게임의 이벤트 소식)를 "근거자료"로 프롬프트에 흘려보내
+    reporter가 엉뚱한 내용을 사실인 양 섞어 쓰는 환각으로 이어졌다. 그래서
+    game_name이 기사 제목/요약에 문자 그대로 등장하는 것만 최종 통과시킨다 -
+    임베딩 거리 기반 컷오프보다 훨씬 보수적이지만, 오탐(전혀 다른 게임 얘기를
+    근거자료로 착각)보다는 미탐(관련 기사인데 놓침)이 훨씬 안전한 실패 모드다.
+
     반환 항목: {"title", "excerpt", "link", "source"}. 컬렉션이 비어있거나
-    임베딩 실패, chroma 조회 실패면 [] (기존 Steam 소개글만으로 작성하는
-    경로로 자연스럽게 폴백된다 — reporter.py/prompts.py 참고).
+    임베딩 실패, chroma 조회 실패, 관련 기사 없음이면 [] (기존 Steam 소개글만으로
+    작성하는 경로로 자연스럽게 폴백된다 — reporter.py/prompts.py 참고).
     """
     embeddings = await llm.embed_batch([query], model=EMBEDDING_MODEL)
     if not embeddings:
@@ -44,11 +53,12 @@ async def search_relevant_articles(query: str, *, limit: int = 3) -> list[dict]:
         collection = _get_collection()
         if collection.count() == 0:
             return []
+        # 실제로 game_name 매칭되는 후보를 limit개 채울 수 있도록 넉넉히 뽑는다.
         result = collection.query(
-            query_embeddings=embeddings, n_results=limit, include=["documents", "metadatas"]
+            query_embeddings=embeddings, n_results=limit * 5, include=["documents", "metadatas"]
         )
         metadatas = (result.get("metadatas") or [[]])[0]
-        return [
+        candidates = [
             {
                 "title": m.get("title", ""),
                 "excerpt": doc,
@@ -57,6 +67,11 @@ async def search_relevant_articles(query: str, *, limit: int = 3) -> list[dict]:
             }
             for m, doc in zip(metadatas, (result.get("documents") or [[]])[0])
         ]
+        needle = game_name.strip().lower()
+        relevant = [
+            c for c in candidates if needle and needle in f"{c['title']} {c['excerpt']}".lower()
+        ]
+        return relevant[:limit]
 
     try:
         async with CHROMA_SEM:

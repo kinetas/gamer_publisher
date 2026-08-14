@@ -54,8 +54,19 @@ STEAMSPY_ALL_SCHEMA = StructType(
 
 
 def clean(spark: SparkSession, schema: StructType, raw_path: str) -> DataFrame:
-    """명시된 스키마로 raw JSON을 읽고, 파싱 실패/필수 필드(appid) 누락 레코드를 제거한다."""
-    df = spark.read.schema(schema).option("mode", "DROPMALFORMED").json(raw_path)
+    """명시된 스키마로 raw JSON을 읽고, 파싱 실패/필수 필드(appid) 누락 레코드를 제거한다.
+
+    raw_path가 아예 없으면(recent pool에서 ingest.py의 RECENT_MIN_POSITIVE_REVIEWS
+    필터를 통과한 후보가 이번 실행엔 하나도 없어서 write_raw_json이 아무 파일도
+    안 쓴 경우) 빈 스키마 DataFrame으로 대체한다 - "이번 주는 후보가 0개일 수
+    있다"는 정상적인 상황이라, PATH_NOT_FOUND로 파이프라인 전체가 죽으면 안 된다.
+    """
+    try:
+        df = spark.read.schema(schema).option("mode", "DROPMALFORMED").json(raw_path)
+    except Exception as exc:  # noqa: BLE001 - AnalysisException은 pyspark 버전마다 모듈 경로가 달라 문자열로 판별
+        if "PATH_NOT_FOUND" not in str(exc):
+            raise
+        df = spark.createDataFrame([], schema)
     return df.filter(col("appid").isNotNull())
 
 

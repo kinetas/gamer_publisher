@@ -2,7 +2,7 @@ import type { WeeklyReport, GameEntry } from "../types";
 import { PageSheet } from "./PageSheet";
 import { GameGrid } from "./GameGrid";
 import { GameDetailRow } from "./GameDetailRow";
-import { chunk } from "../utils/chunk";
+import { chunkBalanced } from "../utils/chunk";
 
 const DETAIL_ITEMS_PER_PAGE = 4;
 
@@ -49,7 +49,7 @@ export function ReportDocument({ report }: ReportDocumentProps) {
       </PageSheet>
 
       {sections.map((section) => {
-        const pages = chunk(section.games, DETAIL_ITEMS_PER_PAGE);
+        const pages = chunkBalanced(section.games, DETAIL_ITEMS_PER_PAGE);
         return pages.map((pageGames, pageIndex) => (
           <PageSheet key={`${section.title}-${pageIndex}`} pageLabel={`PAGE ${pageNumber++}`}>
             <h2
