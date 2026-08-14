@@ -11,9 +11,21 @@ copy_editor는 reporter가 이미 가져온 Reddit/Steam 자료(draft.research)�
 fan-out해서 이미 끝난 다른 게임들까지 중복 실행되기 때문. 대신 reporter가
 재작성을 마치면 copy_editor 한 명에게 곧장 Command로 돌아온다(reporter.py 참고).
 
-이 루프 때문에 게임마다 "교열 완료"에 도달하는 superstep이 달라질 수 있어서,
-layout_desk로 넘어가는 지점은 고정 edge가 아니라 dispatch_layout_desk가
-checked 개수를 직접 세서 기대치에 도달했을 때만 트리거하는 조건부 edge다.
+layout_desk는 copy_editor -> layout_desk 고정 edge(graph.py)로 도달한다. 예전엔
+"checked 개수가 기대치에 도달했는지"를 직접 세는 조건부 edge(dispatch_layout_desk)를
+썼는데, Send로 도달한 노드(copy_editor)에 붙은 조건부 edge 함수는 같은 superstep 안
+형제 브랜치들의 기여분(checked/old_introductions 등)을 볼 수 없어(LangGraph가
+superstep 종료 후에만 reducer를 병합) expected가 항상 0으로 계산되는 버그가 있었다
+— layout_desk가 아예 안 불려서 매번 postgres 저장이 조용히 스킵됐다
+(doc/session-2026-08-11-local-llm-and-studio.md §12). 고정 edge는 대상 노드가
+실제로 실행되는 시점(다음 superstep)에 정상적으로 병합된 전역 state를 받으므로
+문제가 없다 — reporter -> copy_desk가 이미 같은 패턴으로 정상 동작 중.
+
+반려/재작성 루프 때문에 재작성된 게임의 copy_editor는 별도 Send로 뒤늦게(다른
+superstep에) 도착하므로, 그 케이스에서는 layout_desk가 두 번 실행될 수 있다
+(최초 배치 완료 시 1회 + 재작성 완료 시 1회 더). db.save_weekly_report가
+report_date 기준 upsert라 마지막 실행이 항상 전체 게임을 포함한 완전한 content로
+덮어써서 최종 저장 결과는 정확하다.
 """
 import logging
 import time
@@ -107,21 +119,3 @@ async def copy_editor(payload: CopyState) -> dict | Command[Literal["reporter"]]
             f"[copy_editor] appid={game['appid']} 교열 완료 (수정={'O' if corrections else 'X'})"
         ],
     }
-
-
-def dispatch_layout_desk(state: ReportState) -> list[str]:
-    """checked가 전체 게임 수만큼 다 모였을 때만 layout_desk를 트리거하는 barrier.
-
-    재작성 루프 때문에 게임마다 도착하는 superstep이 달라질 수 있어서, 고정
-    edge(add_edge) 대신 카운트를 직접 확인한다. 여러 copy_editor 완료가 같은
-    superstep에서 동시에 조건을 만족해도 문자열 리턴은 LangGraph가 같은
-    타깃으로 중복 없이 한 번만 트리거한다 (Send를 안 쓰는 이유).
-    """
-    expected = (
-        len(state.get("old_introductions") or [])
-        + len(state.get("recent_replays") or [])
-        + len(state.get("recent_new") or [])
-    )
-    if len(state.get("checked") or []) >= expected:
-        return ["layout_desk"]
-    return []

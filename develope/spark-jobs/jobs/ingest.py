@@ -154,16 +154,12 @@ def fetch_recent_release_appids(
     return appids
 
 
-def fetch_steam_official_name(appid: int) -> dict | None:
-    """SteamSpy가 아직 못 채운 신작(appid는 있는데 name 등이 빈 문자열)을 보강한다.
+def fetch_steam_official_appdetails(appid: int) -> dict | None:
+    """Steam 공식 storefront API(appdetails)로 앱 상세를 조회한다 (키 불필요).
 
-    SteamSpy는 커뮤니티가 스크래핑해서 채우는 데이터라 출시 2개월 시점(recent
-    pool이 노리는 창)의 신작, 특히 인지도 낮은 인디는 appid만 인식하고 name/
-    developer/publisher가 통째로 빈 채로 오는 경우가 잦다 (실측: appid는
-    맞는데 나머지 필드 전부 "" — 에러가 아니라 SteamSpy 쪽 데이터 공백).
-    Steam 공식 storefront API(키 불필요)는 출시 즉시 채워지므로 이걸로 메운다.
-    owners/ccu 같은 SteamSpy 고유 추정치는 이 API에 없어서 SteamSpy를
-    완전히 대체하진 않는다 - 딱 이름/개발사/배급사만 보강한다.
+    SteamSpy가 아직 못 채운 신작 name/developer/publisher 보강(아래
+    fetch_steam_official_name)과, DLC/사운드트랙/데모 등 게임이 아닌 항목을
+    걸러내는 type 필터링(아래 filter_game_appids) 양쪽에서 공유해서 쓴다.
     """
     response = requests.get(
         STEAM_APPDETAILS_URL,
@@ -176,14 +172,51 @@ def fetch_steam_official_name(appid: int) -> dict | None:
     payload = response.json().get(str(appid))
     if not payload or not payload.get("success"):
         return None
-    data = payload.get("data") or {}
-    if not data.get("name"):
+    return payload.get("data") or {}
+
+
+def fetch_steam_official_name(appid: int) -> dict | None:
+    """SteamSpy가 아직 못 채운 신작(appid는 있는데 name 등이 빈 문자열)을 보강한다.
+
+    SteamSpy는 커뮤니티가 스크래핑해서 채우는 데이터라 출시 2개월 시점(recent
+    pool이 노리는 창)의 신작, 특히 인지도 낮은 인디는 appid만 인식하고 name/
+    developer/publisher가 통째로 빈 채로 오는 경우가 잦다 (실측: appid는
+    맞는데 나머지 필드 전부 "" — 에러가 아니라 SteamSpy 쪽 데이터 공백).
+    Steam 공식 storefront API(키 불필요)는 출시 즉시 채워지므로 이걸로 메운다.
+    owners/ccu 같은 SteamSpy 고유 추정치는 이 API에 없어서 SteamSpy를
+    완전히 대체하진 않는다 - 딱 이름/개발사/배급사만 보강한다.
+    """
+    data = fetch_steam_official_appdetails(appid)
+    if not data or not data.get("name"):
         return None
     return {
         "name": data["name"],
         "developer": ", ".join(data.get("developers") or []),
         "publisher": ", ".join(data.get("publishers") or []),
     }
+
+
+def filter_game_appids(appids: list[int], max_count: int | None = None) -> list[int]:
+    """type == "game"인 appid만 남긴다.
+
+    fetch_recent_release_appids()가 쓰는 비공식 store 검색은 출시일 구간만
+    걸러서 DLC/사운드트랙/데모/소프트웨어 등 게임이 아닌 항목도 그대로 섞어
+    반환한다(실측: "Yesterday's News - Health & Lifestyle DLC", "Dream about
+    yoU Soundtrack" 등이 recent_games 후보에 섞여 들어옴 — doc/error.md #9,
+    doc/session-2026-08-11-local-llm-and-studio.md §9 참고). max_count가
+    있으면(RECENT_MAX_CANDIDATES 등) 그 개수의 진짜 게임을 채우는 즉시
+    중단한다 — appid당 API 호출 1회라 후보 전부를 검사하면 느리다.
+    """
+    result: list[int] = []
+    for i, appid in enumerate(appids):
+        if max_count is not None and len(result) >= max_count:
+            break
+        data = fetch_steam_official_appdetails(appid)
+        if data and data.get("type") == "game":
+            result.append(appid)
+        if i < len(appids) - 1:
+            time.sleep(STEAM_SEARCH_REQUEST_INTERVAL_SECONDS)
+    return result
 
 
 def fetch_steamspy_appdetails(appids: list[int]) -> list[dict]:
@@ -238,8 +271,10 @@ def main() -> None:
         # 개발/테스트 시 DAG의 env_vars로 RECENT_MAX_CANDIDATES를 넘겨 appdetails
         # 호출 개수를 제한한다 (appid당 1초, 미설정 시 수백 개라 10분+ 걸릴 수 있음).
         max_candidates_env = os.environ.get("RECENT_MAX_CANDIDATES", "")
-        if max_candidates_env:
-            appids = appids[: int(max_candidates_env)]
+        max_candidates = int(max_candidates_env) if max_candidates_env else None
+        # DLC/사운드트랙/데모 등을 먼저 걸러낸 뒤에 개수를 제한해야, 그 제한이
+        # "진짜 게임 몇 개"를 뜻하게 된다 (filter_game_appids 참고).
+        appids = filter_game_appids(appids, max_count=max_candidates)
         games = fetch_steamspy_appdetails(appids)
         write_raw_json(spark, games, "s3a://datalake/raw/steam/steamspy_recent/")
     else:

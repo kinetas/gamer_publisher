@@ -70,6 +70,14 @@ def load_gold_to_postgres(pool: str) -> None:
     conn = PostgresHook(postgres_conn_id="postgres_app").get_conn()
     try:
         with conn.cursor() as cur:
+            # ingested_at은 UPDATE 대상에서 뺀다 — gold.py가 매 실행마다
+            # withColumn("ingested_at", current_timestamp())로 전체 스냅샷에
+            # "지금"을 찍는데다, raw/bronze/silver가 append 전용(정리 없음)이라
+            # 몇 주 전에 처음 본 appid도 매번 gold 재처리 대상에 그대로 들어있다.
+            # 여기서 EXCLUDED.ingested_at으로 덮어쓰면 이미 알고 있던 appid의
+            # "최초 수집 시각"이 재실행할 때마다 "지금"으로 리셋되어, select_weekly_report의
+            # "1년 이내" 신선도 필터가 사실상 절대 만료 안 되는 것처럼 무력화된다.
+            # appid가 처음 INSERT될 때만 실제 최초 수집 시각이 박히게 둔다.
             psycopg2.extras.execute_values(
                 cur,
                 f"""
@@ -83,8 +91,7 @@ def load_gold_to_postgres(pool: str) -> None:
                     positive = EXCLUDED.positive,
                     negative = EXCLUDED.negative,
                     owners = EXCLUDED.owners,
-                    ccu = EXCLUDED.ccu,
-                    ingested_at = EXCLUDED.ingested_at
+                    ccu = EXCLUDED.ccu
                 """,
                 rows,
             )
@@ -127,49 +134,89 @@ def select_weekly_report(**context) -> None:
             )
             old_picks = cur.fetchall()
 
-            # 두 쿼리 다 공통으로 recent_games 풀 자체를 "1년 이내 수집된 것"으로
+            # 두 쿼리 다 공통으로 recent_games 풀 자체를 "오늘 기준 1년 이내 수집된 것"으로
             # 제한하고(1년 넘으면 old_games 영역과 개념이 겹치므로 recent 후보에서
             # 아예 배제), 그 안에서 positive=0(리뷰 하나도 못 받은 것)인 것도 뺀다.
+            # old_games에서 이미 고른 15개 최종 선정 결과에 겹치는 게 없어야 하므로
+            # (기획 요구사항), old_appids를 먼저 구해서 아래 recent 쿼리들에서
+            # 전부 미리 제외한다 — appid 전역 유일성상 이론적으로만 가능한 케이스지만
+            # 방어적으로 막아둔다.
+            old_appids = {r["appid"] for r in old_picks}
             recent_pool_filter = "ingested_at >= now() - interval '1 year' AND positive != 0"
 
-            # 다시 추천: 한 번이라도 추천된 것 중, 적게 추천된 것부터 우선 (recommend_count
-            # ASC). 신규 추천을 먼저 정하지 않고 이걸 먼저 뽑는 이유는 아래 신규 추천이
-            # 이 결과와 안 겹치게 걸러야 하기 때문.
+            # 다시 추천: recommend_count > 1(두 번 이상 추천된 적 있는 것)을 주 후보로
+            # 삼아 적게 추천된 것부터 우선(ASC)으로 5개를 채운다. 그것만으로 5개가
+            # 안 되면 recommend_count = 1(한 번만 추천된 것)에서 부족한 만큼 보충한다.
+            # 신규 추천보다 먼저 확정하는 이유는 아래 신규 추천이 이 결과와 안
+            # 겹치게 걸러야 하기 때문.
             cur.execute(
                 f"""
-                SELECT appid, name, developer, publisher, ccu, positive, negative, last_recommended_at
+                SELECT appid, name, developer, publisher, ccu, positive, negative,
+                       last_recommended_at, recommend_count
                 FROM recent_games
-                WHERE first_recommended_at IS NOT NULL AND name IS NOT NULL AND name != ''
-                  AND {recent_pool_filter}
+                WHERE recommend_count > 1 AND name IS NOT NULL AND name != ''
+                  AND {recent_pool_filter} AND appid != ALL(%s::int[])
                 ORDER BY recommend_count ASC, last_recommended_at ASC NULLS FIRST
                 LIMIT %s
                 """,
-                (RECENT_REPLAY_SLOT_COUNT,),
+                (list(old_appids), RECENT_REPLAY_SLOT_COUNT),
             )
             recent_replay_picks = cur.fetchall()
+
+            if len(recent_replay_picks) < RECENT_REPLAY_SLOT_COUNT:
+                exclude = old_appids | {r["appid"] for r in recent_replay_picks}
+                cur.execute(
+                    f"""
+                    SELECT appid, name, developer, publisher, ccu, positive, negative,
+                           last_recommended_at, recommend_count
+                    FROM recent_games
+                    WHERE recommend_count = 1 AND name IS NOT NULL AND name != ''
+                      AND {recent_pool_filter} AND appid != ALL(%s::int[])
+                    ORDER BY last_recommended_at ASC NULLS FIRST
+                    LIMIT %s
+                    """,
+                    (list(exclude), RECENT_REPLAY_SLOT_COUNT - len(recent_replay_picks)),
+                )
+                recent_replay_picks += cur.fetchall()
+
             replay_appids = {r["appid"] for r in recent_replay_picks}
 
-            # 신규 추천: 추천 안 한 것(first_recommended_at IS NULL) 우선, 모자라면
-            # 추천 적게 한 것으로 채운다 - 단 다시 추천에 이미 뽑힌 appid와는 겹치면
-            # 안 되므로, 여유 있게 뽑은 뒤 파이썬에서 걸러낸다. ccu는 여전히 인기
-            # 많은 신작 우선(DESC) - old_games와 달리 "묻힌 걸 찾는다"는 취지가 아니다.
+            # 신규 추천: recommend_count = 0(한 번도 추천 안 된 것)을 주 후보로 삼아
+            # 인기 많은 신작 우선(ccu DESC) - old_games와 달리 "묻힌 걸 찾는다"는
+            # 취지가 아니다. 그것만으로 5개가 안 되면 recommend_count = 1에서
+            # 부족한 만큼 보충하되, 다시 추천에 이미 뽑힌 appid와는 겹치지 않게 뺀다.
+            exclude_for_new = old_appids | replay_appids
             cur.execute(
                 f"""
                 SELECT appid, name, developer, publisher, ccu, positive, negative,
                        first_recommended_at, recommend_count
                 FROM recent_games
-                WHERE name IS NOT NULL AND name != '' AND {recent_pool_filter}
-                ORDER BY (first_recommended_at IS NOT NULL), recommend_count ASC, ccu DESC
+                WHERE recommend_count = 0 AND name IS NOT NULL AND name != ''
+                  AND {recent_pool_filter} AND appid != ALL(%s::int[])
+                ORDER BY ccu DESC
                 LIMIT %s
                 """,
-                (RECENT_NEW_SLOT_COUNT + len(replay_appids) + 10,),
+                (list(exclude_for_new), RECENT_NEW_SLOT_COUNT),
             )
-            recent_new_candidates = cur.fetchall()
-            recent_new_picks = [
-                r for r in recent_new_candidates if r["appid"] not in replay_appids
-            ][:RECENT_NEW_SLOT_COUNT]
+            recent_new_picks = cur.fetchall()
 
-            old_appids = [r["appid"] for r in old_picks]
+            if len(recent_new_picks) < RECENT_NEW_SLOT_COUNT:
+                exclude_for_new = exclude_for_new | {r["appid"] for r in recent_new_picks}
+                cur.execute(
+                    f"""
+                    SELECT appid, name, developer, publisher, ccu, positive, negative,
+                           first_recommended_at, recommend_count
+                    FROM recent_games
+                    WHERE recommend_count = 1 AND name IS NOT NULL AND name != ''
+                      AND {recent_pool_filter} AND appid != ALL(%s::int[])
+                    ORDER BY ccu DESC
+                    LIMIT %s
+                    """,
+                    (list(exclude_for_new), RECENT_NEW_SLOT_COUNT - len(recent_new_picks)),
+                )
+                recent_new_picks += cur.fetchall()
+
+            old_appids = list(old_appids)
             recent_appids = [r["appid"] for r in recent_new_picks + recent_replay_picks]
 
             if old_appids:
