@@ -35,14 +35,93 @@ def _row_to_report(row: dict) -> dict:
     return {
         "date": row["report_date"].isoformat(),
         "oldIntroductions": content.get("old_introductions", []),
-        "recentReplays": content.get("recent_replays", []),
-        "recentNew": content.get("recent_new", []),
     }
 
 
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+def _row_to_news(row: dict) -> dict:
+    return {
+        "id": row["id"],
+        "source": row["source"],
+        "title": row["title"],
+        "excerpt": row["excerpt"],
+        "link": row["link"],
+        "imageUrl": row["image_url"],
+        "pubDate": row["pub_date"].isoformat() if row["pub_date"] else None,
+        "appid": row["appid"],
+    }
+
+
+def _row_to_sentiment(row: dict) -> dict:
+    return {
+        "appid": row["appid"],
+        "name": row["name"],
+        "positiveCount": row["positive_count"],
+        "negativeCount": row["negative_count"],
+        "neutralCount": row["neutral_count"],
+        "reviewCount": row["review_count"],
+        "summary": row["summary"],
+        "generatedAt": row["generated_at"].isoformat(),
+    }
+
+
+@app.get("/news")
+def list_news(limit: int = 20, offset: int = 0) -> list[dict]:
+    conn = _db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(
+                "SELECT * FROM game_news ORDER BY pub_date DESC LIMIT %s OFFSET %s",
+                (limit, offset),
+            )
+            rows = cur.fetchall()
+    finally:
+        conn.close()
+    return [_row_to_news(row) for row in rows]
+
+
+@app.get("/news/{news_id}")
+def get_news(news_id: int) -> dict:
+    conn = _db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT * FROM game_news WHERE id = %s", (news_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    if row is None:
+        raise HTTPException(status_code=404, detail="news not found")
+    return _row_to_news(row)
+
+
+@app.get("/sentiment")
+def list_sentiment() -> list[dict]:
+    conn = _db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT * FROM sentiment_reports ORDER BY generated_at DESC")
+            rows = cur.fetchall()
+    finally:
+        conn.close()
+    return [_row_to_sentiment(row) for row in rows]
+
+
+@app.get("/sentiment/{appid}")
+def get_sentiment(appid: int) -> dict:
+    conn = _db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT * FROM sentiment_reports WHERE appid = %s", (appid,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    if row is None:
+        raise HTTPException(status_code=404, detail="sentiment report not found")
+    return _row_to_sentiment(row)
 
 
 @app.get("/reports/latest")

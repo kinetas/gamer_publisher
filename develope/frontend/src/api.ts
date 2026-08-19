@@ -1,4 +1,4 @@
-import type { ReportListItem, WeeklyReport } from "./types";
+import type { NewsArticle, ReportListItem, SentimentReport, WeeklyReport } from "./types";
 
 // 항상 현재 origin 기준 상대경로. nginx(frontend 컨테이너)가 /api/*를
 // fastapi-server:8000으로 프록시해준다 (nginx.conf 참고) - 실제 사용자 브라우저든
@@ -27,4 +27,20 @@ export function fetchReportList(): Promise<ReportListItem[]> {
 
 export function reportDownloadUrl(pdfUrl: string): string {
   return `${API_BASE}${pdfUrl}`;
+}
+
+export function fetchNews(limit = 20, offset = 0): Promise<NewsArticle[]> {
+  return request<NewsArticle[]>(`/news?limit=${limit}&offset=${offset}`);
+}
+
+export function fetchNewsItem(id: number): Promise<NewsArticle> {
+  return request<NewsArticle>(`/news/${id}`);
+}
+
+export function fetchSentimentList(): Promise<SentimentReport[]> {
+  return request<SentimentReport[]>("/sentiment");
+}
+
+export function fetchSentimentItem(appid: number): Promise<SentimentReport> {
+  return request<SentimentReport>(`/sentiment/${appid}`);
 }

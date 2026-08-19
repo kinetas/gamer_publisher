@@ -35,6 +35,7 @@ CHROMA_NEWS_COLLECTION = os.environ.get("CHROMA_NEWS_COLLECTION", "game_news_ref
 REPORTER_MODEL = os.environ.get("REPORTER_MODEL", "gpt-4o-mini")
 COPY_DESK_MODEL = os.environ.get("COPY_DESK_MODEL", "gpt-4o-mini")
 EDITORIAL_MODEL = os.environ.get("EDITORIAL_MODEL", "gpt-4o-mini")
+SENTIMENT_MODEL = os.environ.get("SENTIMENT_MODEL", "gpt-4o-mini")
 EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "text-embedding-3-small")
 
 # 데스크당 기자 수(=카테고리별 슬롯 수)와 일치. Airflow 쪽 OLD_SLOT_COUNT 등이

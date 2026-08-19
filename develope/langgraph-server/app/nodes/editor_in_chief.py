@@ -1,5 +1,5 @@
-"""편집국장: 요청 payload(3개 카테고리 리스트)를 정규화해서 각 게임에 category/
-order_index를 부여하고, 3개 데스크로 fan-out한다. LLM 호출 없음.
+"""편집국장: 요청 payload(카테고리별 리스트)를 정규화해서 각 게임에 category/
+order_index를 부여하고, 카테고리별 데스크로 fan-out한다. LLM 호출 없음.
 """
 import time
 
@@ -8,9 +8,7 @@ from langgraph.types import Send
 from ..state import Category, GameRef, ReportState
 
 _DESK_NAMES: dict[Category, str] = {
-    "old_introductions": "옛 작품 데스크",
-    "recent_replays": "다시 추천 데스크",
-    "recent_new": "신규 추천 데스크",
+    "old_introductions": "명작 아카이브 데스크",
 }
 
 
@@ -35,14 +33,10 @@ def _to_game_refs(raw_games: list[dict], category: Category) -> list[GameRef]:
 
 async def editor_in_chief(state: ReportState) -> dict:
     old_refs = _to_game_refs(state.get("old_introductions") or [], "old_introductions")
-    replay_refs = _to_game_refs(state.get("recent_replays") or [], "recent_replays")
-    new_refs = _to_game_refs(state.get("recent_new") or [], "recent_new")
 
-    total = len(old_refs) + len(replay_refs) + len(new_refs)
+    total = len(old_refs)
     return {
         "old_introductions": old_refs,
-        "recent_replays": replay_refs,
-        "recent_new": new_refs,
         "started_at": time.monotonic(),
         "logs": [f"[editor_in_chief] 총 {total}개 게임 접수"],
     }

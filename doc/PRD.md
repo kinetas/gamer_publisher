@@ -38,8 +38,9 @@ gamer_publisher
 - [ ] 게임 정보 수집 (Spark)
 - [ ] 수집 파이프라인 자동화 (Airflow)
 - [ ] 멀티 서브 에이전트 기반 보고서 작성 자동화 (LangGraph + RAG)
-- [ ] 커뮤니티(Reddit 등) 반응 분석
+- [ ] 커뮤니티(Reddit 등) 반응 분석 → 리뷰 기반 감성분석 섹션으로 구체화 (Updated: 2026-08-19)
 - [ ] 보고서 조회/다운로드 웹사이트
+- [ ] (Updated: 2026-08-19) 사이트 3섹션 구조: 명작 아카이브 / RSS 뉴스 / 감성분석 — 상세는 `doc/CHANGE_REQUEST.md`, 변경 배경은 `doc/decision-record-2026-08-19-three-section-restructure.md` 참고
 
 ## Priority Feature
 정보 수집 (Spark) 기능을 최우선으로 구현
@@ -64,6 +65,49 @@ Airflow가 스케줄에 따라 파이프라인을 트리거하면, Spark 작업�
 
 ### Dependencies
 - Dependencies: None
+
+---
+
+## 명작 아카이브 (구 "오래된 게임", Updated: 2026-08-19)
+
+### Purpose
+`old_games_pipeline`(SteamSpy 기반 구작 명작 발굴)의 컨셉과 로직은 그대로 유지. 섹션 제목만 "명작 아카이브"로 변경
+
+### Expected Behavior
+기존과 동일 (변경 없음)
+
+### Dependencies
+- Dependencies: None (로직 불변)
+
+---
+
+## RSS 뉴스 (Updated: 2026-08-19, `recent_games_pipeline` 대체)
+
+### Purpose
+느리고 히트율 낮았던 `recent_games_pipeline`(신작 능동 발굴)을 폐기하고, 게임 미디어 RSS를 구독해 최신 소식을 그대로 노출
+
+### Expected Behavior
+- 1차: 게임메카 RSS 피드만 연동
+- 이후 여러 매체(디스이즈게임, 인벤 등)로 확장 가능하도록 RSS 소스 목록을 설정 가능한 구조로 설계
+
+### Dependencies
+- Dependencies: None
+
+---
+
+## 감성분석 (신규, Updated: 2026-08-19)
+
+### Purpose
+명작 아카이브 + RSS 뉴스에 노출되는 게임들의 Steam 리뷰를 분석해 "왜 그런 평가를 받는지" 보여주는 독립 섹션 (명작 아카이브 섹션에 종속되지 않음)
+
+### Expected Behavior
+1. 신규 ingest job이 Steam 공식 `appreviews` API로 대상 게임 appid별 리뷰 원문 텍스트를 수집
+2. 대상 게임 appid: 명작 아카이브는 `old_games_pipeline`이 보유한 appid 재사용, RSS 뉴스는 기사 속 게임명을 Steam 공식 `storesearch`(이름 검색) API로 appid 매칭
+3. 1차 분류(라이브러리, 로컬): 경량 사전학습 다국어 감성분석 라이브러리(HuggingFace transformers 기반)로 리뷰 전량을 긍/부정/점수로 분류 — API 호출 없이 로컬 처리
+4. 2차 종합(LLM, 배치): 분류 결과 집계 + 대표 리뷰 샘플을 기존 LLM 파이프라인(자체 LLM 우선, OpenAI fallback)에 배치로 넣어 요약 리포트 생성
+
+### Dependencies
+- Dependencies: 명작 아카이브/RSS 뉴스 섹션의 게임 appid 확보가 선행되어야 함
 
 ---
 
@@ -119,6 +163,10 @@ Airflow가 스케줄에 따라 파이프라인을 트리거하면, Spark 작업�
 | Twitch API | 스트리밍/시청 데이터 수집 |
 | itch.io API | 인디 게임 정보 수집 |
 | LLM API | 보고서 작성용 (자체 LLM 우선 시도, 불가 시 OpenAI로 대체) |
+| Steam `appreviews` API (Updated: 2026-08-19) | 감성분석용 리뷰 원문 텍스트 수집 |
+| Steam `storesearch` API (Updated: 2026-08-19) | RSS 뉴스 게임명 → appid 매칭 |
+| 게임메카 RSS (Updated: 2026-08-19) | 최신 게임 소식 수집 (1차 소스, 이후 확장 예정) |
+| 다국어 감성분석 라이브러리 (Updated: 2026-08-19) | HuggingFace transformers 기반, 리뷰 1차 분류(로컬) |
 
 (목록은 개발 진행에 따라 추가/삭제될 수 있음)
 

@@ -4,6 +4,15 @@
 대응시켜 실제로 LangGraph `Send`/`Command` 기반 병렬 그래프로 재작성한 작업 기록.
 2026-08-10 작업. 원본 계획서: `C:\Users\Administrator\.claude\plans\deep-crunching-leaf.md`.
 
+> **(Updated: 2026-08-19)** 이 문서가 기술하는 `recent_games_pipeline` DAG와
+> `weekly_reports.content`의 `old_introductions/recent_replays/recent_new` 3키
+> 계약은 이후 변경되어 더 이상 유효하지 않다. `recent_games_pipeline`은
+> `weekly_report_pipeline`(+ 별도 `sentiment_pipeline`)으로 재구성됐고,
+> `content`는 `old_introductions` 키 1개(명작 아카이브, 다시추천 흡수)만 남았다.
+> 아래 내용은 병렬 그래프 설계 자체(편집국장→데스크→기자→교열부→편집부)를
+> 이해하는 역사적 기록으로만 참고하고, 계약/DAG명은 `doc/CHANGE_REQUEST.md`,
+> `doc/decision-record-2026-08-19-three-section-restructure.md`를 따를 것.
+
 ---
 
 ## 배경 / 이전 상태

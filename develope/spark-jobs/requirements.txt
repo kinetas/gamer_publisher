@@ -1,3 +1,10 @@
 pyspark
 requests
 praw
+# 감성분석 파이프라인(TASK-006, sentiment_classify.py) 전용. torch는 requirements.txt에
+# 넣지 않고 Dockerfile에서 CPU 전용 wheel로 먼저 설치한다(이미지 용량 절감 이유는
+# Dockerfile 주석 참고) - 여기서 다시 명시하면 기본 PyPI 인덱스(CUDA 빌드)로
+# 재설치/덮어쓰기될 수 있어서 일부러 뺐다.
+transformers
+sentencepiece
+boto3

@@ -8,10 +8,14 @@ from datetime import date
 
 from fastapi import FastAPI, HTTPException
 
+from . import prompts
 from .clients import gamemeca, rag
+from .clients import llm
 from .clients.http import close_http_client, init_http_client
+from .config import SENTIMENT_MODEL
 from .graph import GRAPH
 from .schemas import WeeklyReportRequest
+from .schemas import SentimentSummaryRequest, SentimentSummaryResponse
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -65,8 +69,6 @@ async def weekly_report(payload: WeeklyReportRequest, dry_run: bool = False) -> 
     """
     initial_state = {
         "old_introductions": [g.model_dump() for g in payload.old_introductions],
-        "recent_replays": [g.model_dump() for g in payload.recent_replays],
-        "recent_new": [g.model_dump() for g in payload.recent_new],
         "report_date": date.today().isoformat(),
         "dry_run": dry_run,
     }
@@ -88,3 +90,16 @@ async def weekly_report(payload: WeeklyReportRequest, dry_run: bool = False) -> 
     if dry_run:
         response["content"] = result.get("content")
     return response
+
+
+@app.post("/sentiment/summarize")
+async def sentiment_summarize(payload: SentimentSummaryRequest) -> SentimentSummaryResponse:
+    """감성분석 2차 종합: 라이브러리가 1차 분류한 리뷰 집계+샘플을 받아 LLM으로
+    '왜 그런 평가인지' 자연어 요약 리포트를 생성한다. Airflow 감성분석 DAG가
+    게임별로 호출한다.
+    """
+    prompt = prompts.sentiment_summary_prompt(payload)
+    summary = await llm.complete(prompt, model=SENTIMENT_MODEL, label=f"sentiment-summarize({payload.appid})")
+    if summary is None:
+        summary = f"{payload.name}에 대한 리뷰 요약을 생성하지 못했습니다 (LLM 미설정 또는 호출 실패)."
+    return SentimentSummaryResponse(summary=summary)

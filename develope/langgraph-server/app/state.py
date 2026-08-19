@@ -6,14 +6,14 @@ copy_editor)는 반드시 reducer가 걸린 채널(drafts/checked/logs)에만 �
 런타임에 InvalidUpdateError를 던진다 — 이 채널들은 barrier 이후 단일 노드
 (layout_desk/editorial_board)만 쓴다.
 
-Category 문자열은 weekly_reports.content의 최상위 키(old_introductions/
-recent_replays/recent_new)와 정확히 일치해야 한다 — fastapi-server의
-_row_to_report가 이 키만 읽고, 프론트 타입도 이 이름에 맞춰져 있다.
+Category 문자열은 weekly_reports.content의 최상위 키(old_introductions)와
+정확히 일치해야 한다 — fastapi-server의 _row_to_report가 이 키만 읽고, 프론트
+타입도 이 이름에 맞춰져 있다.
 """
 import operator
 from typing import Annotated, Literal, TypedDict
 
-Category = Literal["old_introductions", "recent_replays", "recent_new"]
+Category = Literal["old_introductions"]
 
 
 class SteamDetail(TypedDict, total=False):
@@ -108,8 +108,6 @@ class ReportState(TypedDict, total=False):
     # 입력. editor_in_chief 실행 전에는 GamePick 유래의 원시 dict, 실행 후에는
     # GameRef(카테고리/순번이 부여된)로 교체된다. 단일 writer라 reducer 불필요.
     old_introductions: list[GameRef]
-    recent_replays: list[GameRef]
-    recent_new: list[GameRef]
 
     report_date: str
     dry_run: bool

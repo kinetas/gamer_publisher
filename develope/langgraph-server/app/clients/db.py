@@ -32,7 +32,11 @@ def save_weekly_report(report_date: str, content: dict) -> None:
 def lookup_past_writeups(appid: int, *, limit: int = 3) -> list[str]:
     """같은 게임의 과거 소개글(최신순)을 최대 limit개 돌려준다. 실패/이력없음이면 [].
 
-    weekly_reports.content(JSONB)의 세 카테고리 배열을 합쳐서 appid로 직접 찾는다.
+    weekly_reports.content(JSONB)의 카테고리 배열을 합쳐서 appid로 직접 찾는다.
+    recent_replays는 recent_games_pipeline 폐기와 함께 신규 적재는 없지만, 과거에
+    저장된 weekly_reports 행에는 그 키로 소개글이 남아있을 수 있어 하위 호환을
+    위해 조회 대상에 그대로 둔다. recent_new는 파이프라인 자체가 폐기되어 과거
+    데이터도 더 이상 의미가 없으므로 제외한다.
     예전엔 chromadb에 임베딩까지 만들어서 같은 걸 조회했는데, "같은 appid"는
     유사도가 아니라 완전일치 질문이라 애초에 벡터 검색이 필요 없었다 — 임베딩
     API 호출(비용/키 의존성) 없이 postgres 쿼리 하나로 대체한다.
@@ -50,7 +54,6 @@ def lookup_past_writeups(appid: int, *, limit: int = 3) -> list[str]:
                      LATERAL jsonb_array_elements(
                          COALESCE(content->'old_introductions', '[]'::jsonb)
                          || COALESCE(content->'recent_replays', '[]'::jsonb)
-                         || COALESCE(content->'recent_new', '[]'::jsonb)
                      ) AS elem
                 WHERE (elem->>'appid')::int = %s
                 ORDER BY report_date DESC

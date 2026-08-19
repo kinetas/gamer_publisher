@@ -24,7 +24,7 @@ from ..state import CheckedDraft, ReportState
 
 logger = logging.getLogger(__name__)
 
-_CATEGORIES = ("old_introductions", "recent_replays", "recent_new")
+_CATEGORIES = ("old_introductions",)
 
 
 def _game_dict(checked_item: CheckedDraft) -> dict:

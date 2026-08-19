@@ -98,3 +98,54 @@ def make_stage_task(
         is_delete_operator_pod=True,
         get_logs=True,
     )
+
+
+def make_python_stage_task(
+    stage: str, env_vars: dict[str, str] | None = None
+) -> KubernetesPodOperator:
+    """spark-submit이 아니라 plain python으로 develope/spark-jobs/jobs/{stage}.py를
+    실행하는 stage task 빌더 (TASK-006, 감성분석 파이프라인의 sentiment_classify
+    단계 전용으로 신설).
+
+    make_stage_task(위 함수)는 건드리지 않는다 - 대신 이 별도 함수를 추가했다.
+    이유: sentiment_classify.py는 SparkSession/k8s executor가 전혀 필요 없는
+    단일 프로세스 작업(HuggingFace transformers 로컬 추론)이라, COMMON_SPARK_CONF의
+    spark-submit 전용 설정(--master k8s://..., dynamicAllocation, driver.host 등)을
+    그대로 붙이면 불필요한 executor pod 기동을 시도하거나 spark-submit 자체의
+    기동 오버헤드만 늘어난다. 같은 spark-jobs 이미지를 그대로 재사용한다
+    (develope/spark-jobs/requirements.txt에 transformers/torch(CPU)/sentencepiece/
+    boto3가 이미 설치돼 있으므로 - Dockerfile 참고).
+
+    MinIO 자격증명은 make_stage_task의 COMMON_SPARK_CONF --conf 방식과 동일한 원리로,
+    DAG 파싱 시점에 BaseHook.get_connection("minio_default")로 읽어 고정 값으로
+    주입한다. 이 값은 Jinja 템플릿이 아니라 파싱 시점에 이미 확정된 문자열이므로
+    k8s.V1EnvVar로 감싸도 안전하다. 런타임에 달라지는 값(대상 appid 목록, 리뷰
+    수집/분류 결과)은 이 env_vars로 넘기지 않는다 - KubernetesPodOperator가
+    env_vars를 list[V1EnvVar]로 받을 때 그 안의 Jinja(XCom pull 등) 문자열까지
+    Airflow가 재귀적으로 렌더링해준다는 보장을 이 환경(Airflow 미설치, 실행 검증
+    불가)에서 확인할 수 없어서다. 대신 고정 MinIO 키
+    (s3a://datalake/interim/sentiment/*.json)를 각 단계가 직접 읽고 쓰는 방식으로
+    데이터를 넘긴다 (develope/airflow/dags/sentiment_pipeline.py 모듈 docstring 참고).
+    """
+    minio_conn = BaseHook.get_connection("minio_default")
+    pod_env = [
+        k8s.V1EnvVar(name="MINIO_ENDPOINT", value="http://minio:9000"),
+        k8s.V1EnvVar(name="MINIO_ACCESS_KEY", value=minio_conn.login),
+        k8s.V1EnvVar(name="MINIO_SECRET_KEY", value=minio_conn.password),
+        *(k8s.V1EnvVar(name=k, value=v) for k, v in (env_vars or {}).items()),
+    ]
+    return KubernetesPodOperator(
+        task_id=stage,
+        name=f"sentiment-{stage}",
+        namespace="default",
+        image="gamer_publisher/spark-jobs:latest",
+        image_pull_policy="Never",  # load-image-to-k3s.sh로 containerd에 반입한 로컬 전용 이미지
+        cmds=["python"],
+        arguments=[f"/opt/spark-jobs/jobs/{stage}.py"],
+        # make_stage_task와 동일한 이유(entrypoint를 건너뛰어 UID가 /etc/passwd에
+        # 없는 상태가 되는 문제)로 root 실행.
+        security_context={"runAsUser": 0},
+        env_vars=pod_env,
+        is_delete_operator_pod=True,
+        get_logs=True,
+    )

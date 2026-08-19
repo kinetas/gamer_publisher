@@ -13,16 +13,20 @@ interface DetailSectionSpec {
 
 interface ReportDocumentProps {
   report: WeeklyReport;
+  startPage?: number;
 }
 
-export function ReportDocument({ report }: ReportDocumentProps) {
+/** 인쇄용 순수 함수: "명작 아카이브" 섹션(ReportDocument)이 차지할 총 페이지 수. */
+export function countReportPages(report: WeeklyReport): number {
+  return 1 + chunkBalanced(report.oldIntroductions, DETAIL_ITEMS_PER_PAGE).length;
+}
+
+export function ReportDocument({ report, startPage }: ReportDocumentProps) {
   const sections: DetailSectionSpec[] = [
-    { title: "옛 게임 추천", games: report.oldIntroductions },
-    { title: "다시 추천", games: report.recentReplays },
-    { title: "신규 추천", games: report.recentNew },
+    { title: "명작 아카이브", games: report.oldIntroductions },
   ];
 
-  let pageNumber = 1;
+  let pageNumber = startPage ?? 1;
 
   return (
     <div>

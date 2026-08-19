@@ -1,12 +1,11 @@
 """한국어 프롬프트 조립. 문자열 상수 대신 함수로 둬서, 취재 자료가 없을 때
 (Steam/Reddit/RAG 실패) 해당 섹션을 프롬프트에서 통째로 빼도록 한다.
 """
+from .schemas import SentimentSummaryRequest
 from .state import CheckedDraft, GameRef, Research
 
 _CATEGORY_LABEL = {
-    "old_introductions": "옛 게임 소개",
-    "recent_replays": "다시 추천",
-    "recent_new": "신규 추천",
+    "old_introductions": "명작 아카이브",
 }
 
 
@@ -184,6 +183,56 @@ def copy_desk_prompt(draft_text: str, game: GameRef, research: Research) -> str:
             lines.append(f"- 게시글: {title}")
         for comment in reddit.get("comments", [])[:3]:
             lines.append(f"- 댓글: {comment}")
+
+    return "\n".join(lines)
+
+
+def sentiment_summary_prompt(payload: SentimentSummaryRequest) -> str:
+    """감성분석 2차 종합(LLM) 프롬프트. 라이브러리(HuggingFace transformers 기반
+    경량 다국어 감성분석)가 리뷰 전량을 1차 분류한 집계 통계와 대표 리뷰 샘플만
+    받아서 "왜 그런 평가를 받는지"를 자연어로 요약한다. 리뷰 원문 전량이 아니라
+    집계+샘플만 넣으므로 게임당 LLM 호출은 이 프롬프트 1회로 끝난다.
+    """
+    lines = [
+        f"다음은 스팀 게임 '{payload.name}'의 리뷰를 경량 감성분석 라이브러리로",
+        "1차 분류한 집계 결과와 대표 리뷰 샘플이야. 이 자료를 바탕으로 이 게임이",
+        "왜 이런 평가를 받는지, 주요 호평 포인트와 주요 불만 포인트를 자연스러운",
+        "한국어 리포트 문구로 3~5문장 정도로 요약해줘.",
+        "게임 리포트 큐레이터 말투로, 과장 없이 담백하게.",
+        "",
+        "반드시 지킬 것:",
+        "- 아래 제공된 집계 수치와 리뷰 샘플 밖의 내용은 절대 지어내지 마라.",
+        "- 리뷰 샘플에 없는 구체적인 기능/버그/이벤트를 상상해서 쓰지 마라.",
+        "- 긍정과 부정 양쪽 근거가 모두 있으면 균형 있게 다뤄라. 한쪽 샘플이",
+        "  없으면 그쪽은 억지로 지어내지 말고 언급을 생략해라.",
+        "",
+        f"게임명: {payload.name}",
+        f"전체 리뷰 수: {payload.review_count}",
+        f"긍정 {payload.positive_count} / 부정 {payload.negative_count} / 중립 {payload.neutral_count}",
+        "",
+    ]
+
+    positive_samples = [s.text for s in payload.sample_reviews if s.sentiment == "positive"]
+    negative_samples = [s.text for s in payload.sample_reviews if s.sentiment == "negative"]
+    neutral_samples = [s.text for s in payload.sample_reviews if s.sentiment == "neutral"]
+
+    if positive_samples:
+        lines.append("긍정 리뷰 샘플:")
+        for text in positive_samples:
+            lines.append(f"- {text}")
+        lines.append("")
+
+    if negative_samples:
+        lines.append("부정 리뷰 샘플:")
+        for text in negative_samples:
+            lines.append(f"- {text}")
+        lines.append("")
+
+    if neutral_samples:
+        lines.append("중립 리뷰 샘플:")
+        for text in neutral_samples:
+            lines.append(f"- {text}")
+        lines.append("")
 
     return "\n".join(lines)
 

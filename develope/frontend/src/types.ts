@@ -16,8 +16,6 @@ export interface WeeklyReport {
   /** YYYY-MM-DD */
   date: string;
   oldIntroductions: GameEntry[];
-  recentReplays: GameEntry[];
-  recentNew: GameEntry[];
 }
 
 export interface ReportListItem {
@@ -27,4 +25,26 @@ export interface ReportListItem {
   title: string;
   /** 아직 PDF로 archive 안 됐으면(가장 최근 리포트는 보통 그렇다) null */
   pdfUrl: string | null;
+}
+
+export interface NewsArticle {
+  id: number;
+  source: string;
+  title: string;
+  excerpt: string | null;
+  link: string | null;
+  imageUrl: string | null;
+  pubDate: string | null;
+  appid: number | null;
+}
+
+export interface SentimentReport {
+  appid: number;
+  name: string;
+  positiveCount: number;
+  negativeCount: number;
+  neutralCount: number;
+  reviewCount: number;
+  summary: string | null;
+  generatedAt: string;
 }

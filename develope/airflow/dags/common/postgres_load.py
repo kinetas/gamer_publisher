@@ -17,6 +17,8 @@ import requests
 from airflow.hooks.base import BaseHook
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
+from common.gamemeca_rss import fetch_gamemeca_articles
+
 logger = logging.getLogger(__name__)
 
 GOLD_COLUMNS = [
@@ -24,11 +26,15 @@ GOLD_COLUMNS = [
     "positive", "negative", "owners", "ccu", "ingested_at",
 ]
 
-# 주간 리포트 슬롯 개수 (총 15개 = 프론트 1행 5열 그리드 x 3섹션에 맞춤).
-# old/신규/다시추천 세 카테고리는 서로 다른 테이블/기준에서 뽑는다.
-OLD_SLOT_COUNT = 5
-RECENT_NEW_SLOT_COUNT = 5
-RECENT_REPLAY_SLOT_COUNT = 5
+# 주간 리포트 슬롯 개수 (총 15개 유지 = 기존 3섹션 x 5개 그리드와 동일한 총량).
+# "신규 추천"(recent_games_pipeline의 Spark 발굴) 폐기로 RECENT_NEW_SLOT_COUNT는 제거하고,
+# 남은 두 카테고리(old_games 명작 아카이브 / recent_games 다시추천)에 15개를 재분배한다.
+# old_games_pipeline은 앞으로도 계속 새 appid를 발굴해 풀이 꾸준히 늘어나는 반면,
+# recent_games_pipeline DAG 자체가 없어져 recent_games 풀은 더 이상 새 appid가 유입되지
+# 않는 고정된(오히려 시간이 지나며 줄어들 수 있는) 풀이다. 그래서 계속 성장하는 old 쪽에
+# 더 큰 비중(8)을, 고정된 recent 쪽에 더 작은 비중(7)을 준다.
+OLD_SLOT_COUNT = 8
+RECENT_REPLAY_SLOT_COUNT = 7
 
 LANGGRAPH_REPORT_URL = "http://langgraph-server:8100/reports/weekly"
 LANGGRAPH_INGEST_GAMEMECA_URL = "http://langgraph-server:8100/ingest/gamemeca"
@@ -119,7 +125,13 @@ def _jsonable_rows(rows: list[dict]) -> list[dict]:
 
 
 def select_weekly_report(**context) -> None:
-    """postgres 이력 대조 후 3슬롯(옛작품/신규/다시추천) 선정하고 이력을 갱신한다."""
+    """postgres 이력 대조 후 2그룹(옛작품/다시추천)을 선정하고 이력을 갱신한다.
+
+    langgraph-server의 WeeklyReportRequest 계약이 old_introductions 단일 리스트만
+    받으므로(schemas.py), old_games에서 뽑은 옛작품과 recent_games에서 뽑은 다시추천을
+    하나의 리스트로 합쳐서 xcom에 싣는다. "신규 추천"(recommend_count=0 발굴)은
+    recent_games_pipeline 폐기와 함께 완전히 제거됐다.
+    """
     conn = PostgresHook(postgres_conn_id="postgres_app").get_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -143,7 +155,7 @@ def select_weekly_report(**context) -> None:
             # 두 쿼리 다 공통으로 recent_games 풀 자체를 "오늘 기준 1년 이내 수집된 것"으로
             # 제한하고(1년 넘으면 old_games 영역과 개념이 겹치므로 recent 후보에서
             # 아예 배제), 그 안에서 positive=0(리뷰 하나도 못 받은 것)인 것도 뺀다.
-            # old_games에서 이미 고른 15개 최종 선정 결과에 겹치는 게 없어야 하므로
+            # old_games에서 이미 고른 옛작품 결과(old_picks)와 겹치는 게 없어야 하므로
             # (기획 요구사항), old_appids를 먼저 구해서 아래 recent 쿼리들에서
             # 전부 미리 제외한다 — appid 전역 유일성상 이론적으로만 가능한 케이스지만
             # 방어적으로 막아둔다.
@@ -155,10 +167,8 @@ def select_weekly_report(**context) -> None:
             recent_pool_filter = "ingested_at >= now() - interval '1 year' AND positive >= 100"
 
             # 다시 추천: recommend_count > 1(두 번 이상 추천된 적 있는 것)을 주 후보로
-            # 삼아 적게 추천된 것부터 우선(ASC)으로 5개를 채운다. 그것만으로 5개가
-            # 안 되면 recommend_count = 1(한 번만 추천된 것)에서 부족한 만큼 보충한다.
-            # 신규 추천보다 먼저 확정하는 이유는 아래 신규 추천이 이 결과와 안
-            # 겹치게 걸러야 하기 때문.
+            # 삼아 적게 추천된 것부터 우선(ASC)으로 RECENT_REPLAY_SLOT_COUNT개를 채운다.
+            # 그것만으로 부족하면 recommend_count = 1(한 번만 추천된 것)에서 나머지를 보충한다.
             cur.execute(
                 f"""
                 SELECT appid, name, developer, publisher, ccu, positive, negative,
@@ -189,45 +199,8 @@ def select_weekly_report(**context) -> None:
                 )
                 recent_replay_picks += cur.fetchall()
 
-            replay_appids = {r["appid"] for r in recent_replay_picks}
-
-            # 신규 추천: recommend_count = 0(한 번도 추천 안 된 것)을 주 후보로 삼아
-            # 인기 많은 신작 우선(ccu DESC) - old_games와 달리 "묻힌 걸 찾는다"는
-            # 취지가 아니다. 그것만으로 5개가 안 되면 recommend_count = 1에서
-            # 부족한 만큼 보충하되, 다시 추천에 이미 뽑힌 appid와는 겹치지 않게 뺀다.
-            exclude_for_new = old_appids | replay_appids
-            cur.execute(
-                f"""
-                SELECT appid, name, developer, publisher, ccu, positive, negative,
-                       first_recommended_at, recommend_count
-                FROM recent_games
-                WHERE recommend_count = 0 AND name IS NOT NULL AND name != ''
-                  AND {recent_pool_filter} AND appid != ALL(%s::int[])
-                ORDER BY ccu DESC
-                LIMIT %s
-                """,
-                (list(exclude_for_new), RECENT_NEW_SLOT_COUNT),
-            )
-            recent_new_picks = cur.fetchall()
-
-            if len(recent_new_picks) < RECENT_NEW_SLOT_COUNT:
-                exclude_for_new = exclude_for_new | {r["appid"] for r in recent_new_picks}
-                cur.execute(
-                    f"""
-                    SELECT appid, name, developer, publisher, ccu, positive, negative,
-                           first_recommended_at, recommend_count
-                    FROM recent_games
-                    WHERE recommend_count = 1 AND name IS NOT NULL AND name != ''
-                      AND {recent_pool_filter} AND appid != ALL(%s::int[])
-                    ORDER BY ccu DESC
-                    LIMIT %s
-                    """,
-                    (list(exclude_for_new), RECENT_NEW_SLOT_COUNT - len(recent_new_picks)),
-                )
-                recent_new_picks += cur.fetchall()
-
             old_appids = list(old_appids)
-            recent_appids = [r["appid"] for r in recent_new_picks + recent_replay_picks]
+            recent_appids = [r["appid"] for r in recent_replay_picks]
 
             if old_appids:
                 cur.execute(
@@ -255,14 +228,15 @@ def select_weekly_report(**context) -> None:
     finally:
         conn.close()
 
+    # langgraph-server의 WeeklyReportRequest는 old_introductions 하나뿐이므로
+    # (develope/langgraph-server/app/schemas.py), 옛작품과 다시추천을 한 리스트로 합친다.
+    # 다른 키를 붙이면 pydantic validation이 422로 거부한다.
     report = {
-        "old_introductions": _jsonable_rows(old_picks),
-        "recent_new": _jsonable_rows(recent_new_picks),
-        "recent_replays": _jsonable_rows(recent_replay_picks),
+        "old_introductions": _jsonable_rows(old_picks) + _jsonable_rows(recent_replay_picks),
     }
     logger.info(
-        "주간 리포트 선정: 옛작품 %d / 신규 %d / 다시추천 %d",
-        len(old_picks), len(recent_new_picks), len(recent_replay_picks),
+        "주간 리포트 선정: 옛작품 %d / 다시추천 %d (합계 %d)",
+        len(old_picks), len(recent_replay_picks), len(old_picks) + len(recent_replay_picks),
     )
     context["ti"].xcom_push(key="weekly_report", value=report)
 
@@ -313,6 +287,66 @@ def ingest_gamemeca_news() -> None:
         logger.warning(
             "게임메카 RSS 색인 예상 밖 응답: %s %s", response.status_code, response.text[:500]
         )
+
+
+def upsert_gamemeca_news() -> None:
+    """게임메카 RSS를 독립 파싱해 game_news 테이블에 upsert한다 (link=external_id 기준).
+
+    langgraph-server의 ChromaDB 색인(ingest_gamemeca_news)과는 별개의 파이프라인 -
+    이 함수는 RAG용이 아니라 프론트 RSS 뉴스 섹션에 표시할 구조화 데이터를 Postgres에
+    저장한다. gamemeca_rss.py가 langgraph-server/app/clients/gamemeca.py를 import하지
+    않고 완전히 독립적으로 RSS를 다시 파싱하듯, 이 함수도 ingest_gamemeca_news와 별개로
+    동작한다 (같은 RSS를 각자 목적에 맞게 따로 가져옴).
+    """
+    articles = fetch_gamemeca_articles()
+
+    if not articles:
+        # fetch_gamemeca_articles는 네트워크/파싱 오류를 이미 warning으로 남기고 []를
+        # 반환한다 - 여기서는 "이번 주기엔 upsert할 기사 없음"만 info로 남기고 스킵한다
+        # (load_gold_to_postgres의 "rows 없으면 스킵" 패턴과 동일).
+        logger.info("게임메카 RSS: 이번 조회에서 upsert할 기사 없음, 스킵")
+        return
+
+    rows = [
+        (
+            a["source"],
+            a["external_id"],
+            a["title"],
+            a["excerpt"],
+            a["link"],
+            a["image_url"],
+            a["pub_date"],
+        )
+        for a in articles
+    ]
+
+    conn = PostgresHook(postgres_conn_id="postgres_app").get_conn()
+    try:
+        with conn.cursor() as cur:
+            # appid는 UPDATE 대상에서 뺀다 - TASK-007(게임명 -> appid 매칭)이 채운 값을
+            # 이 함수가 재실행될 때마다 EXCLUDED.appid(NULL)로 덮어써서 지우면 안 된다.
+            # load_gold_to_postgres가 ingested_at을 EXCLUDED 대상에서 뺀 것과 같은 이유.
+            psycopg2.extras.execute_values(
+                cur,
+                """
+                INSERT INTO game_news
+                    (source, external_id, title, excerpt, link, image_url, pub_date)
+                VALUES %s
+                ON CONFLICT (external_id) DO UPDATE SET
+                    source = EXCLUDED.source,
+                    title = EXCLUDED.title,
+                    excerpt = EXCLUDED.excerpt,
+                    link = EXCLUDED.link,
+                    image_url = EXCLUDED.image_url,
+                    pub_date = EXCLUDED.pub_date
+                """,
+                rows,
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+    logger.info("게임메카 뉴스: %d행 upsert 완료", len(rows))
 
 
 def archive_current_report() -> None:
