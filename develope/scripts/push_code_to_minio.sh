@@ -15,7 +15,7 @@ docker run --rm \
   --entrypoint /bin/sh \
   minio/mc:latest -c "
     mc alias set local http://minio:9000 '$MINIO_ROOT_USER' '$MINIO_ROOT_PASSWORD' &&
-    mc mirror --overwrite /upload/dags local/code/dags
+    mc mirror --overwrite --remove /upload/dags local/code/dags
   "
 
 echo '코드를 MinIO code 버킷에 업로드했습니다. Airflow에 반영하려면: docker compose run --rm dags-sync'

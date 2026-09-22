@@ -121,6 +121,11 @@ services:
       REPORTER_MODEL: ${REPORTER_MODEL:-gpt-4o-mini}
       COPY_DESK_MODEL: ${COPY_DESK_MODEL:-gpt-4o-mini}
       EDITORIAL_MODEL: ${EDITORIAL_MODEL:-gpt-4o-mini}
+      # config.py는 SENTIMENT_MODEL을 읽지만 여기 안 뽑아주면 항상 기본값
+      # gpt-4o-mini로 고정되어 LLM_BASE_URL을 로컬 서버로 돌려도 sentiment/summarize만
+      # 엉뚱한(존재하지 않는) 모델을 호출하게 된다 - sentiment_pipeline 실행 검증 중
+      # 재현/확인한 문제라 다른 *_MODEL과 동일하게 뽑아준다.
+      SENTIMENT_MODEL: ${SENTIMENT_MODEL:-gpt-4o-mini}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
       # GPU 없는 CPU 전용 로컬 서버는 컨테이너 하나가 사실상 순차 처리라, 기본
       # 8(OpenAI 네트워크 병목 기준)을 그대로 쓰면 서로 자원만 나눠 쓰며 다같이
@@ -364,6 +369,8 @@ services:
   # MinIO code 버킷의 dags/ 프리픽스를 Airflow dags 볼륨으로 1회 동기화.
   # 로컬에서 DAG을 고치면 scripts/push_dags_to_minio.sh 로 code 버킷에 올린 뒤
   # `docker compose run --rm dags-sync` 로 다시 반영한다. (Jenkins가 이 두 단계를 대신 수행한다.)
+  # --remove 필수: 없으면 git에서 삭제된 DAG(예: recent_games_pipeline.py)가 code 버킷/
+  # dags 볼륨에 그대로 남아 Airflow가 계속 실행한다 - 실제로 재현된 문제라 추가함.
   dags-sync:
     image: minio/mc:latest
     container_name: airflow-dags-sync
@@ -381,7 +388,7 @@ services:
       - |
         set -e
         until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done
-        mc mirror --overwrite local/code/dags /dags || echo 'code/dags 비어있음, 건너뜀'
+        mc mirror --overwrite --remove local/code/dags /dags || echo 'code/dags 비어있음, 건너뜀'
     networks:
       - backend-net
 

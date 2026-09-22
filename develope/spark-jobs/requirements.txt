@@ -7,4 +7,9 @@ praw
 # 재설치/덮어쓰기될 수 있어서 일부러 뺐다.
 transformers
 sentencepiece
+# sentencepiece만으로는 tokenizer.model(sentencepiece.bpe.model)을 변환할 수 없다
+# (transformers가 protobuf 없이는 slow-tokenizer 변환에 실패하고 tiktoken 폴백을
+# 타는데 tiktoken도 설치돼 있지 않아 ImportError로 죽는다 - 실제 이미지 빌드 후
+# _load_classifier() 실행으로 재현/확인함). protobuf를 명시적으로 추가해야 한다.
+protobuf
 boto3

@@ -110,8 +110,18 @@ def _dedup_by_recommendationid(records: list[dict]) -> list[dict]:
 def _load_classifier():
     from transformers import pipeline
 
+    # max_length를 명시하지 않으면 이 모델의 tokenizer_config에 model_max_length가
+    # 제대로 설정돼 있지 않아(매우 큰 sentinel 값으로 잡힘) truncation=True가 사실상
+    # 아무 효과가 없다. 실제 Steam 리뷰(한국어 등 비-라틴 문자 다수 포함)로 실행해보니
+    # 782 토큰짜리 입력이 그대로 모델에 들어가 "index 514 is out of bounds for
+    # dimension 1 with size 514"로 크래시하는 것을 재현/확인함 - 모델의 실제 한계인
+    # 512(max_position_embeddings 514에서 special token 2개 제외)를 직접 지정한다.
     return pipeline(
-        "sentiment-analysis", model=MODEL_NAME, tokenizer=MODEL_NAME, truncation=True
+        "sentiment-analysis",
+        model=MODEL_NAME,
+        tokenizer=MODEL_NAME,
+        truncation=True,
+        max_length=512,
     )
 
 
