@@ -1,12 +1,8 @@
 import type { SentimentReport } from "../types";
 import { PageSheet } from "./PageSheet";
-import { chunkBalanced } from "../utils/chunk";
-
-const SENTIMENT_ITEMS_PER_PAGE = 3;
 
 interface SentimentPrintSectionProps {
   reports: SentimentReport[];
-  startPage: number;
 }
 
 function formatGeneratedAt(generatedAt: string): string {
@@ -21,15 +17,6 @@ function formatGeneratedAt(generatedAt: string): string {
   });
 }
 
-/** 인쇄용 순수 함수: 이 섹션이 차지할 총 페이지 수 (빈 배열이어도 최소 1장). */
-export function countSentimentPages(
-  reports: SentimentReport[],
-  itemsPerPage: number = SENTIMENT_ITEMS_PER_PAGE
-): number {
-  if (reports.length === 0) return 1;
-  return chunkBalanced(reports, itemsPerPage).length;
-}
-
 function SentimentPrintRow({ report }: { report: SentimentReport }) {
   const total = report.positiveCount + report.negativeCount + report.neutralCount;
   const positivePct = total > 0 ? (report.positiveCount / total) * 100 : 0;
@@ -37,7 +24,7 @@ function SentimentPrintRow({ report }: { report: SentimentReport }) {
   const neutralPct = total > 0 ? (report.neutralCount / total) * 100 : 0;
 
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div className="print-row" style={{ marginBottom: 24 }}>
       <div
         style={{
           display: "flex",
@@ -97,33 +84,25 @@ function SentimentPrintRow({ report }: { report: SentimentReport }) {
   );
 }
 
-export function SentimentPrintSection({ reports, startPage }: SentimentPrintSectionProps) {
-  const pages = reports.length > 0 ? chunkBalanced(reports, SENTIMENT_ITEMS_PER_PAGE) : [[]];
-  let pageNumber = startPage;
-
+export function SentimentPrintSection({ reports }: SentimentPrintSectionProps) {
   return (
-    <div>
-      {pages.map((pageReports, pageIndex) => (
-        <PageSheet key={`sentiment-${pageIndex}`} pageLabel={`PAGE ${pageNumber++}`}>
-          <h2
-            style={{
-              fontSize: 20,
-              fontWeight: 700,
-              margin: "0 0 24px",
-              paddingBottom: 12,
-              borderBottom: "2px solid var(--color-accent)",
-            }}
-          >
-            감성분석
-            {pageIndex > 0 ? " (계속)" : ""}
-          </h2>
-          {pageReports.length > 0 ? (
-            pageReports.map((report) => <SentimentPrintRow key={report.appid} report={report} />)
-          ) : (
-            <p style={{ fontSize: 13, color: "var(--color-text-muted)" }}>표시할 감성분석 결과가 없습니다.</p>
-          )}
-        </PageSheet>
-      ))}
-    </div>
+    <PageSheet breakBefore>
+      <h2
+        style={{
+          fontSize: 20,
+          fontWeight: 700,
+          margin: "0 0 24px",
+          paddingBottom: 12,
+          borderBottom: "2px solid var(--color-accent)",
+        }}
+      >
+        감성분석
+      </h2>
+      {reports.length > 0 ? (
+        reports.map((report) => <SentimentPrintRow key={report.appid} report={report} />)
+      ) : (
+        <p style={{ fontSize: 13, color: "var(--color-text-muted)" }}>표시할 감성분석 결과가 없습니다.</p>
+      )}
+    </PageSheet>
   );
 }

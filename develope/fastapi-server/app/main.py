@@ -1,3 +1,4 @@
+import logging
 import os
 
 import boto3
@@ -5,9 +6,23 @@ import psycopg2
 import psycopg2.extras
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
+from playwright.async_api import Error as PlaywrightError
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from playwright.async_api import async_playwright
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="gamer_publisher API")
+
+# A4 물리 페이지 여백. 프론트 쪽 .page-sheet는 인쇄 시 padding 0/width 100%로
+# 재정의되므로(global.css) 종이 여백은 전부 여기서만 담당한다 - 한 곳만 바꾸면
+# 모든 섹션/페이지에 동일하게 적용된다.
+PDF_PAGE_MARGIN = {"top": "20mm", "bottom": "20mm", "left": "15mm", "right": "15mm"}
+PDF_FOOTER_TEMPLATE = """
+<div style="width:100%; font-size:10px; font-family:monospace; text-align:right; padding:0 15mm; color:#888;">
+  PAGE <span class="pageNumber"></span> / <span class="totalPages"></span>
+</div>
+"""
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 FRONTEND_BASE_URL = os.environ.get("FRONTEND_BASE_URL", "http://frontend")
@@ -188,6 +203,52 @@ def download_report(report_id: int) -> StreamingResponse:
     return StreamingResponse(obj["Body"], media_type="application/pdf")
 
 
+async def _render_report_pdf(report_id: str) -> bytes:
+    """헤드리스 Chromium으로 프론트 /print/:id 페이지를 PDF로 캡처한다.
+
+    브라우저 launch 이후 어느 단계에서 실패하든(페이지 로드 실패, 프론트 쪽
+    데이터 fetch 에러, 타임아웃 등) finally에서 반드시 browser.close()가
+    돌아가도록 해서, 한 번 실패했다고 Chromium 프로세스가 좀비로 남아
+    다음 호출들까지 연쇄로 실패시키는 일이 없게 한다.
+    """
+    async with async_playwright() as playwright:
+        # --no-sandbox: 이 컨테이너는 root로 돌고 전용 seccomp/유저 네임스페이스
+        #   격리가 없어 Chromium 자체 샌드박스가 기동 단계에서 거부당해 죽는 경우가
+        #   있다 (headless 서버에서 흔한 증상). --disable-dev-shm-usage: 도커 기본
+        #   /dev/shm(64MB)이 작아 탭이 크래시하는 걸 방지 - 둘 다 Playwright/Puppeteer가
+        #   도커 환경에 공식적으로 권장하는 플래그.
+        browser = await playwright.chromium.launch(
+            args=["--no-sandbox", "--disable-dev-shm-usage"]
+        )
+        try:
+            page = await browser.new_page()
+            page.set_default_timeout(30_000)
+            await page.goto(f"{FRONTEND_BASE_URL}/print/{report_id}", wait_until="domcontentloaded")
+            # PrintReport.tsx가 로딩/성공/실패를 data-print-status 속성 하나로
+            # 알려준다 - networkidle처럼 "네트워크가 조용해졌을 것"이라는 간접
+            # 신호에 기대지 않고, 실제로 렌더링할 데이터가 다 갖춰졌는지를 직접 확인한다.
+            await page.wait_for_selector('[data-print-status="ready"], [data-print-status="error"]')
+            status = await page.get_attribute("[data-print-status]", "data-print-status")
+            if status != "ready":
+                raise RuntimeError(f"frontend reported data-print-status={status!r}")
+
+            # page.pdf()는 기본적으로 print 미디어를 자동 적용하지 않는다(screen 그대로
+            # 렌더링) — 이걸 안 하면 global.css의 @media print 블록이 통째로 무시돼서,
+            # 사용자가 직접 브라우저로 인쇄(window.print() — 항상 print 미디어 적용됨)한
+            # 결과와 페이지 구성이 달라진다.
+            await page.emulate_media(media="print")
+            return await page.pdf(
+                format="A4",
+                print_background=True,
+                margin=PDF_PAGE_MARGIN,
+                display_header_footer=True,
+                header_template="<span></span>",
+                footer_template=PDF_FOOTER_TEMPLATE,
+            )
+        finally:
+            await browser.close()
+
+
 @app.post("/reports/archive-current")
 async def archive_current_report() -> dict:
     """다음 주 파이프라인이 새 리포트를 만들기 직전에 호출된다. 그때까지 '최신'이던
@@ -211,18 +272,11 @@ async def archive_current_report() -> dict:
     report_id = row["id"]
     report_date = row["report_date"].isoformat()
 
-    async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch()
-        page = await browser.new_page()
-        await page.goto(f"{FRONTEND_BASE_URL}/print/{report_id}", wait_until="networkidle")
-        # page.pdf()는 기본적으로 print 미디어를 자동 적용하지 않는다(screen 그대로
-        # 렌더링) — 이걸 안 하면 global.css의 @media print 블록(PageSheet 페이지
-        # 나눔 break-after: page 등)이 통째로 무시돼서, 사용자가 직접 브라우저로
-        # 인쇄(window.print() — 항상 print 미디어 적용됨)한 결과와 페이지 구성이
-        # 달라진다.
-        await page.emulate_media(media="print")
-        pdf_bytes = await page.pdf(format="A4", print_background=True)
-        await browser.close()
+    try:
+        pdf_bytes = await _render_report_pdf(report_id)
+    except (PlaywrightTimeoutError, PlaywrightError, RuntimeError) as exc:
+        logger.exception("PDF 캡처 실패 (report_id=%s)", report_id)
+        raise HTTPException(status_code=502, detail=f"PDF 생성 실패: {exc}") from exc
 
     pdf_path = f"{report_date}.pdf"
     _s3_client().put_object(
@@ -236,5 +290,7 @@ async def archive_current_report() -> dict:
         conn.commit()
     finally:
         conn.close()
+
+    return {"status": "archived", "report_id": report_id, "pdf_path": pdf_path}
 
     return {"status": "archived", "report_id": report_id, "pdf_path": pdf_path}

@@ -1,13 +1,9 @@
 import type { NewsArticle } from "../types";
 import { PageSheet } from "./PageSheet";
 import { PlaceholderImage } from "./PlaceholderImage";
-import { chunkBalanced } from "../utils/chunk";
-
-const NEWS_ITEMS_PER_PAGE = 4;
 
 interface NewsPrintSectionProps {
   articles: NewsArticle[];
-  startPage: number;
 }
 
 function formatPubDate(pubDate: string | null): string | null {
@@ -17,16 +13,10 @@ function formatPubDate(pubDate: string | null): string | null {
   return parsed.toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
 
-/** 인쇄용 순수 함수: 이 섹션이 차지할 총 페이지 수 (빈 배열이어도 최소 1장). */
-export function countNewsPages(articles: NewsArticle[], itemsPerPage: number = NEWS_ITEMS_PER_PAGE): number {
-  if (articles.length === 0) return 1;
-  return chunkBalanced(articles, itemsPerPage).length;
-}
-
 function NewsPrintRow({ article }: { article: NewsArticle }) {
   const displayDate = formatPubDate(article.pubDate);
   return (
-    <div style={{ display: "flex", gap: 20, marginBottom: 24 }}>
+    <div className="print-row" style={{ display: "flex", gap: 20, marginBottom: 24 }}>
       <div style={{ width: 140, flexShrink: 0, aspectRatio: "16 / 9" }}>
         <PlaceholderImage src={article.imageUrl ?? undefined} alt={article.title} />
       </div>
@@ -57,33 +47,25 @@ function NewsPrintRow({ article }: { article: NewsArticle }) {
   );
 }
 
-export function NewsPrintSection({ articles, startPage }: NewsPrintSectionProps) {
-  const pages = articles.length > 0 ? chunkBalanced(articles, NEWS_ITEMS_PER_PAGE) : [[]];
-  let pageNumber = startPage;
-
+export function NewsPrintSection({ articles }: NewsPrintSectionProps) {
   return (
-    <div>
-      {pages.map((pageArticles, pageIndex) => (
-        <PageSheet key={`news-${pageIndex}`} pageLabel={`PAGE ${pageNumber++}`}>
-          <h2
-            style={{
-              fontSize: 20,
-              fontWeight: 700,
-              margin: "0 0 24px",
-              paddingBottom: 12,
-              borderBottom: "2px solid var(--color-accent)",
-            }}
-          >
-            RSS 뉴스
-            {pageIndex > 0 ? " (계속)" : ""}
-          </h2>
-          {pageArticles.length > 0 ? (
-            pageArticles.map((article) => <NewsPrintRow key={article.id} article={article} />)
-          ) : (
-            <p style={{ fontSize: 13, color: "var(--color-text-muted)" }}>표시할 뉴스가 없습니다.</p>
-          )}
-        </PageSheet>
-      ))}
-    </div>
+    <PageSheet breakBefore>
+      <h2
+        style={{
+          fontSize: 20,
+          fontWeight: 700,
+          margin: "0 0 24px",
+          paddingBottom: 12,
+          borderBottom: "2px solid var(--color-accent)",
+        }}
+      >
+        RSS 뉴스
+      </h2>
+      {articles.length > 0 ? (
+        articles.map((article) => <NewsPrintRow key={article.id} article={article} />)
+      ) : (
+        <p style={{ fontSize: 13, color: "var(--color-text-muted)" }}>표시할 뉴스가 없습니다.</p>
+      )}
+    </PageSheet>
   );
 }

@@ -300,9 +300,11 @@ services:
       - k3s-kubeconfig:/etc/rancher/k3s
     ports:
       - "6443:6443"
-      # Spark Driver UI: k3s/spark-driver-ui-service.yaml의 NodePort(30040)를 호스트 4040에
-      # 고정 매핑. 잡이 실행 중일 때만(라벨 매칭되는 pod가 떠 있을 때만) 실제로 응답한다.
-      - "4040:30040"
+      # Spark Driver UI: k3s/spark-driver-ui-service.yaml의 NodePort(30040)를 호스트 14040에
+      # 고정 매핑. 호스트 4040은 Windows(Hyper-V) 동적 포트 예약 범위(4003-4102)와 겹쳐 바인딩이
+      # 실패해서 15432(postgres)와 같은 패턴으로 14040으로 옮김. 잡이 실행 중일 때만(라벨 매칭되는
+      # pod가 떠 있을 때만) 실제로 응답한다.
+      - "14040:30040"
     networks:
       - k8s-net
       - backend-net

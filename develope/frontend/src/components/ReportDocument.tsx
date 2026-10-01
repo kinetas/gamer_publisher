@@ -1,36 +1,16 @@
-import type { WeeklyReport, GameEntry } from "../types";
+import type { WeeklyReport } from "../types";
 import { PageSheet } from "./PageSheet";
 import { GameGrid } from "./GameGrid";
 import { GameDetailRow } from "./GameDetailRow";
-import { chunkBalanced } from "../utils/chunk";
-
-const DETAIL_ITEMS_PER_PAGE = 4;
-
-interface DetailSectionSpec {
-  title: string;
-  games: GameEntry[];
-}
 
 interface ReportDocumentProps {
   report: WeeklyReport;
-  startPage?: number;
 }
 
-/** 인쇄용 순수 함수: "명작 아카이브" 섹션(ReportDocument)이 차지할 총 페이지 수. */
-export function countReportPages(report: WeeklyReport): number {
-  return 1 + chunkBalanced(report.oldIntroductions, DETAIL_ITEMS_PER_PAGE).length;
-}
-
-export function ReportDocument({ report, startPage }: ReportDocumentProps) {
-  const sections: DetailSectionSpec[] = [
-    { title: "명작 아카이브", games: report.oldIntroductions },
-  ];
-
-  let pageNumber = startPage ?? 1;
-
+export function ReportDocument({ report }: ReportDocumentProps) {
   return (
     <div>
-      <PageSheet pageLabel={`PAGE ${pageNumber++}`}>
+      <PageSheet>
         <div style={{ marginBottom: 40 }}>
           <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "var(--font-mono)" }}>
             {report.date}
@@ -47,33 +27,27 @@ export function ReportDocument({ report, startPage }: ReportDocumentProps) {
           </div>
         </div>
 
-        {sections.map((section) => (
-          <GameGrid key={section.title} title={section.title} games={section.games} />
-        ))}
+        <GameGrid title="명작 아카이브" games={report.oldIntroductions} />
       </PageSheet>
 
-      {sections.map((section) => {
-        const pages = chunkBalanced(section.games, DETAIL_ITEMS_PER_PAGE);
-        return pages.map((pageGames, pageIndex) => (
-          <PageSheet key={`${section.title}-${pageIndex}`} pageLabel={`PAGE ${pageNumber++}`}>
-            <h2
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                margin: "0 0 24px",
-                paddingBottom: 12,
-                borderBottom: "2px solid var(--color-accent)",
-              }}
-            >
-              {section.title}
-              {pageIndex > 0 ? " (계속)" : ""}
-            </h2>
-            {pageGames.map((game) => (
-              <GameDetailRow key={game.appid} game={game} />
-            ))}
-          </PageSheet>
-        ));
-      })}
+      <PageSheet breakBefore>
+        <h2
+          style={{
+            fontSize: 20,
+            fontWeight: 700,
+            margin: "0 0 24px",
+            paddingBottom: 12,
+            borderBottom: "2px solid var(--color-accent)",
+          }}
+        >
+          명작 아카이브
+        </h2>
+        {report.oldIntroductions.map((game) => (
+          <div key={game.appid} className="print-row">
+            <GameDetailRow game={game} />
+          </div>
+        ))}
+      </PageSheet>
     </div>
   );
 }

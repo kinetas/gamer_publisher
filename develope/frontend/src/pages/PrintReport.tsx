@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { fetchNews, fetchReport, fetchSentimentList } from "../api";
-import { ReportDocument, countReportPages } from "../components/ReportDocument";
-import { NewsPrintSection, countNewsPages } from "../components/NewsPrintSection";
+import { ReportDocument } from "../components/ReportDocument";
+import { NewsPrintSection } from "../components/NewsPrintSection";
 import { SentimentPrintSection } from "../components/SentimentPrintSection";
 import type { NewsArticle, SentimentReport, WeeklyReport } from "../types";
 
@@ -13,8 +13,11 @@ import type { NewsArticle, SentimentReport, WeeklyReport } from "../types";
  *    ?print=1로 열면 로드 후 브라우저 인쇄 다이얼로그(다른 이름으로 저장 -> PDF)를
  *    띄운다 (Sidebar.tsx 참고).
  *
- * 주간 PDF 아카이브 정책: 명작 아카이브 / RSS 뉴스 / 감성분석 3섹션을 하나로 묶어
- * 이어붙여 렌더링한다 (페이지 번호도 섹션을 넘어 계속 이어짐).
+ * 주간 PDF 아카이브 정책: 명작 아카이브 / RSS 뉴스 / 감성분석 3섹션을 섹션 단위로
+ * 새 물리 페이지에서 시작시키고, 섹션 내부의 실제 페이지 분할(몇 장이 될지)과
+ * 쪽 번호는 각 섹션이 몇 개씩 들어가는지 미리 추측하지 않고 Chromium의
+ * page.pdf({ displayHeaderFooter, footerTemplate }) 쪽 번호 기능에 맡긴다
+ * (fastapi-server/app/main.py 참고) — 내용 길이가 달라져도 깨지지 않는다.
  */
 export default function PrintReport() {
   const { id } = useParams<{ id: string }>();
@@ -51,17 +54,21 @@ export default function PrintReport() {
     }
   }, [allLoaded, searchParams]);
 
-  if (error) return <p style={{ padding: 40 }}>{error}</p>;
-  if (!allLoaded) return <p style={{ padding: 40 }}>불러오는 중...</p>;
-
-  const newsStartPage = countReportPages(report) + 1;
-  const sentimentStartPage = newsStartPage + countNewsPages(news);
+  // fastapi-server가 networkidle 같은 간접 신호 대신 이 속성 하나만 보고
+  // "캡처해도 되는지/실패했는지"를 바로 판단한다 (아래 main.py 참고).
+  const printStatus = error ? "error" : allLoaded ? "ready" : "loading";
 
   return (
-    <div style={{ padding: "40px 0" }}>
-      <ReportDocument report={report} />
-      <NewsPrintSection articles={news} startPage={newsStartPage} />
-      <SentimentPrintSection reports={sentiment} startPage={sentimentStartPage} />
+    <div data-print-status={printStatus}>
+      {error && <p style={{ padding: 40 }}>{error}</p>}
+      {!error && !allLoaded && <p style={{ padding: 40 }}>불러오는 중...</p>}
+      {!error && allLoaded && (
+        <div style={{ padding: "40px 0" }}>
+          <ReportDocument report={report} />
+          <NewsPrintSection articles={news} />
+          <SentimentPrintSection reports={sentiment} />
+        </div>
+      )}
     </div>
   );
 }

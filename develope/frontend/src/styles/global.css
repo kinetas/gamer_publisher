@@ -13,7 +13,11 @@
   --font-sans: "Inter", "Pretendard", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  --page-width: 840px;
+  /* 화면에서 "PDF 페이지처럼" 보이게 하는 용도일 뿐이고, 실제 PDF의 물리적
+     크기/여백은 fastapi-server의 page.pdf({ format: "A4", margin: {...} })가
+     전담한다 (CSS 쪽에서 정확한 mm 단위를 안 맞춰도 PDF 자체는 항상 A4로 나옴).
+     210mm(A4 가로) - 좌우 여백(15mm*2)을 96dpi로 환산한 값. */
+  --page-width: 680px;
 }
 
 * {
@@ -61,19 +65,37 @@ a {
 /* PrintReport(/print/:id)의 window.print() 폴백용 - archive-current의
    Playwright page.pdf({ print_background: true })와 달리 브라우저 기본
    인쇄는 배경을 날리고 흰 배경에 옅은 글자색을 그대로 써서 거의 안 보이게
-   만든다. print-color-adjust로 다크 테마를 그대로 강제하고, PageSheet
-   단위로 페이지를 나눈다. */
+   만든다. print-color-adjust로 다크 테마를 그대로 강제한다.
+   페이지 분할은 미리 "N개씩 자르기"로 추측하지 않고, 실제 내용 높이에 맞춰
+   브라우저/Chromium의 표준 CSS 분할(break-before/break-inside)에 맡긴다 —
+   리뷰 요약 글자 수 등으로 한 줄이 예상보다 길어져도 중간이 잘리지 않고
+   다음 물리 페이지로 통째로 넘어가므로, PDF 변환 결과가 항상 안전하다. */
 @media print {
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
+  /* 화면용 카드 테두리/배경은 인쇄 결과물에는 불필요 - 종이(PDF) 여백은
+     page.pdf()의 margin 옵션이 전담하므로 폭도 100%로 채운다. */
   .page-sheet {
-    break-after: page;
+    width: 100% !important;
+    max-width: none !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 0 24px !important;
   }
 
-  .page-sheet:last-child {
-    break-after: auto;
+  .page-sheet--break-before {
+    break-before: page;
+  }
+
+  .page-sheet--break-before:first-child {
+    break-before: auto;
+  }
+
+  .print-row {
+    break-inside: avoid;
   }
 }
